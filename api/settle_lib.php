@@ -6,17 +6,20 @@ function pbg_settle_pending_lib()
 {
     $db = pbg_db();
     $drawDb = pbg_db('draw_db');
-    $res = $db->query('SELECT DISTINCT round FROM bets WHERE state=1 ORDER BY round ASC');
-    $rounds = [];
-    while ($r = $res->fetch_assoc()) {
-        $rounds[] = (int)$r['round'];
-    }
+    $roundRows = pbg_query_fetch_all($db, 'SELECT DISTINCT round FROM bets WHERE state=1 ORDER BY round ASC');
     $settled = 0;
-    foreach ($rounds as $round) {
+    foreach ($roundRows as $rr) {
+        $round = (int)$rr['round'];
         $stmt = $drawDb->prepare('SELECT * FROM draw_results WHERE round=? LIMIT 1');
+        if (!($stmt instanceof mysqli_stmt)) {
+            continue;
+        }
         $stmt->bind_param('i', $round);
-        $stmt->execute();
-        $draw = $stmt->get_result()->fetch_assoc();
+        if (!$stmt->execute()) {
+            $stmt->close();
+            continue;
+        }
+        $draw = pbg_stmt_fetch_one($stmt);
         $stmt->close();
         if (!$draw) {
             continue;
@@ -31,23 +34,25 @@ function pbg_settle_round_lib($round, $cls)
 {
     $db = pbg_db();
     $stmt = $db->prepare('SELECT * FROM bets WHERE round=? AND state=1');
-    $stmt->bind_param('i', $round);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    $bets = [];
-    while ($r = $res->fetch_assoc()) {
-        $bets[] = $r;
+    if (!($stmt instanceof mysqli_stmt)) {
+        return 0;
     }
+    $stmt->bind_param('i', $round);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return 0;
+    }
+    $bets = pbg_stmt_fetch_all($stmt);
     $stmt->close();
     $count = 0;
     foreach ($bets as $bet) {
         $db->begin_transaction();
         try {
             $bid = (int)$bet['id'];
-            $chk = $db->prepare('SELECT * FROM bets WHERE id=? AND state=1 FOR UPDATE');
+            $chk = pbg_prepare($db, 'SELECT * FROM bets WHERE id=? AND state=1 FOR UPDATE');
             $chk->bind_param('i', $bid);
             $chk->execute();
-            $row = $chk->get_result()->fetch_assoc();
+            $row = pbg_stmt_fetch_one($chk);
             $chk->close();
             if (!$row) {
                 $db->rollback();
@@ -64,7 +69,7 @@ function pbg_settle_round_lib($round, $cls)
                 $state = 2;
             }
 
-            $upd = $db->prepare('UPDATE bets SET state=?, win_amount=?, result=?, settled_at=NOW() WHERE id=?');
+            $upd = pbg_prepare($db, 'UPDATE bets SET state=?, win_amount=?, result=?, settled_at=NOW() WHERE id=?');
             $upd->bind_param('idsi', $state, $winMoney, $resultStr, $bid);
             $upd->execute();
             $upd->close();
@@ -73,26 +78,34 @@ function pbg_settle_round_lib($round, $cls)
                 $mbFid = (int)$row['mb_fid'];
                 $mbUid = (string)$row['mb_uid'];
                 if ($mbFid > 0) {
-                    $lock = $db->prepare('SELECT mb_money FROM member WHERE mb_fid=? FOR UPDATE');
+                    $lock = pbg_prepare($db, 'SELECT mb_money FROM member WHERE mb_fid=? FOR UPDATE');
                     $lock->bind_param('i', $mbFid);
                     $lock->execute();
-                    $bal = (float)$lock->get_result()->fetch_assoc()['mb_money'];
+                    $lockRow = pbg_stmt_fetch_one($lock);
                     $lock->close();
+                    if (!$lockRow) {
+                        throw new RuntimeException('member lock failed');
+                    }
+                    $bal = (float)$lockRow['mb_money'];
                     $after = $bal + $winMoney;
-                    $um = $db->prepare('UPDATE member SET mb_money=? WHERE mb_fid=?');
+                    $um = pbg_prepare($db, 'UPDATE member SET mb_money=? WHERE mb_fid=?');
                     $um->bind_param('di', $after, $mbFid);
                     $um->execute();
                     $um->close();
                     pbg_money_log((int)$row['machine_id'], $bid, 2, $winMoney, $bal, $after, 'win', $mbFid, $mbUid);
                 } else {
                     $mid = (int)$row['machine_id'];
-                    $lock = $db->prepare('SELECT balance FROM machines WHERE id=? FOR UPDATE');
+                    $lock = pbg_prepare($db, 'SELECT balance FROM machines WHERE id=? FOR UPDATE');
                     $lock->bind_param('i', $mid);
                     $lock->execute();
-                    $bal = (float)$lock->get_result()->fetch_assoc()['balance'];
+                    $lockRow = pbg_stmt_fetch_one($lock);
                     $lock->close();
+                    if (!$lockRow) {
+                        throw new RuntimeException('machine lock failed');
+                    }
+                    $bal = (float)$lockRow['balance'];
                     $after = $bal + $winMoney;
-                    $um = $db->prepare('UPDATE machines SET balance=? WHERE id=?');
+                    $um = pbg_prepare($db, 'UPDATE machines SET balance=? WHERE id=?');
                     $um->bind_param('di', $after, $mid);
                     $um->execute();
                     $um->close();

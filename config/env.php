@@ -48,9 +48,7 @@ function pbg_load_env($path = null)
                 $value = rtrim(substr($value, 0, $hash));
             }
         }
-        if (getenv($name) === false) {
-            putenv("$name=$value");
-        }
+        putenv("$name=$value");
         $_ENV[$name] = $value;
         $_SERVER[$name] = $value;
     }
@@ -63,9 +61,11 @@ function pbg_load_env($path = null)
 function pbg_env($key, $default = null)
 {
     pbg_load_env();
-    $value = getenv($key);
-    if ($value === false && array_key_exists($key, $_ENV)) {
+    // Prefer $_ENV (always refreshed from .env) over sticky getenv()
+    if (array_key_exists($key, $_ENV) && $_ENV[$key] !== '' && $_ENV[$key] !== null) {
         $value = $_ENV[$key];
+    } else {
+        $value = getenv($key);
     }
     if ($value === false || $value === null || $value === '') {
         return $default;

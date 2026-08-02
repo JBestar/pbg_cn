@@ -29,6 +29,93 @@ function pbg_db($which = 'db')
     return $mysqli;
 }
 
+/**
+ * Safe mysqli_stmt::get_result — returns null instead of false.
+ * @return mysqli_result|null
+ */
+function pbg_stmt_result($stmt)
+{
+    if (!($stmt instanceof mysqli_stmt)) {
+        return null;
+    }
+    $res = $stmt->get_result();
+    return ($res instanceof mysqli_result) ? $res : null;
+}
+
+/**
+ * @return array<string,mixed>|null
+ */
+function pbg_stmt_fetch_one($stmt)
+{
+    $res = pbg_stmt_result($stmt);
+    if (!$res) {
+        return null;
+    }
+    $row = $res->fetch_assoc();
+    return is_array($row) ? $row : null;
+}
+
+/**
+ * @return list<array<string,mixed>>
+ */
+function pbg_stmt_fetch_all($stmt)
+{
+    $res = pbg_stmt_result($stmt);
+    if (!$res) {
+        return [];
+    }
+    $rows = [];
+    while ($row = $res->fetch_assoc()) {
+        if (is_array($row)) {
+            $rows[] = $row;
+        }
+    }
+    return $rows;
+}
+
+/**
+ * @return array<string,mixed>|null
+ */
+function pbg_query_fetch_one(mysqli $db, $sql)
+{
+    $res = $db->query($sql);
+    if (!($res instanceof mysqli_result)) {
+        return null;
+    }
+    $row = $res->fetch_assoc();
+    return is_array($row) ? $row : null;
+}
+
+/**
+ * @return list<array<string,mixed>>
+ */
+function pbg_query_fetch_all(mysqli $db, $sql)
+{
+    $res = $db->query($sql);
+    if (!($res instanceof mysqli_result)) {
+        return [];
+    }
+    $rows = [];
+    while ($row = $res->fetch_assoc()) {
+        if (is_array($row)) {
+            $rows[] = $row;
+        }
+    }
+    return $rows;
+}
+
+/**
+ * @return mysqli_stmt
+ */
+function pbg_prepare(mysqli $db, $sql)
+{
+    $stmt = $db->prepare($sql);
+    if (!($stmt instanceof mysqli_stmt)) {
+        throw new RuntimeException('prepare failed: ' . $db->error);
+    }
+    return $stmt;
+}
+
 function pbg_json($data, $code = 200)
 {
     http_response_code($code);
@@ -209,11 +296,10 @@ function pbg_is_win($mode, $target, $cls)
 function pbg_get_machine($code)
 {
     $db = pbg_db();
-    $stmt = $db->prepare('SELECT * FROM machines WHERE code=? AND status=1 LIMIT 1');
+    $stmt = pbg_prepare($db, 'SELECT * FROM machines WHERE code=? AND status=1 LIMIT 1');
     $stmt->bind_param('s', $code);
     $stmt->execute();
-    $res = $stmt->get_result();
-    $row = $res->fetch_assoc();
+    $row = pbg_stmt_fetch_one($stmt);
     $stmt->close();
     return $row;
 }
@@ -239,10 +325,10 @@ function pbg_verify_password($plain, $hash)
 function pbg_get_member_by_uid($uid)
 {
     $db = pbg_db();
-    $stmt = $db->prepare('SELECT * FROM member WHERE mb_uid=? AND mb_state_delete=0 LIMIT 1');
+    $stmt = pbg_prepare($db, 'SELECT * FROM member WHERE mb_uid=? AND mb_state_delete=0 LIMIT 1');
     $stmt->bind_param('s', $uid);
     $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc();
+    $row = pbg_stmt_fetch_one($stmt);
     $stmt->close();
     return $row;
 }
@@ -251,10 +337,10 @@ function pbg_get_member_by_fid($fid)
 {
     $db = pbg_db();
     $fid = (int)$fid;
-    $stmt = $db->prepare('SELECT * FROM member WHERE mb_fid=? AND mb_state_delete=0 LIMIT 1');
+    $stmt = pbg_prepare($db, 'SELECT * FROM member WHERE mb_fid=? AND mb_state_delete=0 LIMIT 1');
     $stmt->bind_param('i', $fid);
     $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc();
+    $row = pbg_stmt_fetch_one($stmt);
     $stmt->close();
     return $row;
 }
@@ -282,10 +368,10 @@ function pbg_auth_member($requireStore = true)
         pbg_json(['status' => 'fail', 'code' => 'AUTH', 'message' => '로그인이 필요합니다'], 401);
     }
     $db = pbg_db();
-    $stmt = $db->prepare('SELECT * FROM sess_list WHERE sess_id=? LIMIT 1');
+    $stmt = pbg_prepare($db, 'SELECT * FROM sess_list WHERE sess_id=? LIMIT 1');
     $stmt->bind_param('s', $token);
     $stmt->execute();
-    $sess = $stmt->get_result()->fetch_assoc();
+    $sess = pbg_stmt_fetch_one($stmt);
     $stmt->close();
     if (!$sess) {
         pbg_json(['status' => 'fail', 'code' => 'AUTH', 'message' => '세션이 만료되었습니다'], 401);
@@ -309,8 +395,11 @@ function pbg_new_token()
 function pbg_get_conf()
 {
     $db = pbg_db();
-    $res = $db->query('SELECT * FROM conf_game WHERE id=1 LIMIT 1');
-    return $res->fetch_assoc();
+    $row = pbg_query_fetch_one($db, 'SELECT * FROM conf_game WHERE id=1 LIMIT 1');
+    if (!$row) {
+        throw new RuntimeException('conf_game id=1 missing (run sql/schema.sql)');
+    }
+    return $row;
 }
 
 /**
@@ -604,26 +693,20 @@ function pbg_build_powerball_odd_even_pattern_html($date = '', $mode = '', $roun
     $drawDb = pbg_db('draw_db');
     $rows = [];
     if ($mode === 'latestLog') {
-        $stmt = $drawDb->prepare('SELECT round, powerball FROM draw_results ORDER BY round DESC LIMIT ?');
+        $stmt = pbg_prepare($drawDb, 'SELECT round, powerball FROM draw_results ORDER BY round DESC LIMIT ?');
         $stmt->bind_param('i', $roundCnt);
         $stmt->execute();
-        $res = $stmt->get_result();
-        while ($r = $res->fetch_assoc()) {
-            $rows[] = $r;
-        }
+        $rows = pbg_stmt_fetch_all($stmt);
         $stmt->close();
         usort($rows, static function ($a, $b) {
             return ((int)$a['round']) <=> ((int)$b['round']);
         });
     } else {
         list($dateFrom, $dateTo) = pbg_game_day_window($date);
-        $stmt = $drawDb->prepare('SELECT round, powerball FROM draw_results WHERE drawn_at >= ? AND drawn_at <= ? ORDER BY round ASC');
+        $stmt = pbg_prepare($drawDb, 'SELECT round, powerball FROM draw_results WHERE drawn_at >= ? AND drawn_at <= ? ORDER BY round ASC');
         $stmt->bind_param('ss', $dateFrom, $dateTo);
         $stmt->execute();
-        $res = $stmt->get_result();
-        while ($r = $res->fetch_assoc()) {
-            $rows[] = $r;
-        }
+        $rows = pbg_stmt_fetch_all($stmt);
         $stmt->close();
     }
 
@@ -707,26 +790,20 @@ function pbg_build_powerball_under_over_pattern_html($date = '', $mode = '', $ro
     $drawDb = pbg_db('draw_db');
     $rows = [];
     if ($mode === 'latestLog') {
-        $stmt = $drawDb->prepare('SELECT round, powerball FROM draw_results ORDER BY round DESC LIMIT ?');
+        $stmt = pbg_prepare($drawDb, 'SELECT round, powerball FROM draw_results ORDER BY round DESC LIMIT ?');
         $stmt->bind_param('i', $roundCnt);
         $stmt->execute();
-        $res = $stmt->get_result();
-        while ($r = $res->fetch_assoc()) {
-            $rows[] = $r;
-        }
+        $rows = pbg_stmt_fetch_all($stmt);
         $stmt->close();
         usort($rows, static function ($a, $b) {
             return ((int)$a['round']) <=> ((int)$b['round']);
         });
     } else {
         list($dateFrom, $dateTo) = pbg_game_day_window($date);
-        $stmt = $drawDb->prepare('SELECT round, powerball FROM draw_results WHERE drawn_at >= ? AND drawn_at <= ? ORDER BY round ASC');
+        $stmt = pbg_prepare($drawDb, 'SELECT round, powerball FROM draw_results WHERE drawn_at >= ? AND drawn_at <= ? ORDER BY round ASC');
         $stmt->bind_param('ss', $dateFrom, $dateTo);
         $stmt->execute();
-        $res = $stmt->get_result();
-        while ($r = $res->fetch_assoc()) {
-            $rows[] = $r;
-        }
+        $rows = pbg_stmt_fetch_all($stmt);
         $stmt->close();
     }
 
@@ -761,26 +838,20 @@ function pbg_pattern_fetch_draws($date = '', $mode = '', $roundCnt = 300)
     $drawDb = pbg_db('draw_db');
     $rows = [];
     if ($mode === 'latestLog') {
-        $stmt = $drawDb->prepare('SELECT round, powerball, ball_sum FROM draw_results ORDER BY round DESC LIMIT ?');
+        $stmt = pbg_prepare($drawDb, 'SELECT round, powerball, ball_sum FROM draw_results ORDER BY round DESC LIMIT ?');
         $stmt->bind_param('i', $roundCnt);
         $stmt->execute();
-        $res = $stmt->get_result();
-        while ($r = $res->fetch_assoc()) {
-            $rows[] = $r;
-        }
+        $rows = pbg_stmt_fetch_all($stmt);
         $stmt->close();
         usort($rows, static function ($a, $b) {
             return ((int)$a['round']) <=> ((int)$b['round']);
         });
     } else {
         list($dateFrom, $dateTo) = pbg_game_day_window($date);
-        $stmt = $drawDb->prepare('SELECT round, powerball, ball_sum FROM draw_results WHERE drawn_at >= ? AND drawn_at <= ? ORDER BY round ASC');
+        $stmt = pbg_prepare($drawDb, 'SELECT round, powerball, ball_sum FROM draw_results WHERE drawn_at >= ? AND drawn_at <= ? ORDER BY round ASC');
         $stmt->bind_param('ss', $dateFrom, $dateTo);
         $stmt->execute();
-        $res = $stmt->get_result();
-        while ($r = $res->fetch_assoc()) {
-            $rows[] = $r;
-        }
+        $rows = pbg_stmt_fetch_all($stmt);
         $stmt->close();
     }
     return $rows;
