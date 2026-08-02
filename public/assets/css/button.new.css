@@ -1,0 +1,223 @@
+.btnGameSelect {
+    position: relative;
+    box-shadow: 0px 2px 0px 0px #b2b1b1;
+    background: linear-gradient(to bottom, #f5f5f5 5%, #e2e2e2 100%);
+    background-color: #f5f5f5;
+    border-radius: 3px;
+    border: 1px solid #bbbbbb;
+    display: inline-block;
+    cursor: pointer;
+    height: 65px;
+    line-height: 65px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.btnGameSelect:hover {
+    background: linear-gradient(to bottom, #e2e2e2 5%, #f5f5f5 100%);
+    background-color: #e2e2e2;
+}
+
+.btnGameSelected {
+    background: linear-gradient(to bottom, #aae4f8 5%, #75d0f4 100%);
+    background-color: #aae4f8;
+}
+
+.btnGameSelected:hover {
+    background: linear-gradient(to bottom, #aae4f8 5%, #75d0f4 100%);
+    background-color: #aae4f8;
+}
+
+.btnGamebeted {
+    background: linear-gradient(to bottom, #f8aaee 5%, #f475d2 100%);
+    background-color: #f8aaf2;
+}
+
+.btnGamebeted:hover {
+    background: linear-gradient(to bottom, #f475d2 5%, #f8aaee 100%);
+    background-color: #f8aaf2;
+}
+
+.divMarkOdd {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 19px;
+    background-color: #0000ff;
+    border-radius: 20px;
+    color: #ffffff;
+    font-size: 18px;
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #010101;
+}
+
+.divMarkEven {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 19px;
+    background-color: #ff0000;
+    border-radius: 20px;
+    color: #ffffff;
+    font-size: 18px;
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #010101;
+}
+
+.divMarkUnder {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 19px;
+    color: #0000ff;
+    font-size: 18px;
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #010101;
+}
+
+.divMarkOver {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 19px;
+    color: #ff0000;
+    font-size: 18px;
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #010101;
+}
+
+.divMarkBig {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 19px;
+    color: #010101;
+    font-size: 18px;
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #fefefe;
+}
+
+.divMarkRate {
+    position: absolute;
+    left: calc(100% - 40px);
+    top: 2px;
+    width: 40px;
+    height: 20px;
+    line-height: 20px;
+    color: #010101;
+    font-size: 14px;
+    text-align: left;
+}
+
+.divMarkPower {
+    position: absolute;
+    left: 10px;
+    top: 2px;
+    width: 60px;
+    height: 20px;
+    line-height: 20px;
+    color: #444444;
+    font-size: 17px;
+    font-weight: bold;
+    text-align: left;
+    text-shadow: 0px 1px 0px #fefefe;
+}
+
+.btnMoneySelect {
+    position: relative;
+    box-shadow: 0px 2px 0px 0px #3867ac;
+    background: linear-gradient(to bottom, #97b4de 5%, #6590c9 100%);
+    background-color: #97b4de;
+    border-radius: 3px;
+    border: 1px solid #7394c5;
+    display: inline-block;
+    cursor: pointer;
+    height: 40px;
+    line-height: 40px;
+    color: #fefefe;
+    font-size: 20px;
+    text-shadow: 0px 1px 0px #3867ac;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.btnMoneySelect:hover {
+    background: linear-gradient(to bottom, #6590c9 5%, #97b4de 100%);
+    background-color: #6590c9;
+}
+
+.inputBetMoney {
+    height: 42px;
+    border: 1px solid #010101;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-left: 8px;
+    text-align: center;
+    font-size: 20px;
+    color: #010101;
+}
+
+.btnMoneyReset {
+    position: relative;
+    box-shadow: 0px 2px 0px 0px #bd2524;
+    background: linear-gradient(to bottom, #e67e7b 5%, #d12929 100%);
+    background-color: #e67e7b;
+    border-radius: 3px;
+    border: 1px solid #b73535;
+    display: inline-block;
+    cursor: pointer;
+    height: 40px;
+    line-height: 40px;
+    color: #fefefe;
+    font-size: 20px;
+    text-shadow: 0px 1px 0px #bd2524;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.btnMoneyReset:hover {
+    background: linear-gradient(to bottom, #d12929 5%, #e67e7b 100%);
+    background-color: #d12929;
+}
+
+.btnMoneyBuy {
+    position: relative;
+    box-shadow: 0px 2px 0px 0px #4d2955;
+    background: linear-gradient(to bottom, #bb92b5 5%, #643e6e 100%);
+    background-color: #bb92b5;
+    border-radius: 3px;
+    border: 1px solid #563a5f;
+    display: inline-block;
+    cursor: pointer;
+    height: 40px;
+    line-height: 40px;
+    color: #fefefe;
+    font-size: 20px;
+    text-shadow: 0px 1px 0px #4d2955;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.btnMoneyBuy:hover {
+    background: linear-gradient(to bottom, #643e6e 5%, #bb92b5 100%);
+    background-color: #643e6e;
+}
+
+.divCurrentBetList {
+    position: absolute;
+    width: 358px;
+    height: 311px;
+    border: 1px solid #0c4367;
+    border-radius: 5px;
+    background-color: #042b46;
+}
+
+.tdBetList {
+    height: 27px;
+    border-bottom: 1px solid #cccccc;
+}

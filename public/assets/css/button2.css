@@ -1,0 +1,105 @@
+.btn {
+    display: inline-block;
+    font-weight: 300;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor:pointer;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    border-radius: 2px;
+    -webkit-transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+
+}
+
+.btn.focus, .btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(108,117,125,.5);
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #7460ee;
+    border-color: #7460ee;
+}
+.btn-primary.hover, .btn-primary:hover {
+    color: #fff;
+    background-color: #563dea;
+    border-color: #563dea;
+}
+
+.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-secondary.hover, .btn-secondary:hover {
+    color: #fff;
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+.btn-success {
+    color: #212529;
+    background-color: #55ce63;
+    border-color: #55ce63;
+}
+.btn-success.hover, .btn-success:hover {
+    color: #fff;
+    background-color: #39c449;
+    border-color: #39c449;
+}
+
+.btn-info {
+    color: #fff;
+    background-color: #009efb;
+    border-color: #009efb;
+}
+.btn-info.hover, .btn-info:hover {
+    color: #fff;
+    background-color: #0086d5;
+    border-color: #0086d5;
+}
+
+.btn-warning {
+    color: #212529;
+    background-color: #ffbc34;
+    border-color: #ffbc34;
+}
+.btn-warning.hover, .btn-warning:hover {
+    color: #fff;
+    background-color: #ffaf0e;
+    border-color: #ffaf0e;
+}
+
+.btn-danger {
+    color: #212529;
+    background-color: #fb9678;
+    border-color: #fb9678;
+}
+.btn-danger.hover, .btn-danger:hover {
+    color: #fff;
+    background-color: #fa7953;
+    border-color: #fa7953;
+}
+
+.btn-outline-secondary {
+    color: #6c757d;
+    background-color: transparent;
+    background-image: none;
+    border-color: #6c757d;
+}
+
+.btn-outline-secondary.hover, .btn-outline-secondary:hover {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+

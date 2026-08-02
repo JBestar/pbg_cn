@@ -1,0 +1,394 @@
+@font-face {
+    font-family: 'NanumSquare';
+    src: url('/fonts/nanumsquarer.eot');
+    src: url('/fonts/nanumsquarer.eot?#iefix') format('embedded-opentype'), url('/fonts/nanumsquarer.woff2') format('woff2'), url('/fonts/nanumsquarer.woff') format('woff'), url('/fonts/nanumsquarer.ttf') format('truetype'), url('/fonts/nanumsquarer.svg#nanumsquarerregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BareunDotum';
+    font-style: normal;
+    font-weight: 300;
+    /* Hangul only — prevents empty CJK glyphs from blocking Chinese fallback fonts */
+    unicode-range: U+AC00-D7A3, U+1100-11FF, U+3130-318F, U+A960-A97F, U+D7B0-D7FF;
+    src: url('//cdn.jsdelivr.net/korean-webfonts/1/orgs/othrs/kpa/BareunDotum/BareunDotumOTFPro1.woff2') format('woff2'), url('//cdn.jsdelivr.net/korean-webfonts/1/orgs/othrs/kpa/BareunDotum/BareunDotumOTFPro1.woff') format('woff');
+}
+
+* {
+    font-family: 'Microsoft YaHei', 'Malgun Gothic', 'BareunDotum', 'Segoe UI', sans-serif;
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'Malgun Gothic', 'BareunDotum', 'Segoe UI', sans-serif;
+    font-size: 12px;
+}
+
+body.lang-zh {
+    font-family: 'Microsoft YaHei', 'SimSun', 'Noto Sans SC', 'Malgun Gothic', sans-serif;
+}
+body.lang-zh *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad) {
+    font-family: 'Microsoft YaHei', 'SimSun', 'Noto Sans SC', 'Malgun Gothic', sans-serif;
+}
+/* Keep Font Awesome glyph font — lang-zh must not override icon fonts */
+body.lang-zh .fa,
+body.lang-zh .fas,
+body.lang-zh .far,
+body.lang-zh .fab,
+body.lang-zh .fal,
+body.lang-zh .fad,
+body.lang-zh [class^="fa-"],
+body.lang-zh [class*=" fa-"] {
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands", "FontAwesome" !important;
+}
+body.lang-zh .fas,
+body.lang-zh .fa {
+    font-weight: 900 !important;
+}
+body.lang-zh .far {
+    font-weight: 400 !important;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a:active {
+    text-decoration: none;
+}
+
+.spanLeftMenu {
+    position: relative;
+    border: 0px solid #ff0000;
+    padding: 6px 0px 0px 20px;
+    left: 0px;
+    width: 200px;
+    height: 24px;
+    background-color: #39435c;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.spanLeftMenu:hover {
+    background-color: #425164;
+}
+
+.spanLeftSubMenu {
+    position: relative;
+    border: 0px solid #ff0000;
+    padding: 6px 0px 0px 50px;
+    left: 0px;
+    width: 170px;
+    height: 24px;
+    background-color: #39435c;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.spanLeftSubMenu:hover {
+    background-color: #425164;
+}
+
+.spanActiveMenu {
+    color: rgb(255, 255, 0);
+    background-color: rgb(66, 81, 100);
+}
+
+.badge {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px 3px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    color: #ffffff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    background-color: #999999;
+    border-radius: 10px
+}
+
+.spanTitle01 {
+    font-weight: bold;
+    font-size: 20px;
+    color: #181818;
+    vertical-align: top;
+}
+
+.tdTitle01 {
+    text-align: left;
+    height: 40px;
+    vertical-align: top;
+}
+
+.well {
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px;
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.inputUserInfo {
+    position: absolute;
+    left: 120px;
+    width: 180px;
+    height: 18px;
+    font-size: 14px;
+    text-align: center;
+    color: #000000;
+    background-color: #ffffff;
+    border: 1px solid #0064aa;
+}
+
+.inputUserInfo2 {
+    width: 180px;
+    height: 18px;
+    font-size: 14px;
+    text-align: center;
+    color: #000000;
+    background-color: #ffffff;
+    border: 1px solid #0064aa;
+}
+
+.tdTitle {
+    width: 90px;
+    height: 24px;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.styled-select {
+    background: url(/img/15xvbd5.png) no-repeat 90% 0;
+    height: 29px;
+    overflow: hidden;
+    width: 120px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.styled-select select {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    height: 29px;
+    padding: 5px;
+    /* If you add too much padding here, the options won't show in IE */
+    width: 148px;
+    color: #000000;
+    font-weight: bold;
+}
+
+.semi-square {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.blue {
+    background-color: #3b8ec2;
+}
+
+.yellow {
+    background-color: #eec111;
+}
+
+.red {
+    background-color: #f52b2b;
+}
+
+.divContent {
+    position: absolute;
+    left: 220px;
+    top: 30px;
+    width: calc(100% - 220px);
+    height: calc(100% - 30px);
+    border: 0px;
+    overflow: auto;
+    /*background-color: #c1c1c1;*/
+}
+
+.default_table {
+    border-collapse: collapse;
+    width: calc(100% - 10px);
+    margin: 5px 5px 5px 5px;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.default_table table {
+    border: 1px solid #a3a3a3;
+    border-collapse: collapse;
+}
+
+.default_table th,
+td {
+    border: 1px solid #a3a3a3;
+    height: 26px;
+}
+
+.tdMoney {
+    text-align: right;
+    padding-right: 3px;
+}
+
+.tdDate {
+    text-align: center;
+}
+
+.tdSum {
+    font-weight: bold;
+    background-color: #d8d8d8;
+}
+
+.divTitle {
+    position: relative;
+    width: calc(100% - 5px);
+    line-height: 30px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #010101;
+    padding-left: 5px;
+}
+
+.divInfoBox {
+    position: relative;
+    width: calc(100% - 38px);
+    margin: 5px 5px 5px 5px;
+    padding: 5px 10px 5px 10px;
+    border: 3px solid #014e02;
+}
+
+.divSearch {
+    position: relative;
+    width: calc(100% - 5px);
+    line-height: 30px;
+    font-size: 14px;
+    font-weight: normal;
+    color: #010101;
+    padding-left: 5px;
+}
+
+.inputDate {
+    width: 120px;
+    text-align: center;
+}
+
+.divList {
+    position: relative;
+    width: calc(100% - 18px);
+    margin: 5px 5px 5px 5px;
+    border: 3px solid #014e02;
+}
+
+.divPaging {
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.spanRed {
+    padding: 3px 15px 3px 15px;
+    background-color: #cb251d;
+    color: #fefefe;
+}
+
+.spanBlue {
+    padding: 3px 15px 3px 15px;
+    background-color: #0070bd;
+    color: #fefefe;
+}
+
+.spanGreen {
+    padding: 3px 15px 3px 15px;
+    background-color: #1b6b2c;
+    color: #fefefe;
+}
+
+.spanGray {
+    padding: 3px 10px 3px 10px;
+    background-color: #777777;
+    color: #fefefe;
+}
+
+.spanUnOverRed {
+    padding: 3px 10px 3px 10px;
+    background-color: #cb251d;
+    color: #fefefe;
+}
+
+.spanUnOverBlue {
+    padding: 3px 10px 3px 10px;
+    background-color: #0070bd;
+    color: #fefefe;
+}
+
+/* Equal badge widths for paired marks (Odd/Even, Under/Over, Power Odd/Even, …) */
+.bw-oe,
+.bw-uo,
+.bw-pb-oe,
+.bw-pb-uo,
+.bw-pw-oe,
+.bw-pw-uo,
+.bw-nm-oe,
+.bw-nm-uo,
+.bw-p-oe,
+.bw-lms {
+    display: inline-block;
+    box-sizing: border-box;
+    text-align: center;
+    vertical-align: middle;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+body.lang-en .bw-oe { min-width: 4.6em; }
+body.lang-en .bw-uo { min-width: 5.0em; }
+body.lang-en .bw-pb-oe { min-width: 6.0em; }
+body.lang-en .bw-pb-uo { min-width: 6.6em; }
+body.lang-en .bw-pw-oe { min-width: 7.2em; }
+body.lang-en .bw-pw-uo { min-width: 7.8em; }
+body.lang-en .bw-nm-oe { min-width: 6.0em; }
+body.lang-en .bw-nm-uo { min-width: 6.6em; }
+body.lang-en .bw-p-oe { min-width: 5.0em; }
+body.lang-en .bw-lms { min-width: 3.2em; }
+
+.spanYellow {
+    background-color: #f7f4ac;
+}
+
+/* Lang select: BareunDotum lacks Han glyphs — force CJK-capable stack; option text dark on white when open */
+#adminLangSelect {
+    width: 100%;
+    height: 24px;
+    line-height: 24px;
+    border: 0;
+    background: #1a3a5c;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Microsoft YaHei', 'SimSun', 'Malgun Gothic', 'BareunDotum', sans-serif !important;
+    font-size: 13px;
+}
+#adminLangSelect option {
+    color: #111;
+    background: #fff;
+    font-family: 'Microsoft YaHei', 'SimSun', 'Malgun Gothic', 'BareunDotum', sans-serif !important;
+}
