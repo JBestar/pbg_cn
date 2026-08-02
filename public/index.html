@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>파워볼 게임기</title>
+  <link rel="stylesheet" href="assets/vendor/powerball/css/chat_owner_pick.css" />
+  <link rel="stylesheet" href="assets/css/owner-pick.css" />
+  <link rel="stylesheet" href="assets/css/pattern-box.css" />
+  <link rel="stylesheet" href="assets/css/app.css" />
+</head>
+<body class="chat-popup-window">
+  <div id="toast" class="toast" hidden></div>
+
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <h1 data-i18n="loginTitle">로그인</h1>
+      <p class="login-sub" data-i18n="loginHint">매장 아이디와 비밀번호를 입력하세요</p>
+      <label class="login-lang-label"><span data-i18n="loginLang">언어</span>
+        <select id="loginLang" class="login-lang">
+          <option value="ko">한국어</option>
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      <label><span data-i18n="loginId">아이디</span>
+        <input type="text" id="loginUid" autocomplete="username" maxlength="50" />
+      </label>
+      <label><span data-i18n="loginPwd">비밀번호</span>
+        <input type="password" id="loginPwd" autocomplete="current-password" maxlength="50" />
+      </label>
+      <button type="button" id="loginBtn" data-i18n="loginBtn">로그인</button>
+      <p class="login-err" id="loginErr" hidden></p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="date-block">
+      <div class="date-led">
+        <span id="serverDateDay">——————</span>
+        <span id="serverDateTime" class="date-time">--:--</span>
+      </div>
+    </div>
+    <div class="countdown-block">
+      <span class="label" data-i18n="countdownLabel">개봉까지</span>
+      <div id="countdown" class="seg-clock" aria-live="polite">
+        <span class="seg-digit" data-d="-"><b class="a"></b><b class="b"></b><b class="c"></b><b class="d"></b><b class="e"></b><b class="f"></b><b class="g"></b></span>
+        <span class="seg-digit" data-d="-"><b class="a"></b><b class="b"></b><b class="c"></b><b class="d"></b><b class="e"></b><b class="f"></b><b class="g"></b></span>
+        <span class="seg-colon" aria-hidden="true"><i></i><i></i></span>
+        <span class="seg-digit" data-d="-"><b class="a"></b><b class="b"></b><b class="c"></b><b class="d"></b><b class="e"></b><b class="f"></b><b class="g"></b></span>
+        <span class="seg-digit" data-d="-"><b class="a"></b><b class="b"></b><b class="c"></b><b class="d"></b><b class="e"></b><b class="f"></b><b class="g"></b></span>
+      </div>
+      <span class="round"><span data-i18n="roundPrefix">제</span> <em id="roundNo">-</em> <span data-i18n="roundSuffix">회</span></span>
+    </div>
+    <div class="draft-block user-draft">
+      <div class="user-display" id="headerUserName">—</div>
+      <div class="user-money"><span data-i18n="balance">잔액</span> <strong id="headerBalance">$0</strong></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="col-left owner-pick-col">
+      <div class="ownerPickStyleRoot chat-popup-owner-head">
+        <div class="resultBox">
+          <ul class="tab">
+            <li><a href="#" onclick="return false;" class="result on" data-i18n="ownerPickTab">개봉기록</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="ownerPickStyleRoot chat-popup-owner-body">
+        <div class="resultBox">
+          <div class="content">
+            <div class="chat-popup-result-scroll">
+              <ul class="resultList" id="resultList"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="col-center">
+      <div class="mini-wrap panel">
+        <iframe
+          id="miniFrame"
+          data-i18n-attr="title:miniTitle"
+          title="파워볼 애니메이션"
+          src="about:blank"
+          width="830"
+          height="273"
+          scrolling="no"
+          frameborder="0"
+          allowtransparency="true"
+        ></iframe>
+      </div>
+
+      <div class="pattern-panel-wrap">
+        <table width="100%" border="0" id="patternBox" class="pattern-box">
+          <tr>
+            <th height="30" class="title" id="patternTitle" data-i18n="patternTitle">파워볼 홀/짝 패턴 분석</th>
+          </tr>
+          <tr>
+            <td style="border-top:1px solid #d5d5d5;">
+              <div class="content" id="patternContent">불러오는 중…</div>
+            </td>
+          </tr>
+        </table>
+        <table width="100%" border="0" id="patternBoxUo" class="pattern-box">
+          <tr>
+            <th height="30" class="title" id="patternTitleUo" data-i18n="patternTitleUo">파워볼 언더/오버 패턴 분석</th>
+          </tr>
+          <tr>
+            <td style="border-top:1px solid #d5d5d5;">
+              <div class="content" id="patternContentUo">불러오는 중…</div>
+            </td>
+          </tr>
+        </table>
+        <table width="100%" border="0" id="patternBoxSumOe" class="pattern-box">
+          <tr>
+            <th height="30" class="title" id="patternTitleSumOe" data-i18n="patternTitleSumOe">일반볼 홀/짝 패턴 분석</th>
+          </tr>
+          <tr>
+            <td style="border-top:1px solid #d5d5d5;">
+              <div class="content" id="patternContentSumOe">불러오는 중…</div>
+            </td>
+          </tr>
+        </table>
+        <table width="100%" border="0" id="patternBoxSumUo" class="pattern-box">
+          <tr>
+            <th height="30" class="title" id="patternTitleSumUo" data-i18n="patternTitleSumUo">일반볼 언더/오버 패턴 분석</th>
+          </tr>
+          <tr>
+            <td style="border-top:1px solid #d5d5d5;">
+              <div class="content" id="patternContentSumUo">불러오는 중…</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </section>
+
+    <aside class="col-right">
+      <div class="panel mode-pick">
+        <div class="mode-row">
+          <div class="mode-visual">
+            <div id="modeSprite" class="mode-sprite is-empty" aria-live="polite"></div>
+            <div class="mode-none is-visible" id="modeNone" data-i18n="draftNone">게임을 선택해주세요</div>
+          </div>
+          <div class="odds-meter is-empty" id="oddsMeter" aria-live="polite">
+            <div class="odds-value" id="oddsValue">—</div>
+            <div class="odds-track">
+              <div class="odds-fill" id="oddsFill"></div>
+            </div>
+          </div>
+        </div>
+        <div class="draft-amount-block">
+          <strong id="draftAmount" class="draft-amount-num">$0</strong>
+        </div>
+        <div class="sel-hint" id="selHint"></div>
+      </div>
+      <section class="panel bet-history">
+        <h2 class="bet-history-title" data-i18n="betHistory">배팅 기록</h2>
+        <div class="bet-history-scroll">
+          <table>
+            <colgroup>
+              <col class="col-round" />
+              <col class="col-mode" />
+              <col class="col-amount" />
+              <col class="col-payout" />
+              <col class="col-result" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th data-i18n="thRound">회차</th>
+                <th data-i18n="thMode">항목</th>
+                <th data-i18n="thAmount">금액</th>
+                <th data-i18n="thPayout">당첨금</th>
+                <th data-i18n="thResult">결과</th>
+              </tr>
+            </thead>
+            <tbody id="betBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/resultList.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

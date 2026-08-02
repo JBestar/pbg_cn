@@ -1,0 +1,106 @@
+/* powerball dayLog #patternBox + .patternTable — excerpt from common.css */
+.pattern-box,
+#patternBox {
+  border: 1px solid #D5D5D5;
+  width: 830px;
+  max-width: 100%;
+  background: #fff;
+  color: #5F6164;
+  font-size: 11px;
+  font-family: dotum, "Microsoft YaHei", sans-serif;
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+.pattern-box th,
+#patternBox th { position: relative; }
+.pattern-box th.title,
+#patternBox th.title {
+  font-weight: normal;
+  background-color: #F1F1F1;
+  color: #5F6164;
+  border-bottom: 1px solid #D5D5D5;
+  font-size: 11px;
+  height: 30px;
+}
+.pattern-box .content,
+#patternBox .content {
+  width: 830px;
+  max-width: 100%;
+  overflow-x: auto;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+
+.patternTable {
+  background-color: #fff;
+  border: 1px solid #9b9b9b;
+  border-collapse: collapse;
+}
+.patternTable .innerTable {
+  background-color: #fff;
+  border-collapse: collapse;
+}
+.patternTable .innerTable th {
+  height: 30px;
+  font-size: 12px;
+  font-family: dotum, "Microsoft YaHei", sans-serif;
+  background-color: #EFEFEF;
+  border-right: 1px solid #9b9b9b;
+  border-bottom: 1px solid #9b9b9b;
+}
+.patternTable .innerTable td {
+  width: 30px;
+  height: 30px;
+  border-top: 1px solid #e4e4e4;
+  border-right: 1px solid #e4e4e4;
+  text-align: center;
+}
+.patternTable .innerTable td.sum { font-weight: bold; }
+.patternTable .innerTable td.order {
+  font-weight: bold;
+  background-color: #EFEFEF;
+  border-right: 1px solid #9b9b9b;
+  border-top: 1px solid #9b9b9b;
+}
+.patternTable .innerTable th.title_odd,
+.patternTable .innerTable th.title_under { color: #1265cd; }
+.patternTable .innerTable th.title_even,
+.patternTable .innerTable th.title_over { color: #cd1212; }
+
+.patternTable .innerTable td .odd,
+.patternTable .innerTable td .under {
+  width: 21.6px;
+  height: 21.6px;
+  line-height: 21.6px;
+  border-radius: 21.6px;
+  box-sizing: border-box;
+  background-color: #1265cd;
+  border: 1px solid #0d50a3;
+  color: #fff;
+  text-align: center;
+  font-size: 11px;
+  margin: 0 5px;
+}
+.patternTable .innerTable td .even,
+.patternTable .innerTable td .over {
+  width: 21.6px;
+  height: 21.6px;
+  line-height: 21.6px;
+  border-radius: 21.6px;
+  box-sizing: border-box;
+  background-color: #cd1212;
+  border: 1px solid #a30d0d;
+  color: #fff;
+  text-align: center;
+  font-size: 11px;
+  margin: 0 5px;
+}
+
+.pattern-panel-wrap {
+  width: 830px;
+  max-width: 100%;
+  margin-top: 8px;
+}
+.pattern-panel-wrap .pattern-box:first-child {
+  margin-top: 0;
+}

@@ -1,0 +1,13 @@
+{
+  "name": "pbg-cn",
+  "version": "1.0.0",
+  "description": "Chinese arcade Powerball betting terminal (Electron)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^28.3.3"
+  }
+}
