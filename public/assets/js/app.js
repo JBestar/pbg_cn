@@ -52,7 +52,7 @@
   }
 
   function fmtMoney(n) {
-    return I18N.currency + Number(n || 0).toLocaleString('zh-CN', { maximumFractionDigits: 0 });
+    return Number(n || 0).toLocaleString('zh-CN', { maximumFractionDigits: 0 }) + 'u';
   }
 
   function fmtCountdown(sec) {
@@ -556,7 +556,7 @@
         toast(apiErrorMsg(json, 'modeCleared'));
         return;
       }
-      toast(I18N.msg.cancelOk + ' ' + I18N.currency + json.data.refunded);
+      toast(I18N.msg.cancelOk + ' ' + fmtMoney(json.data.refunded));
       await Promise.all([refreshStatus(), refreshBets()]);
     } finally {
       state.busy = false;

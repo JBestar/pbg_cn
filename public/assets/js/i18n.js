@@ -7,7 +7,7 @@
     ko: {
       lang: 'ko',
       htmlLang: 'ko',
-      currency: '$',
+      currency: 'u',
       title: '파워볼 게임기',
       ui: {
         countdownLabel: '개봉까지',
@@ -100,7 +100,7 @@
     zh: {
       lang: 'zh',
       htmlLang: 'zh-CN',
-      currency: '$',
+      currency: 'u',
       title: '功率球游戏机',
       ui: {
         countdownLabel: '距开奖',
@@ -193,7 +193,7 @@
     en: {
       lang: 'en',
       htmlLang: 'en',
-      currency: '$',
+      currency: 'u',
       title: 'Powerball Terminal',
       ui: {
         countdownLabel: 'Until draw',
