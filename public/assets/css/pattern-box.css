@@ -1,15 +1,17 @@
-/* powerball dayLog #patternBox + .patternTable — excerpt from common.css */
+/* powerball dayLog #patternBox + .patternTable — cabinet 1080×1920, 7-row road */
 .pattern-box,
 #patternBox {
   border: 1px solid #D5D5D5;
-  width: 830px;
+  width: 100%;
   max-width: 100%;
   background: #fff;
   color: #5F6164;
   font-size: 11px;
   font-family: dotum, "Microsoft YaHei", sans-serif;
-  margin-top: 10px;
+  margin-top: 0;
   border-collapse: collapse;
+  height: 245px;
+  table-layout: fixed;
 }
 .pattern-box th,
 #patternBox th { position: relative; }
@@ -19,41 +21,76 @@
   background-color: #F1F1F1;
   color: #5F6164;
   border-bottom: 1px solid #D5D5D5;
-  font-size: 11px;
-  height: 30px;
+  font-size: 13px;
+  /* panel 245 − border 2 − body 196(7×28) = 47 */
+  height: 47px;
+  line-height: 47px;
+  padding: 0 10px;
+  text-align: left;
+  box-sizing: border-box;
+}
+.pattern-box .pattern-body-cell {
+  border-top: 1px solid #d5d5d5;
+  height: 196px;
+  vertical-align: top;
+  padding: 0;
 }
 .pattern-box .content,
 #patternBox .content {
-  width: 830px;
+  width: 100%;
   max-width: 100%;
-  overflow-x: auto;
-  min-height: 80px;
+  overflow: hidden;
+  height: 196px;
+  min-height: 0;
   box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end; /* newest columns on the right */
 }
 
 .patternTable {
   background-color: #fff;
   border: 1px solid #9b9b9b;
   border-collapse: collapse;
+  margin: 0;
+}
+.patternTable.roadTable {
+  border: none;
+  margin-left: auto;
 }
 .patternTable .innerTable {
   background-color: #fff;
   border-collapse: collapse;
 }
 .patternTable .innerTable th {
-  height: 30px;
+  height: 28px;
   font-size: 12px;
   font-family: dotum, "Microsoft YaHei", sans-serif;
   background-color: #EFEFEF;
   border-right: 1px solid #9b9b9b;
   border-bottom: 1px solid #9b9b9b;
 }
-.patternTable .innerTable td {
-  width: 30px;
-  height: 30px;
+.patternTable .innerTable td,
+.patternTable.roadTable td {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  max-width: 28px;
   border-top: 1px solid #e4e4e4;
   border-right: 1px solid #e4e4e4;
   text-align: center;
+  vertical-align: middle;
+  padding: 0;
+  box-sizing: border-box;
+}
+.patternTable.roadTable tr:first-child td {
+  border-top: 1px solid #9b9b9b;
+}
+.patternTable.roadTable td:first-child {
+  border-left: 1px solid #9b9b9b;
+}
+.patternTable.roadTable tr:last-child td {
+  border-bottom: 1px solid #9b9b9b;
 }
 .patternTable .innerTable td.sum { font-weight: bold; }
 .patternTable .innerTable td.order {
@@ -68,39 +105,52 @@
 .patternTable .innerTable th.title_over { color: #cd1212; }
 
 .patternTable .innerTable td .odd,
-.patternTable .innerTable td .under {
-  width: 21.6px;
-  height: 21.6px;
-  line-height: 21.6px;
-  border-radius: 21.6px;
+.patternTable .innerTable td .under,
+.patternTable.roadTable td .odd,
+.patternTable.roadTable td .under {
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  border-radius: 22px;
   box-sizing: border-box;
   background-color: #1265cd;
   border: 1px solid #0d50a3;
   color: #fff;
   text-align: center;
-  font-size: 11px;
-  margin: 0 5px;
+  font-size: 10px;
+  margin: 0 auto;
 }
 .patternTable .innerTable td .even,
-.patternTable .innerTable td .over {
-  width: 21.6px;
-  height: 21.6px;
-  line-height: 21.6px;
-  border-radius: 21.6px;
+.patternTable .innerTable td .over,
+.patternTable.roadTable td .even,
+.patternTable.roadTable td .over {
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  border-radius: 22px;
   box-sizing: border-box;
   background-color: #cd1212;
   border: 1px solid #a30d0d;
   color: #fff;
   text-align: center;
-  font-size: 11px;
-  margin: 0 5px;
+  font-size: 10px;
+  margin: 0 auto;
 }
 
 .pattern-panel-wrap {
-  width: 830px;
+  width: 100%;
   max-width: 100%;
-  margin-top: 8px;
+  margin-top: 0;
+  height: 980px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
 }
-.pattern-panel-wrap .pattern-box:first-child {
+.pattern-panel-wrap .pattern-box {
+  flex: 0 0 245px;
+  margin-top: 0;
+}
+.pattern-panel-wrap .pattern-box + .pattern-box {
   margin-top: 0;
 }

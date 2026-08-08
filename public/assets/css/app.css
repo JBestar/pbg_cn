@@ -17,7 +17,9 @@
 * { box-sizing: border-box; }
 html, body {
   margin: 0;
-  height: 100%;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
   color: var(--text);
   font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
   background-color: var(--bg);
@@ -36,12 +38,46 @@ html, body {
   background-attachment: fixed;
 }
 
+body.cab-1080x1920 {
+  width: 1080px !important;
+  height: 1920px !important;
+  min-height: 1920px !important;
+  max-height: 1920px !important;
+  overflow: hidden !important;
+  display: block !important;
+}
+
+/* PC 확인용: ?dev=1 — 페이지 세로 스크롤만 허용 (캐비닛 캔버스는 1080×1920 유지) */
+html.dev-scroll,
+html.dev-scroll body,
+html.dev-scroll body.cab-1080x1920 {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+html.dev-scroll .cab-root {
+  height: 1920px;
+  overflow: hidden;
+}
+
+.cab-root {
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .topbar {
   display: grid;
-  grid-template-columns: 1fr 1.4fr 1fr;
-  gap: 12px;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 0;
   align-items: center;
-  padding: 10px 16px;
+  flex: 0 0 80px;
+  height: 80px;
+  padding: 0 12px;
   border-bottom: 1px solid rgba(240, 193, 75, 0.28);
   background: linear-gradient(180deg, rgba(46, 38, 96, 0.92) 0%, rgba(20, 18, 48, 0.88) 100%);
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
@@ -56,8 +92,8 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 14px;
-  min-height: 68px;
-  padding: 0 18px;
+  min-height: 60px;
+  padding: 0 10px;
   border-radius: 0;
   background: transparent;
   border: none;
@@ -102,13 +138,13 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 68px;
+  min-height: 60px;
   color: #c5d4f0;
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: none;
-  padding: 0 16px;
+  padding: 0 12px;
   border-radius: 0;
   background: transparent;
   border: none;
@@ -117,17 +153,22 @@ html, body {
   white-space: nowrap;
   box-sizing: border-box;
 }
+.round-block {
+  justify-self: end;
+  text-align: right;
+}
+.round-block .round,
 .countdown-block .round {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 68px;
+  min-height: 60px;
   margin-left: 0;
   color: #a8b8d8;
   font-size: 1.08rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  padding: 0 18px;
+  padding: 0 12px;
   border-radius: 0;
   background: transparent;
   border: none;
@@ -135,6 +176,7 @@ html, body {
   white-space: nowrap;
   box-sizing: border-box;
 }
+.round-block .round em,
 .countdown-block .round em {
   color: #ffe566;
   font-style: normal;
@@ -150,8 +192,8 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 68px;
-  padding: 10px 14px;
+  min-height: 60px;
+  padding: 6px 10px;
   border-radius: 0;
   background: transparent;
   border: none;
@@ -274,44 +316,80 @@ html, body {
   font-size: 0.95rem;
   line-height: 1.5;
 }
-.user-draft .user-display {
+.user-draft .user-display,
+.user-footer .user-display {
   font-size: 1.15rem;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.02em;
 }
-.user-draft .user-money {
+.user-draft .user-money,
+.user-footer .user-money {
   margin-top: 2px;
   color: var(--muted);
   font-size: 0.9rem;
 }
-.user-draft .user-money strong {
+.user-draft .user-money strong,
+.user-footer .user-money strong {
   color: var(--gold);
   font-size: 1.05rem;
   margin-left: 4px;
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 256px 830px 1fr;
-  gap: 12px;
-  padding: 12px;
-  min-height: calc(100vh - 120px);
-}
-.col-center {
-  width: 830px;
-  max-width: 830px;
-  min-width: 830px;
-  flex-shrink: 0;
-}
-.col-right {
-  min-width: 0;
-  width: 100%;
-  min-height: 0;
+/* Portrait cabinet: topbar 80 + mini 355 + gap 8 + mid 980 + gap 8 + bot 489 = 1920 */
+.layout-cab {
+  flex: 1 1 auto;
+  width: 1080px;
+  height: 1840px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  align-self: stretch;
+  gap: 8px;
+  padding: 0;
+  overflow: hidden;
+  min-height: 0;
+}
+.cab-mini {
+  flex: 0 0 355px;
+  width: 1080px;
+  height: 355px;
+  overflow: hidden;
+}
+.cab-mid {
+  flex: 0 0 980px;
+  width: 1080px;
+  height: 980px;
+  display: grid;
+  grid-template-columns: 220px 8px 852px;
+  grid-template-rows: 980px;
+  overflow: hidden;
+}
+.cab-mid > .col-left { grid-column: 1; }
+.cab-mid > .pattern-panel-wrap { grid-column: 3; width: 852px; }
+.cab-bot {
+  flex: 0 0 489px;
+  width: 1080px;
+  height: 489px;
+  display: grid;
+  grid-template-columns: 420px 8px 652px;
+  overflow: hidden;
+}
+.cab-bot > .bet-history { grid-column: 1; height: 489px; }
+.cab-bot-right {
+  grid-column: 3;
+  width: 652px;
+  height: 489px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cab-bot-meta {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 289px;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 .panel {
@@ -330,12 +408,20 @@ html, body {
 .mini-wrap {
   padding: 0;
   overflow: hidden;
-  width: 830px;
-  max-width: 100%;
-  height: 273px;
+  width: 1080px;
+  height: 355px;
   min-height: 0;
-  margin: 0 auto 0 0;
+  margin: 0;
   box-sizing: border-box;
+  border-radius: 0;
+  border: none;
+  position: relative;
+}
+.mini-scale {
+  width: 830px;
+  height: 273px;
+  transform: scale(1.301204819);
+  transform-origin: top left;
 }
 .mini-wrap iframe {
   display: block;
@@ -344,6 +430,58 @@ html, body {
   border: 0;
   background: #000;
   vertical-align: top;
+}
+
+.cab-deco {
+  flex: 0 0 200px;
+  height: 200px;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(255, 200, 60, 0.35), transparent 45%),
+    radial-gradient(circle at 70% 55%, rgba(60, 140, 255, 0.4), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(220, 60, 100, 0.3), transparent 45%),
+    linear-gradient(145deg, #1a1040 0%, #0c2038 50%, #1a0a28 100%);
+  border-bottom: 1px solid rgba(240, 193, 75, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+.cab-deco::before,
+.cab-deco::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(1px);
+}
+.cab-deco::before {
+  width: 72px;
+  height: 72px;
+  left: 18%;
+  top: 28%;
+  background: radial-gradient(circle at 35% 30%, #fff 0%, #ffd54a 35%, #e65100 75%);
+  box-shadow: 0 0 24px rgba(255, 180, 40, 0.55);
+}
+.cab-deco::after {
+  width: 54px;
+  height: 54px;
+  right: 22%;
+  top: 38%;
+  background: radial-gradient(circle at 35% 30%, #fff 0%, #64b5f6 40%, #1565c0 80%);
+  box-shadow: 0 0 20px rgba(80, 160, 255, 0.5);
+}
+
+.user-footer {
+  flex: 0 0 280px;
+  width: 280px;
+  height: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(180deg, rgba(30, 40, 70, 0.95), rgba(14, 20, 40, 0.98));
+  border-left: 1px solid rgba(240, 193, 75, 0.28);
+  border-top: none;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 .pattern-grid {
@@ -373,10 +511,21 @@ html, body {
   flex-direction: column;
   align-items: stretch;
   text-align: center;
-  height: auto;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   min-height: 0;
+  height: auto;
   box-sizing: border-box;
+  border-radius: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.cab-bot-right .mode-pick {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  justify-content: center;
+  border-radius: 0;
+  border-right: none;
 }
 .mode-pick h2 {
   align-self: stretch;
@@ -386,10 +535,43 @@ html, body {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  justify-content: flex-start;
-  gap: 10px;
+  justify-content: center;
+  gap: 16px;
   height: 100px;
   width: 100%;
+  flex-shrink: 0;
+}
+.cab-bot-right .mode-row {
+  justify-content: flex-start;
+  padding: 0 24px;
+}
+.draft-amount-block {
+  margin-top: 8px;
+  width: 100%;
+  text-align: center;
+  flex-shrink: 0;
+}
+.draft-amount-num {
+  display: inline-block;
+  margin-top: 0;
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+  color: #ffe566;
+  text-shadow:
+    0 0 8px rgba(255, 200, 40, 0.85),
+    0 0 22px rgba(255, 140, 0, 0.5),
+    0 2px 0 #8a5a00;
+  transform-origin: center center;
+}
+.sel-hint {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--gold);
+  min-height: 1.2em;
+  align-self: stretch;
   flex-shrink: 0;
 }
 .mode-visual {
@@ -486,36 +668,6 @@ html, body {
   50% { filter: brightness(1.12); }
 }
 
-.sel-hint {
-  margin-top: 8px;
-  font-size: 0.85rem;
-  color: var(--gold);
-  min-height: 1.4em;
-  align-self: stretch;
-  flex-shrink: 0;
-}
-
-.draft-amount-block {
-  margin-top: 14px;
-  width: 100%;
-  text-align: center;
-  flex-shrink: 0;
-}
-.draft-amount-num {
-  display: inline-block;
-  margin-top: 0;
-  font-size: 2.35rem;
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: 0.03em;
-  font-variant-numeric: tabular-nums;
-  color: #ffe566;
-  text-shadow:
-    0 0 8px rgba(255, 200, 40, 0.85),
-    0 0 22px rgba(255, 140, 0, 0.5),
-    0 2px 0 #8a5a00;
-  transform-origin: center center;
-}
 .draft-amount-num.is-pop {
   animation: draftAmountPop 0.42s cubic-bezier(0.22, 1.4, 0.36, 1);
 }
@@ -530,19 +682,20 @@ html, body {
   display: none;
 }
 
-/* 배팅기록: col-right 금액 아래 */
-/* 배팅기록: col-right 전체 폭, 나머지 높이 */
-.col-right > .bet-history.panel,
+/* 배팅기록: cab-bot 좌측 420×489 — 열 정보 잘림 없이 표시 */
+.cab-bot > .bet-history.panel,
 .panel.bet-history {
   background: #fff;
   border: 1px solid #D5D5D5;
+  border-radius: 0;
   color: #5F6164;
   margin: 0;
-  width: 100%;
-  max-width: 100%;
+  width: 420px;
+  max-width: 420px;
+  height: 489px;
   box-sizing: border-box;
   align-self: stretch;
-  flex: 1 1 auto;
+  flex: none;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -553,12 +706,14 @@ html, body {
 .panel.bet-history h2,
 .panel.bet-history .bet-history-title {
   margin: 0;
-  padding: 10px 12px;
+  padding: 8px 10px;
+  height: 36px;
+  box-sizing: border-box;
   border-bottom: 1px solid #c9a227;
-  border-radius: 8px 8px 0 0;
-  font-size: 1.05rem;
+  border-radius: 0;
+  font-size: 0.95rem;
   font-weight: 800;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-align: center;
   font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
   color: #fff8d6;
@@ -578,8 +733,8 @@ html, body {
 .bet-history-scroll {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;
-  padding: 0 0 4px;
+  overflow: hidden;
+  padding: 0;
 }
 .bet-history table {
   width: 100%;
@@ -588,23 +743,25 @@ html, body {
   font-size: 0.78rem;
   color: #5F6164;
 }
-/* Fixed cols: round / mode / result — amount & payout share the rest equally */
 .bet-history col.col-round { width: 4.8em; }
 .bet-history col.col-mode { width: 7.5em; }
 .bet-history col.col-result { width: 3.6em; }
-/* Remaining width split evenly between amount & payout */
 .bet-history col.col-amount,
 .bet-history col.col-payout { width: auto; }
 
 .bet-history th,
 .bet-history td {
   padding: 5px 4px;
+  height: 42px;
   border-bottom: 1px solid #e4e4e4;
   text-align: center;
   vertical-align: middle;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
   white-space: nowrap;
+}
+.bet-history thead th {
+  height: 32px;
 }
 .bet-history th {
   color: #5F6164;
@@ -776,10 +933,4 @@ html, body {
   text-align: center;
   font-size: 0.9rem;
   min-height: 1.2em;
-}
-
-@media (max-width: 1200px) {
-  .layout { grid-template-columns: 256px 830px; }
-  .col-right { display: none; }
-  .pattern-grid { grid-template-columns: repeat(3, 1fr); }
 }

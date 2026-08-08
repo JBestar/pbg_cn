@@ -8,8 +8,8 @@ const defaultConfig = {
   // Local XAMPP URL for the Chinese terminal page
   appUrl: 'http://localhost/pbg_cn/public/index.html',
   fullscreen: true,
-  width: 1280,
-  height: 800,
+  width: 1080,
+  height: 1920,
 };
 
 function loadConfig() {

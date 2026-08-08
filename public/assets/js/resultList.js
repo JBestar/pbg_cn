@@ -1,9 +1,11 @@
 /**
- * powerball chatRoom resultList — i18n-aware draw history
+ * powerball chatRoom resultList — i18n-aware draw history (num + rs only)
  */
 window.PBG_OwnerPick = (function () {
   var lastNewestRound = null;
   var cache = { draws: [], nextRound: 0, nextDrawnAt: '' };
+  /** MID list area 944px / row 60px → 15 rows total */
+  var MAX_ROWS = 15;
 
   function escHtml(s) {
     return String(s == null ? '' : s)
@@ -45,15 +47,20 @@ window.PBG_OwnerPick = (function () {
     if (!/^[oeumsb]{5}$/.test(sk)) {
       sk = 'oouus';
     }
+    var pbNum = (pbRaw != null && pbRaw !== '') ? String(parseInt(pbRaw, 10)) : '';
+    if (pbNum !== '' && (isNaN(pbNum) || parseInt(pbNum, 10) < 0)) {
+      pbNum = '';
+    }
+    var pbBadge = pbNum !== ''
+      ? '<span class="pb-num" aria-label="powerball">' + escHtml(pbNum) + '</span>'
+      : '';
     return '<li id="pick-' + r + '" regdate="0" class="" style="display:list-item;"'
       + ' data-pick-sprite-key="' + escHtml(sk) + '"'
       + ' data-powerball="' + escHtml(String(pbRaw != null ? pbRaw : '')) + '"'
       + ' data-ball-sum="' + escHtml(String(sumRaw != null ? sumRaw : '')) + '"'
       + ' data-drawn-at="' + escHtml(String(d.drawn_at || '')) + '">'
       + '<div class="num">' + dl + '<br>' + escHtml(roundLabel(r)) + '</div>'
-      + '<div class="rs ' + escHtml(sk) + '"></div>'
-      + '<div class="blank"></div>'
-      + '<div class="pick pass"></div>'
+      + '<div class="rs ' + escHtml(sk) + '">' + pbBadge + '</div>'
       + '</li>';
   }
 
@@ -63,8 +70,6 @@ window.PBG_OwnerPick = (function () {
     return '<li id="pick-' + nr + '" class="" style="display:list-item;">'
       + '<div class="num">' + dl + '<br>' + escHtml(roundLabel(nr)) + '</div>'
       + '<div class="rs ready"></div>'
-      + '<div class="blank"></div>'
-      + '<div class="pick"></div>'
       + '</li>';
   }
 
@@ -120,7 +125,7 @@ window.PBG_OwnerPick = (function () {
       && newestCompleted !== lastNewestRound;
 
     var showWaiting = nextRound > 0 && nextRound > newestCompleted;
-    var maxCompleted = showWaiting ? 19 : 20;
+    var maxCompleted = showWaiting ? (MAX_ROWS - 1) : MAX_ROWS;
     if (draws.length > maxCompleted) {
       draws = draws.slice(0, maxCompleted);
     }
@@ -139,7 +144,7 @@ window.PBG_OwnerPick = (function () {
     list.innerHTML = html;
 
     if (shouldAnimate) {
-      var done = list.querySelector('li .pick.pass');
+      var done = list.querySelector('li .rs:not(.ready)');
       var row = done ? done.closest('li') : list.querySelector('li');
       scheduleAnimatePush(row);
     }

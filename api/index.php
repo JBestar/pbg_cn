@@ -345,7 +345,10 @@ function api_pattern_pb_oddeven()
 {
     pbg_config(); // Asia/Seoul before date()
     $date = isset($_GET['date']) ? trim($_GET['date']) : date('Y-m-d');
-    $mode = isset($_GET['mode']) ? trim($_GET['mode']) : '';
+    $mode = isset($_GET['mode']) ? trim($_GET['mode']) : 'latestLog';
+    if ($mode === '') {
+        $mode = 'latestLog';
+    }
     $roundCnt = isset($_GET['roundCnt']) ? (int)$_GET['roundCnt'] : 300;
     $lang = isset($_GET['lang']) ? trim($_GET['lang']) : 'ko';
     if ($lang !== 'ko' && $lang !== 'zh' && $lang !== 'en') {
@@ -357,7 +360,7 @@ function api_pattern_pb_oddeven()
         'content' => $html,
         'meta' => [
             'date' => $date,
-            'mode' => $mode === '' ? 'day' : $mode,
+            'mode' => $mode,
             'roundCnt' => $roundCnt,
             'lang' => $lang,
             'type' => 'powerball_oddEven',
@@ -373,7 +376,10 @@ function api_pattern_pb_underover()
 {
     pbg_config();
     $date = isset($_GET['date']) ? trim($_GET['date']) : date('Y-m-d');
-    $mode = isset($_GET['mode']) ? trim($_GET['mode']) : '';
+    $mode = isset($_GET['mode']) ? trim($_GET['mode']) : 'latestLog';
+    if ($mode === '') {
+        $mode = 'latestLog';
+    }
     $roundCnt = isset($_GET['roundCnt']) ? (int)$_GET['roundCnt'] : 300;
     $lang = isset($_GET['lang']) ? trim($_GET['lang']) : 'ko';
     if ($lang !== 'ko' && $lang !== 'zh' && $lang !== 'en') {
@@ -385,7 +391,7 @@ function api_pattern_pb_underover()
         'content' => $html,
         'meta' => [
             'date' => $date,
-            'mode' => $mode === '' ? 'day' : $mode,
+            'mode' => $mode,
             'roundCnt' => $roundCnt,
             'lang' => $lang,
             'type' => 'powerball_underOver',
@@ -400,7 +406,10 @@ function api_pattern_sum_oddeven()
 {
     pbg_config();
     $date = isset($_GET['date']) ? trim($_GET['date']) : date('Y-m-d');
-    $mode = isset($_GET['mode']) ? trim($_GET['mode']) : '';
+    $mode = isset($_GET['mode']) ? trim($_GET['mode']) : 'latestLog';
+    if ($mode === '') {
+        $mode = 'latestLog';
+    }
     $roundCnt = isset($_GET['roundCnt']) ? (int)$_GET['roundCnt'] : 300;
     $lang = isset($_GET['lang']) ? trim($_GET['lang']) : 'ko';
     if ($lang !== 'ko' && $lang !== 'zh' && $lang !== 'en') {
@@ -412,7 +421,7 @@ function api_pattern_sum_oddeven()
         'content' => $html,
         'meta' => [
             'date' => $date,
-            'mode' => $mode === '' ? 'day' : $mode,
+            'mode' => $mode,
             'roundCnt' => $roundCnt,
             'lang' => $lang,
             'type' => 'number_oddEven',
@@ -427,7 +436,10 @@ function api_pattern_sum_underover()
 {
     pbg_config();
     $date = isset($_GET['date']) ? trim($_GET['date']) : date('Y-m-d');
-    $mode = isset($_GET['mode']) ? trim($_GET['mode']) : '';
+    $mode = isset($_GET['mode']) ? trim($_GET['mode']) : 'latestLog';
+    if ($mode === '') {
+        $mode = 'latestLog';
+    }
     $roundCnt = isset($_GET['roundCnt']) ? (int)$_GET['roundCnt'] : 300;
     $lang = isset($_GET['lang']) ? trim($_GET['lang']) : 'ko';
     if ($lang !== 'ko' && $lang !== 'zh' && $lang !== 'en') {
@@ -439,7 +451,7 @@ function api_pattern_sum_underover()
         'content' => $html,
         'meta' => [
             'date' => $date,
-            'mode' => $mode === '' ? 'day' : $mode,
+            'mode' => $mode,
             'roundCnt' => $roundCnt,
             'lang' => $lang,
             'type' => 'number_underOver',

@@ -429,8 +429,11 @@
     const ui = t();
     try {
       const lang = I18N.getLang ? I18N.getLang() : 'ko';
+      /* latestLog: 날짜 제한 없이 최근 회차만 — 고정 폭 안 최신 열 표시 */
       const json = await api(action, {
-        qs: '&lang=' + encodeURIComponent(lang),
+        qs: '&lang=' + encodeURIComponent(lang)
+          + '&mode=latestLog'
+          + '&roundCnt=300',
       });
       if (json.status !== 'success') {
         content.innerHTML = '<div style="padding:12px;color:#969696;text-align:center;">'
@@ -438,10 +441,6 @@
         return;
       }
       content.innerHTML = json.content || '';
-      content.scrollLeft = content.scrollWidth;
-      requestAnimationFrame(function () {
-        content.scrollLeft = content.scrollWidth;
-      });
     } catch (err) {
       console.warn(action, err);
     }
@@ -462,6 +461,10 @@
     if (!rows || !rows.length) {
       body.innerHTML = '<tr><td colspan="5" class="bet-empty">' + (ui.betEmpty || '') + '</td></tr>';
       return;
+    }
+    /* cab-bot bet area ≈ 10 data rows (no scroll) */
+    if (rows.length > 10) {
+      rows = rows.slice(0, 10);
     }
     let stripe = 0;
     let prevRound = null;
@@ -485,7 +488,7 @@
   }
 
   async function refreshBets() {
-    const json = await api('history', { qs: '&limit=20' });
+    const json = await api('history', { qs: '&limit=10' });
     if (json.status !== 'success') return;
     state.lastBets = json.data || [];
     renderBetRows(state.lastBets);

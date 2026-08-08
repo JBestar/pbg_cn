@@ -1,72 +1,124 @@
-/* pbg_cn layout glue for transplanted owner-pick panel */
+/* pbg_cn layout glue for transplanted owner-pick panel — cabinet 220px */
 
-/* chat_owner_pick.css 는 body.chat-popup-window 셀렉터를 씀 — 페이지 레이아웃은 app.css 유지 */
 body.chat-popup-window {
-  /* vendor CSS의 flex 전체창 규칙을 단말 레이아웃에 맞게 완화 */
   display: block;
   min-height: 100%;
 }
 
 .col-left.owner-pick-col {
-  width: 256px;
-  min-width: 256px;
-  max-width: 256px;
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
   padding: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 980px;
   align-self: stretch;
   color: #333;
   font-size: 12px;
   font-family: tahoma, dotum, "Microsoft YaHei", sans-serif;
+  overflow: hidden;
+  background: #fff;
 }
 
 .col-left .ownerPickStyleRoot {
-  width: 256px;
+  width: 220px;
   box-sizing: border-box;
 }
 
-/* vendor chat_owner_pick.css (316px) override */
 body.chat-popup-window .col-left.owner-pick-col,
 body.chat-popup-window .col-left .ownerPickStyleRoot {
-  width: 256px !important;
-  max-width: 256px;
-  min-width: 256px;
+  width: 220px !important;
+  max-width: 220px;
+  min-width: 220px;
 }
 
-/* pickResultText removed from markup — hide if any leftover */
 body.chat-popup-window .col-left .pickResultText {
   display: none !important;
 }
 
 .col-left .chat-popup-owner-head.ownerPickStyleRoot {
   flex-shrink: 0;
+  height: 36px;
   border-left: none;
 }
 
 .col-left .chat-popup-owner-body.ownerPickStyleRoot {
   flex: 1 1 auto;
   min-height: 0;
+  height: 944px;
   display: flex;
   flex-direction: column;
   border-left: none;
   z-index: 1;
+  overflow: hidden;
 }
 
 .col-left .chat-popup-owner-body .chat-popup-result-scroll {
-  max-height: none;
-  overflow: visible;
+  max-height: 944px;
+  height: 944px;
+  overflow: hidden !important;
 }
 
-/* vendor CSS의 ul.resultList overflow-y:auto 이중 스크롤 제거 */
 body.chat-popup-window .ownerPickStyleRoot .resultBox .content .chat-popup-result-scroll ul.resultList {
-  overflow: visible;
-  height: auto !important;
+  overflow: hidden !important;
+  height: 944px !important;
+  max-height: 944px !important;
 }
 
-/* app.css * { box-sizing:border-box } 때문에 행이 낮아지던 문제 — 원본처럼 content-box */
 body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li {
-  box-sizing: content-box;
+  box-sizing: border-box !important;
+  height: 60px !important;
+  padding: 0 4px 0 6px !important;
+  margin: 0 !important;
+  overflow: visible;
+}
+
+/* num + rs only — hide legacy blank/pick if any remain */
+body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .blank,
+body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .pick {
+  display: none !important;
+}
+
+body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .num {
+  width: 140px !important;
+  max-width: 140px;
+  font-size: 11px;
+  line-height: 1.25;
+  overflow: hidden;
+}
+
+body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .rs {
+  width: 68px !important;
+  height: 60px !important;
+  position: relative;
+  overflow: visible;
+}
+
+/*
+ * Powerball number badge — mirror of 「중」 across main-circle vertical axis.
+ * Sprite measure (68×60): main≈(29.5,30), 중≈(57.5,29.5) Ø~18 → left (9 o'clock).
+ */
+body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .rs .pb-num {
+  position: absolute;
+  z-index: 2;
+  left: -7px;
+  top: 21px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: #ffd400;
+  border: 1px solid #e6b800;
+  color: #e53935;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: tahoma, "Microsoft YaHei", sans-serif;
+  text-align: center;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
 .col-left .resultList-empty {
@@ -80,20 +132,28 @@ body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li 
   list-style: none;
   margin: 0;
   padding: 0;
+  height: 36px;
 }
 .col-left .ownerPickStyleRoot .resultBox .tab li {
   list-style: none;
+  height: 36px;
 }
 .col-left .ownerPickStyleRoot .resultBox .tab a {
   text-decoration: none;
   color: inherit;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 10px;
+  font-weight: 700;
 }
 
 .col-left .chat-popup-owner-body .resultBox .content {
   background: #fff;
+  height: 100%;
+  overflow: hidden;
 }
 
-/* lang sprites: ko default in vendor CSS; zh/en swap image only (all 1292×1080) */
 html[lang="zh-CN"] body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .rs,
 html[lang="zh-CN"] body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .pick,
 html[lang="zh-CN"] body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .pick span {

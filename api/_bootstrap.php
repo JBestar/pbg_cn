@@ -624,52 +624,126 @@ function pbg_game_day_window($ymd)
 }
 
 /**
- * Powerball odd/even pattern HTML (same structure as powerball buildOddEvenPatternTable).
+ * Baccarat big-road pattern: fixed 7 rows, bend right on collision / overflow.
+ * Newest columns kept when clipping to $maxCols (no horizontal scroll).
+ *
+ * @param array $groups [[type, [rounds...]], ...] chronological
+ * @param string $emptyLabel
+ * @param int $maxRows
+ * @param int $maxCols
+ */
+function pbg_build_baccarat_road_table(array $groups, $emptyLabel = '', $maxRows = 7, $maxCols = 30)
+{
+    $maxRows = max(1, (int)$maxRows);
+    $maxCols = max(1, (int)$maxCols);
+    $cols = [];
+    $nextStartCol = 0;
+
+    foreach ($groups as $group) {
+        list($type, $rounds) = $group;
+        if (!$rounds) {
+            continue;
+        }
+        $col = $nextStartCol;
+        while (true) {
+            if (!isset($cols[$col])) {
+                $cols[$col] = array_fill(0, $maxRows, null);
+            }
+            if ($cols[$col][0] === null) {
+                break;
+            }
+            $col++;
+        }
+        $startCol = $col;
+        $row = 0;
+        $dragon = false;
+        $typeEsc = htmlspecialchars((string)$type, ENT_QUOTES, 'UTF-8');
+
+        foreach ($rounds as $i => $r) {
+            $cell = [
+                'class' => $typeEsc,
+                'text' => ((int)$r % 1000),
+            ];
+            if ($i === 0) {
+                if (!isset($cols[$col])) {
+                    $cols[$col] = array_fill(0, $maxRows, null);
+                }
+                $cols[$col][$row] = $cell;
+                continue;
+            }
+            if (!$dragon) {
+                $nextRow = $row + 1;
+                if ($nextRow < $maxRows) {
+                    if (!isset($cols[$col])) {
+                        $cols[$col] = array_fill(0, $maxRows, null);
+                    }
+                    if ($cols[$col][$nextRow] === null) {
+                        $row = $nextRow;
+                        $cols[$col][$row] = $cell;
+                        continue;
+                    }
+                }
+                $dragon = true;
+            }
+            $col++;
+            while (true) {
+                if (!isset($cols[$col])) {
+                    $cols[$col] = array_fill(0, $maxRows, null);
+                }
+                if ($cols[$col][$row] === null) {
+                    break;
+                }
+                $col++;
+            }
+            $cols[$col][$row] = $cell;
+        }
+        $nextStartCol = $startCol + 1;
+    }
+
+    if (!$cols) {
+        return '<div style="padding:12px;color:#969696;text-align:center;">'
+            . htmlspecialchars((string)$emptyLabel, ENT_QUOTES, 'UTF-8') . '</div>';
+    }
+
+    ksort($cols);
+    $cols = array_values($cols);
+    if (count($cols) > $maxCols) {
+        $cols = array_slice($cols, -$maxCols);
+    }
+
+    $html = '<table class="patternTable roadTable"><tbody>';
+    for ($r = 0; $r < $maxRows; $r++) {
+        $html .= '<tr>';
+        foreach ($cols as $colCells) {
+            $c = isset($colCells[$r]) ? $colCells[$r] : null;
+            if ($c === null) {
+                $html .= '<td></td>';
+            } else {
+                $html .= '<td><div class="' . $c['class'] . '">' . $c['text'] . '</div></td>';
+            }
+        }
+        $html .= '</tr>';
+    }
+    $html .= '</tbody></table>';
+    return $html;
+}
+
+/**
+ * Powerball odd/even pattern HTML (baccarat 7-row road).
  * @param array $groups
  * @param string $lang ko|zh|en
  */
 function pbg_build_odd_even_pattern_table(array $groups, $lang = 'ko')
 {
     $oddEven = [
-        'ko' => ['odd' => '홀', 'even' => '짝', 'empty' => '패턴 데이터 없음'],
-        'zh' => ['odd' => '单', 'even' => '双', 'empty' => '暂无图案数据'],
-        'en' => ['odd' => 'Odd', 'even' => 'Even', 'empty' => 'No pattern data'],
+        'ko' => ['empty' => '패턴 데이터 없음'],
+        'zh' => ['empty' => '暂无图案数据'],
+        'en' => ['empty' => 'No pattern data'],
     ];
     if (!isset($oddEven[$lang])) {
         $lang = 'ko';
     }
-    $labels = $oddEven[$lang];
-
-    $maxRows = 0;
-    foreach ($groups as $group) {
-        $cnt = count($group[1]);
-        if ($cnt > $maxRows) {
-            $maxRows = $cnt;
-        }
-    }
-    $cells = [];
-    $order = 0;
-    foreach ($groups as $group) {
-        $order++;
-        list($type, $rounds) = $group;
-        $titleClass = $type === 'odd' ? 'title_odd' : 'title_even';
-        $titleText = $type === 'odd' ? $labels['odd'] : $labels['even'];
-        $inner = '<tr><th class="' . $titleClass . '">' . $titleText . '</th></tr>';
-        foreach ($rounds as $r) {
-            $inner .= '<tr><td><div class="' . htmlspecialchars($type, ENT_QUOTES, 'UTF-8') . '">' . ((int)$r % 1000) . '</div></td></tr>';
-        }
-        $pad = $maxRows - count($rounds);
-        for ($i = 0; $i < $pad; $i++) {
-            $inner .= '<tr><td>&nbsp;</td></tr>';
-        }
-        $inner .= '<tr><td class="sum">' . count($rounds) . '</td></tr>';
-        $inner .= '<tr><td class="order">' . $order . '</td></tr>';
-        $cells[] = '<td><table class="innerTable"><tbody>' . $inner . '</tbody></table></td>';
-    }
-    if (!$cells) {
-        return '<div style="padding:12px;color:#969696;text-align:center;">' . htmlspecialchars($labels['empty'], ENT_QUOTES, 'UTF-8') . '</div>';
-    }
-    return '<table class="patternTable"><tbody><tr>' . implode('', $cells) . '</tr></tbody></table>';
+    return pbg_build_baccarat_road_table($groups, $oddEven[$lang]['empty'], 7, 30);
 }
 
 /**
@@ -725,52 +799,21 @@ function pbg_build_powerball_odd_even_pattern_html($date = '', $mode = '', $roun
 }
 
 /**
- * Under/over pattern table (same structure as powerball buildUnderOverPatternTable).
+ * Under/over pattern table (baccarat 7-row road).
  * @param array $groups
  * @param string $lang ko|zh|en
  */
 function pbg_build_under_over_pattern_table(array $groups, $lang = 'ko')
 {
     $uo = [
-        'ko' => ['under' => '언더', 'over' => '오버', 'empty' => '패턴 데이터 없음'],
-        'zh' => ['under' => '小', 'over' => '大', 'empty' => '暂无图案数据'],
-        'en' => ['under' => 'Under', 'over' => 'Over', 'empty' => 'No pattern data'],
+        'ko' => ['empty' => '패턴 데이터 없음'],
+        'zh' => ['empty' => '暂无图案数据'],
+        'en' => ['empty' => 'No pattern data'],
     ];
     if (!isset($uo[$lang])) {
         $lang = 'ko';
     }
-    $labels = $uo[$lang];
-
-    $maxRows = 0;
-    foreach ($groups as $group) {
-        $cnt = count($group[1]);
-        if ($cnt > $maxRows) {
-            $maxRows = $cnt;
-        }
-    }
-    $cells = [];
-    $order = 0;
-    foreach ($groups as $group) {
-        $order++;
-        list($type, $rounds) = $group;
-        $titleClass = $type === 'under' ? 'title_under' : 'title_over';
-        $titleText = $type === 'under' ? $labels['under'] : $labels['over'];
-        $inner = '<tr><th class="' . $titleClass . '">' . $titleText . '</th></tr>';
-        foreach ($rounds as $r) {
-            $inner .= '<tr><td><div class="' . htmlspecialchars($type, ENT_QUOTES, 'UTF-8') . '">' . ((int)$r % 1000) . '</div></td></tr>';
-        }
-        $pad = $maxRows - count($rounds);
-        for ($i = 0; $i < $pad; $i++) {
-            $inner .= '<tr><td>&nbsp;</td></tr>';
-        }
-        $inner .= '<tr><td class="sum">' . count($rounds) . '</td></tr>';
-        $inner .= '<tr><td class="order">' . $order . '</td></tr>';
-        $cells[] = '<td><table class="innerTable"><tbody>' . $inner . '</tbody></table></td>';
-    }
-    if (!$cells) {
-        return '<div style="padding:12px;color:#969696;text-align:center;">' . htmlspecialchars($labels['empty'], ENT_QUOTES, 'UTF-8') . '</div>';
-    }
-    return '<table class="patternTable"><tbody><tr>' . implode('', $cells) . '</tr></tbody></table>';
+    return pbg_build_baccarat_road_table($groups, $uo[$lang]['empty'], 7, 30);
 }
 
 /**

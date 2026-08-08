@@ -2,6 +2,6 @@
   "machineId": "m01",
   "appUrl": "http://localhost:83/pbg_cn/public/index.html",
   "fullscreen": false,
-  "width": 1400,
-  "height": 900
+  "width": 1080,
+  "height": 1920
 }
