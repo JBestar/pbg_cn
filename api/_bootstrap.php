@@ -141,6 +141,17 @@ function pbg_body()
 function pbg_mode_meta($mode, $conf)
 {
     $mode = (int)$mode;
+    /* 파워볼 숫자 0~9 → mode 30~39 (lion), 배당 ratio_23 */
+    if ($mode >= 30 && $mode <= 39) {
+        $ratio = isset($conf['ratio_23']) ? (float)$conf['ratio_23'] : 9.0;
+        if ($ratio < 1) {
+            $ratio = 9.0;
+        }
+        return [
+            'target' => (string)($mode - 30),
+            'ratio' => $ratio,
+        ];
+    }
     $map = [
         1  => ['target' => 'P',  'ratio' => 'ratio_1'],
         2  => ['target' => 'B',  'ratio' => 'ratio_1'],
@@ -172,6 +183,10 @@ function pbg_mode_meta($mode, $conf)
 
 function pbg_mode_label_cn($mode)
 {
+    $mode = (int)$mode;
+    if ($mode >= 30 && $mode <= 39) {
+        return '功率球 ' . ($mode - 30);
+    }
     $labels = [
         1 => '功率球 单',
         2 => '功率球 双',
@@ -190,7 +205,6 @@ function pbg_mode_label_cn($mode)
         15 => '普通球 单+大',
         16 => '普通球 双+大',
     ];
-    $mode = (int)$mode;
     return isset($labels[$mode]) ? $labels[$mode] : ('模式' . $mode);
 }
 
@@ -210,6 +224,7 @@ function pbg_classify_draw($pb, $sum)
         $r5 = 'L';
     }
     return [
+        'pb' => $pb,
         'result_1' => $r1,
         'result_2' => $r2,
         'result_3' => $r3,
@@ -255,10 +270,19 @@ function pbg_date_label($drawnAt)
     return sprintf('%02d月%02d日', (int)date('n', $ts), (int)date('j', $ts));
 }
 
-/** Evaluate win like lion PballBet_Model::updateBetRound modes 1-16 */
+/** Evaluate win like lion — modes 1-16 OE/UO + 30-39 powerball digit */
 function pbg_is_win($mode, $target, $cls)
 {
     $mode = (int)$mode;
+    if ($mode >= 30 && $mode <= 39) {
+        $digit = $mode - 30;
+        $pb = isset($cls['pb']) ? (int)$cls['pb'] : -1;
+        /* target may be digit string or legacy 'Q' */
+        if ($target !== '' && $target !== 'Q' && ctype_digit((string)$target)) {
+            return (int)$target === $pb;
+        }
+        return $digit === $pb;
+    }
     switch ($mode) {
         case 1:
         case 2:
@@ -395,9 +419,17 @@ function pbg_new_token()
 function pbg_get_conf()
 {
     $db = pbg_db();
+    static $ensuredRatio23 = false;
+    if (!$ensuredRatio23) {
+        $ensuredRatio23 = true;
+        @$db->query("ALTER TABLE conf_game ADD COLUMN ratio_23 DECIMAL(8,3) NOT NULL DEFAULT 9.000 AFTER ratio_12");
+    }
     $row = pbg_query_fetch_one($db, 'SELECT * FROM conf_game WHERE id=1 LIMIT 1');
     if (!$row) {
         throw new RuntimeException('conf_game id=1 missing (run sql/schema.sql)');
+    }
+    if (!isset($row['ratio_23']) || (float)$row['ratio_23'] < 1) {
+        $row['ratio_23'] = 9.0;
     }
     return $row;
 }

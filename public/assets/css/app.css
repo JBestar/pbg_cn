@@ -322,11 +322,12 @@ html.dev-scroll .cab-root {
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.02em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
 }
 .user-draft .user-money,
 .user-footer .user-money {
   margin-top: 2px;
-  color: var(--muted);
+  color: #c5d4f0;
   font-size: 0.9rem;
 }
 .user-draft .user-money strong,
@@ -334,6 +335,7 @@ html.dev-scroll .cab-root {
   color: var(--gold);
   font-size: 1.05rem;
   margin-left: 4px;
+  text-shadow: 0 0 8px rgba(255, 200, 40, 0.45);
 }
 
 /* Portrait cabinet: topbar 80 + mini 355 + gap 8 + mid 980 + gap 8 + bot 489 = 1920 */
@@ -370,26 +372,252 @@ html.dev-scroll .cab-root {
   width: 1080px;
   height: 489px;
   display: grid;
-  grid-template-columns: 420px 8px 652px;
+  /* cab-bot-hud.png 1024×868 → 577×489; 배팅기록 = 1080−8−577 */
+  grid-template-columns: 495px 8px 577px;
   overflow: hidden;
 }
 .cab-bot > .bet-history { grid-column: 1; height: 489px; }
 .cab-bot-right {
   grid-column: 3;
-  width: 652px;
+  position: relative;
+  width: 577px;
   height: 489px;
+  overflow: hidden;
+  background: #000;
+}
+
+.cab-deco {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 577px;
+  height: 489px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+  border: none;
+}
+.cab-deco img {
+  display: block;
+  width: 577px;
+  height: 489px;
+  object-fit: contain;
+  object-position: center center;
+}
+.cab-deco::before,
+.cab-deco::after {
+  display: none;
+}
+
+/*
+ * ========== cab-bot-hud.png 오버레이 (1024×868 → 577×489) ==========
+ * 금색 상단 칸(배팅종목):  ~7.5% ~ 36.5%
+ * 금색 중간 바(장식):      ~38% ~ 52%  — 오버레이 없음
+ * 금색 하단 칸(배당/금액): ~53% ~ 69%
+ * 블루 3칸:                 ~78% ~ 92%
+ * 가로 콘텐츠 inset:        ~5% ~ 95%
+ */
+.cab-bot-hud {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 577px;
+  height: 489px;
+  pointer-events: none;
+  font-family: Orbitron, "Arial Black", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+.hud-zone {
+  position: absolute;
+  left: 5.2%;
+  right: 5.2%;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* 금색 첫번째 칸 — 배팅종목 (아이콘 그룹 가로·세로 중앙) */
+.hud-zone-mode {
+  top: 7.4%;
+  height: 29.2%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+/* 금색 하단 칸 — 배당률 | 배팅금액 */
+.hud-zone-meta {
+  top: 53%;
+  height: 16%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2%;
+  align-items: stretch;
+}
+.hud-meta-slot {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
   overflow: hidden;
+  pointer-events: auto;
 }
-.cab-bot-meta {
-  flex: 1 1 auto;
-  min-height: 0;
-  height: 289px;
+.hud-meta-label {
+  flex: 0 0 auto;
+  color: rgba(255, 204, 0, 0.85);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 6px rgba(255, 204, 0, 0.5);
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+html[lang="zh-CN"] .hud-meta-label,
+html[lang="en"] .hud-meta-label {
+  font-size: 10px;
+}
+
+/*
+ * betting_icos.png — 14칸 가로 스프라이트
+ * 셀 160×160, 간격 16 → stride 176, 전체 2448×160
+ * 0~9 숫자 | 10 일반볼 | 11 파워볼 | 12 언더 | 13 오버
+ */
+.hud-bet-icons {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: auto;
+  max-width: 100%;
+  height: 92%;
+  max-height: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+.hud-bet-icons[hidden] {
+  display: none !important;
+}
+.bet-ico {
+  flex: 0 0 auto;
+  display: block;
+  background-image: url(../img/betting_icos.png);
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 8px rgba(255, 204, 0, 0.55));
+  image-rendering: auto;
+}
+.bet-ico.is-normal {
+  filter: drop-shadow(0 0 8px rgba(255, 60, 60, 0.55));
+}
+.hud-zone-mode.has-icons .hud-mode-text {
+  display: none;
+}
+
+.hud-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 4px 8px;
+  box-sizing: border-box;
   overflow: hidden;
+  line-height: 1.15;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.hud-mode-text {
+  color: #fff8d6;
+  font-size: 18px;
+  font-weight: 700;
+  text-shadow:
+    0 0 8px #ffcc00,
+    0 0 16px rgba(255, 160, 0, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.85);
+}
+html[lang="zh-CN"] .hud-mode-text,
+html[lang="en"] .hud-mode-text {
+  font-size: 15px;
+}
+.hud-odds-text {
+  width: 100%;
+  color: #ffcc00;
+  font-size: 42px;
+  font-weight: 800;
+  text-shadow:
+    0 0 8px #ffcc00,
+    0 0 20px rgba(255, 180, 0, 0.55),
+    0 2px 0 #6a4a00;
+}
+.hud-amount-text {
+  width: 100%;
+  color: #fff8d6;
+  font-size: 33px;
+  font-weight: 800;
+  text-shadow:
+    0 0 8px #ffcc00,
+    0 0 16px rgba(255, 160, 0, 0.45);
+}
+
+/* --- 블루 3칸 (매장ID / 머니 / 포인트) — 중앙 칸이 더 넓음 --- */
+.hud-blue {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 78.5%;
+  height: 13%;
+  display: grid;
+  grid-template-columns: 1.6fr 2.11fr 1fr;
+  gap: 1.8%;
+  min-height: 0;
+  align-items: stretch;
+}
+.hud-blue .hud-text {
+  width: 100%;
+  height: 100%;
+  color: #00ccff;
+  font-weight: 700;
+  font-size: 28px;
+  text-shadow:
+    0 0 8px rgba(0, 204, 255, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+}
+html[lang="zh-CN"] .hud-blue .hud-text,
+html[lang="en"] .hud-blue .hud-text {
+  font-size: 24px;
+}
+.hud-blue .hud-store {
+  color: #e8fbff;
+  font-size: 25px;
+}
+html[lang="zh-CN"] .hud-blue .hud-store,
+html[lang="en"] .hud-blue .hud-store {
+  font-size: 26px;
+}
+.hud-money {
+  font-variant-numeric: tabular-nums;
+}
+.hud-point {
+  font-variant-numeric: tabular-nums;
+}
+
+.draft-amount-num.is-pop {
+  animation: draftAmountPop 0.42s cubic-bezier(0.22, 1.4, 0.36, 1);
 }
 
 .panel {
@@ -432,58 +660,6 @@ html.dev-scroll .cab-root {
   vertical-align: top;
 }
 
-.cab-deco {
-  flex: 0 0 200px;
-  height: 200px;
-  background:
-    radial-gradient(circle at 30% 40%, rgba(255, 200, 60, 0.35), transparent 45%),
-    radial-gradient(circle at 70% 55%, rgba(60, 140, 255, 0.4), transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(220, 60, 100, 0.3), transparent 45%),
-    linear-gradient(145deg, #1a1040 0%, #0c2038 50%, #1a0a28 100%);
-  border-bottom: 1px solid rgba(240, 193, 75, 0.25);
-  position: relative;
-  overflow: hidden;
-}
-.cab-deco::before,
-.cab-deco::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(1px);
-}
-.cab-deco::before {
-  width: 72px;
-  height: 72px;
-  left: 18%;
-  top: 28%;
-  background: radial-gradient(circle at 35% 30%, #fff 0%, #ffd54a 35%, #e65100 75%);
-  box-shadow: 0 0 24px rgba(255, 180, 40, 0.55);
-}
-.cab-deco::after {
-  width: 54px;
-  height: 54px;
-  right: 22%;
-  top: 38%;
-  background: radial-gradient(circle at 35% 30%, #fff 0%, #64b5f6 40%, #1565c0 80%);
-  box-shadow: 0 0 20px rgba(80, 160, 255, 0.5);
-}
-
-.user-footer {
-  flex: 0 0 280px;
-  width: 280px;
-  height: auto;
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  background: linear-gradient(180deg, rgba(30, 40, 70, 0.95), rgba(14, 20, 40, 0.98));
-  border-left: 1px solid rgba(240, 193, 75, 0.28);
-  border-top: none;
-  text-align: left;
-  box-sizing: border-box;
-}
-
 .pattern-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -506,80 +682,7 @@ html.dev-scroll .cab-root {
   line-height: 1.45;
 }
 
-.mode-pick {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  text-align: center;
-  flex: 1 1 auto;
-  min-height: 0;
-  height: auto;
-  box-sizing: border-box;
-  border-radius: 0;
-  margin: 0;
-  overflow: hidden;
-}
-.cab-bot-right .mode-pick {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 100%;
-  justify-content: center;
-  border-radius: 0;
-  border-right: none;
-}
-.mode-pick h2 {
-  align-self: stretch;
-  text-align: left;
-}
-.mode-row {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  justify-content: center;
-  gap: 16px;
-  height: 100px;
-  width: 100%;
-  flex-shrink: 0;
-}
-.cab-bot-right .mode-row {
-  justify-content: flex-start;
-  padding: 0 24px;
-}
-.draft-amount-block {
-  margin-top: 8px;
-  width: 100%;
-  text-align: center;
-  flex-shrink: 0;
-}
-.draft-amount-num {
-  display: inline-block;
-  margin-top: 0;
-  font-size: 2.1rem;
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: 0.03em;
-  font-variant-numeric: tabular-nums;
-  color: #ffe566;
-  text-shadow:
-    0 0 8px rgba(255, 200, 40, 0.85),
-    0 0 22px rgba(255, 140, 0, 0.5),
-    0 2px 0 #8a5a00;
-  transform-origin: center center;
-}
-.sel-hint {
-  margin-top: 4px;
-  font-size: 0.85rem;
-  color: var(--gold);
-  min-height: 1.2em;
-  align-self: stretch;
-  flex-shrink: 0;
-}
-.mode-visual {
-  position: relative;
-  width: 200px;
-  height: 100px;
-  flex-shrink: 0;
-}
+/* Legacy mode/odds helpers (HUD uses .hud-v-* overrides) */
 .mode-sprite {
   width: 200px;
   height: 100px;
@@ -588,89 +691,10 @@ html.dev-scroll .cab-root {
   border-radius: 4px;
   flex-shrink: 0;
 }
-.mode-sprite.is-empty {
-  display: none;
-}
-.mode-none {
-  display: none;
-  width: 200px;
-  height: 100px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  background: #101827;
-  border: 1px dashed #3a4b6b;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-.mode-none.is-visible {
-  display: flex;
-}
+.mode-sprite.is-empty { display: none; }
+.mode-none { display: none; }
+.mode-none.is-visible { display: flex; }
 
-/* Odds bar: value + track = 100px (same as mode sprite) */
-.odds-meter {
-  display: flex;
-  flex-direction: column;
-  width: 48px;
-  height: 100px;
-  flex-shrink: 0;
-  box-sizing: border-box;
-}
-.odds-meter.is-empty {
-  opacity: 0.35;
-}
-.odds-value {
-  height: 22px;
-  line-height: 22px;
-  flex-shrink: 0;
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  font-variant-numeric: tabular-nums;
-  color: #ffe566;
-  text-shadow:
-    0 0 8px rgba(255, 200, 40, 0.9),
-    0 0 16px rgba(255, 160, 0, 0.45);
-  text-align: center;
-}
-.odds-track {
-  flex: 1;
-  min-height: 0;
-  height: 78px;
-  width: 100%;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #0a101c 0%, #151f33 100%);
-  border: 1px solid #3a4b6b;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.55);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  overflow: hidden;
-  box-sizing: border-box;
-  padding: 2px;
-}
-.odds-fill {
-  width: 100%;
-  height: 0%;
-  border-radius: 4px 4px 3px 3px;
-  background: linear-gradient(180deg, #fff3a8 0%, #f0c14b 35%, #e8910a 70%, #c96a00 100%);
-  box-shadow:
-    0 0 10px rgba(255, 200, 60, 0.75),
-    0 0 18px rgba(255, 140, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  transition: height 0.28s cubic-bezier(0.22, 1.15, 0.36, 1);
-}
-.odds-meter:not(.is-empty) .odds-fill {
-  animation: oddsGlow 1.8s ease-in-out infinite;
-}
-@keyframes oddsGlow {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.12); }
-}
-
-.draft-amount-num.is-pop {
-  animation: draftAmountPop 0.42s cubic-bezier(0.22, 1.4, 0.36, 1);
-}
 @keyframes draftAmountPop {
   0% { transform: scale(1); filter: brightness(1); }
   35% { transform: scale(1.22); filter: brightness(1.35); }
@@ -682,7 +706,7 @@ html.dev-scroll .cab-root {
   display: none;
 }
 
-/* 배팅기록: cab-bot 좌측 420×489 — 열 정보 잘림 없이 표시 */
+/* 배팅기록: cab-bot 좌측 495×489 */
 .cab-bot > .bet-history.panel,
 .panel.bet-history {
   background: #fff;
@@ -690,8 +714,8 @@ html.dev-scroll .cab-root {
   border-radius: 0;
   color: #5F6164;
   margin: 0;
-  width: 420px;
-  max-width: 420px;
+  width: 495px;
+  max-width: 495px;
   height: 489px;
   box-sizing: border-box;
   align-self: stretch;

@@ -149,71 +149,126 @@
     return I18N.ui || {};
   }
 
-  /** mode id → [col, row] on 4×4 bet_mode_* sprite sheet */
-  var MODE_SPRITE_POS = {
-    1: [0, 0], 2: [1, 0], 9: [2, 0], 10: [3, 0],
-    3: [0, 1], 4: [1, 1], 11: [2, 1], 12: [3, 1],
-    5: [0, 2], 7: [1, 2], 6: [2, 2], 8: [3, 2],
-    13: [0, 3], 15: [1, 3], 14: [2, 3], 16: [3, 3],
-  };
-  var MODE_SPRITE_CELL_W = 200;
-  var MODE_SPRITE_CELL_H = 100;
+  /** betting_icos.png: 160 cell, 16 gap → stride 176; sheet 2448×160 */
+  var BET_ICO_CELL = 160;
+  var BET_ICO_STRIDE = 176;
+  var BET_ICO_SHEET_W = 2448;
+  var BET_ICO = { NORMAL: 10, POWER: 11, UNDER: 12, OVER: 13 };
 
-  function modeSpriteUrl() {
-    var lang = I18N.getLang ? I18N.getLang() : 'ko';
-    if (lang !== 'ko' && lang !== 'zh' && lang !== 'en') lang = 'ko';
-    return 'images/bet_mode_' + lang + '.png';
+  /**
+   * mode → sprite indices (홀=볼3, 짝=볼2, 언더/오버 단독=화살표1, 조합=볼+화살표)
+   * 숫자 단독(0~9)은 idx 0~9 한 개.
+   */
+  function modeIconIndices(mode) {
+    var m = Number(mode);
+    if (!m && m !== 0) return [];
+    /* 파워볼 숫자 0~9 → mode 30~39, 스프라이트 idx 0~9 */
+    if (m >= 30 && m <= 39) return [m - 30];
+
+    var ball = (m >= 1 && m <= 8) ? BET_ICO.POWER
+      : (m >= 9 && m <= 16) ? BET_ICO.NORMAL
+      : null;
+    if (ball == null) return [];
+
+    var spec = {
+      1: { n: 3 }, 2: { n: 2 },
+      3: { n: 1, uo: BET_ICO.UNDER }, 4: { n: 1, uo: BET_ICO.OVER },
+      5: { n: 3, uo: BET_ICO.UNDER }, 6: { n: 2, uo: BET_ICO.UNDER },
+      7: { n: 3, uo: BET_ICO.OVER }, 8: { n: 2, uo: BET_ICO.OVER },
+      9: { n: 3 }, 10: { n: 2 },
+      11: { n: 1, uo: BET_ICO.UNDER }, 12: { n: 1, uo: BET_ICO.OVER },
+      13: { n: 3, uo: BET_ICO.UNDER }, 14: { n: 2, uo: BET_ICO.UNDER },
+      15: { n: 3, uo: BET_ICO.OVER }, 16: { n: 2, uo: BET_ICO.OVER },
+    }[m];
+    if (!spec) return [];
+
+    var out = [];
+    var i;
+    var n = spec.n || 0;
+    for (i = 0; i < n; i++) out.push(ball);
+    if (spec.uo != null) out.push(spec.uo);
+    return out;
+  }
+
+  function paintBetIcon(el, idx, size) {
+    var scale = size / BET_ICO_CELL;
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    el.style.backgroundSize = (BET_ICO_SHEET_W * scale) + 'px ' + (BET_ICO_CELL * scale) + 'px';
+    el.style.backgroundPosition = (-idx * BET_ICO_STRIDE * scale) + 'px 0';
+    el.classList.toggle('is-normal', idx === BET_ICO.NORMAL);
+  }
+
+  function layoutModeIcons(indices) {
+    var box = $('modeIcons');
+    var slot = $('hudZoneMode') || (box && box.closest ? box.closest('.hud-zone-mode') : null);
+    var labelEl = $('modeLabel');
+    var ui = t();
+    if (!box) return;
+
+    box.innerHTML = '';
+    if (!indices || !indices.length) {
+      box.hidden = true;
+      if (slot) slot.classList.remove('has-icons');
+      if (labelEl) {
+        labelEl.hidden = false;
+        labelEl.textContent = ui.draftNone || '게임을 선택해주세요';
+      }
+      return;
+    }
+
+    box.hidden = false;
+    if (slot) slot.classList.add('has-icons');
+    if (labelEl) labelEl.hidden = true;
+
+    /* 세로 = 칸 높이 기준, 간격 0; 4개일 때는 높이의 약 83%로 축소 */
+    var maxH = Math.max(32, Math.floor((slot && slot.clientHeight) || box.clientHeight || 120));
+    var maxW = Math.max(32, Math.floor((slot && slot.clientWidth) || box.clientWidth || 400));
+    var n = indices.length;
+    var size = Math.min(maxH, BET_ICO_CELL);
+    if (n === 4) {
+      size = Math.floor(size * 0.83);
+    }
+    if (n * size > maxW) {
+      size = Math.floor(maxW / n);
+    }
+    size = Math.max(24, Math.min(size, maxH, BET_ICO_CELL));
+    box.style.gap = '0';
+
+    indices.forEach(function (idx) {
+      var ico = document.createElement('i');
+      ico.className = 'bet-ico';
+      ico.setAttribute('aria-hidden', 'true');
+      paintBetIcon(ico, idx, size);
+      box.appendChild(ico);
+    });
   }
 
   function updateModeSprite() {
-    var el = $('modeSprite');
-    var noneEl = $('modeNone');
-    if (!el) return;
-    var pos = state.mode ? MODE_SPRITE_POS[state.mode] : null;
-    if (!pos) {
-      el.classList.add('is-empty');
-      el.style.backgroundImage = '';
-      el.style.backgroundPosition = '';
-      el.removeAttribute('title');
-      if (noneEl) noneEl.classList.add('is-visible');
-      return;
+    var indices = state.mode ? modeIconIndices(state.mode) : [];
+    layoutModeIcons(indices);
+    var box = $('modeIcons');
+    if (box && indices.length) {
+      box.title = I18N.modes[state.mode] || ('#' + state.mode);
+    } else if (box) {
+      box.removeAttribute('title');
     }
-    if (noneEl) noneEl.classList.remove('is-visible');
-    el.classList.remove('is-empty');
-    el.style.backgroundImage = 'url("' + modeSpriteUrl() + '")';
-    el.style.backgroundPosition =
-      '-' + (pos[0] * MODE_SPRITE_CELL_W) + 'px -' + (pos[1] * MODE_SPRITE_CELL_H) + 'px';
-    el.title = I18N.modes[state.mode] || ('#' + state.mode);
   }
 
   function updateOddsMeter() {
-    var meter = $('oddsMeter');
     var valEl = $('oddsValue');
-    var fillEl = $('oddsFill');
-    if (!meter || !valEl || !fillEl) return;
+    if (!valEl) return;
 
     if (!state.mode || !state.odds || state.odds[state.mode] == null) {
-      meter.classList.add('is-empty');
       valEl.textContent = '—';
-      fillEl.style.height = '0%';
       return;
     }
 
     var odds = Number(state.odds[state.mode]) || 0;
-    var maxOdds = 1;
-    Object.keys(state.odds).forEach(function (k) {
-      var v = Number(state.odds[k]) || 0;
-      if (v > maxOdds) maxOdds = v;
-    });
-    var pct = maxOdds > 0 ? Math.min(100, (odds / maxOdds) * 100) : 0;
-
-    meter.classList.remove('is-empty');
     valEl.textContent = odds.toFixed(2);
-    fillEl.style.height = pct + '%';
   }
 
   function updateDraft() {
-    const ui = t();
     const amountEl = $('draftAmount');
     const nextText = fmtMoney(state.amount);
     const prevAmt = lastDraftAmount;
@@ -231,10 +286,6 @@
     lastDraftAmount = nextAmt;
     updateModeSprite();
     updateOddsMeter();
-    var hint = $('selHint');
-    if (hint) {
-      hint.textContent = state.mode ? '' : (ui.hintIdle || '');
-    }
   }
 
   function updateHeaderUser(d) {
@@ -243,10 +294,24 @@
     var bal = (d.machine && d.machine.balance != null)
       ? d.machine.balance
       : (d.member && d.member.balance);
+    var point = (d.machine && d.machine.point != null)
+      ? d.machine.point
+      : (d.member && d.member.point);
     var nameEl = $('headerUserName');
     var balEl = $('headerBalance');
-    if (nameEl) nameEl.textContent = nick || uid || '—';
+    var pointEl = $('headerPoint');
+    if (nameEl) {
+      var base = nick || uid || '';
+      var honor = (t().nameHonorific != null) ? t().nameHonorific : '님';
+      nameEl.textContent = base ? (base + honor) : '—';
+    }
     if (balEl) balEl.textContent = fmtMoney(bal);
+    if (pointEl) {
+      var pNum = (point != null && point !== '')
+        ? Number(point || 0).toLocaleString('zh-CN', { maximumFractionDigits: 0 })
+        : '0';
+      pointEl.textContent = 'p: ' + pNum;
+    }
   }
 
   function showLoginErr(msg) {
@@ -662,6 +727,20 @@
   async function boot() {
     if (I18N.applyStatic) I18N.applyStatic();
     updateDraft();
+    var iconsBox = $('modeIcons');
+    var zoneMode = $('hudZoneMode') || iconsBox;
+    if (zoneMode && typeof ResizeObserver !== 'undefined') {
+      var roTimer = null;
+      new ResizeObserver(function () {
+        if (roTimer) clearTimeout(roTimer);
+        roTimer = setTimeout(function () {
+          if (state.mode) updateModeSprite();
+        }, 50);
+      }).observe(zoneMode);
+    }
+    requestAnimationFrame(function () {
+      if (state.mode) updateModeSprite();
+    });
     const langSel = $('loginLang');
     if (langSel && I18N.getLang) {
       langSel.value = I18N.getLang();

@@ -47,7 +47,11 @@ function createWindow() {
     const watch = new Set([
       'KeyA','KeyB','KeyC','KeyD','KeyE','KeyF','KeyG','KeyH',
       'KeyO','KeyP','KeyQ','KeyR','KeyS','KeyT','KeyU','KeyV',
-      'KeyW','KeyX','KeyY','KeyZ','KeyI','Escape',
+      'KeyW','KeyX','KeyY','KeyZ','KeyI','KeyJ','Escape',
+      'Digit0','Digit1','Digit2','Digit3','Digit4',
+      'Digit5','Digit6','Digit7','Digit8','Digit9',
+      'Numpad0','Numpad1','Numpad2','Numpad3','Numpad4',
+      'Numpad5','Numpad6','Numpad7','Numpad8','Numpad9',
     ]);
     if (!watch.has(code)) return;
     event.preventDefault();

@@ -11,6 +11,9 @@
       }
     })();
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/vendor/powerball/css/chat_owner_pick.css" />
   <link rel="stylesheet" href="assets/css/owner-pick.css" />
   <link rel="stylesheet" href="assets/css/pattern-box.css" />
@@ -179,29 +182,31 @@
         </section>
 
         <aside class="cab-bot-right">
-          <div class="cab-deco" aria-hidden="true"></div>
-          <div class="cab-bot-meta">
-            <div class="panel mode-pick">
-              <div class="mode-row">
-                <div class="mode-visual">
-                  <div id="modeSprite" class="mode-sprite is-empty" aria-live="polite"></div>
-                  <div class="mode-none is-visible" id="modeNone" data-i18n="draftNone">게임을 선택해주세요</div>
-                </div>
-                <div class="odds-meter is-empty" id="oddsMeter" aria-live="polite">
-                  <div class="odds-value" id="oddsValue">—</div>
-                  <div class="odds-track">
-                    <div class="odds-fill" id="oddsFill"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="draft-amount-block">
-                <strong id="draftAmount" class="draft-amount-num">0u</strong>
-              </div>
-              <div class="sel-hint" id="selHint"></div>
+          <div class="cab-deco" aria-hidden="true">
+            <img src="assets/img/cab-bot-hud.png" alt="" width="577" height="489" />
+          </div>
+          <div class="cab-bot-hud" aria-live="polite">
+            <!-- 금색 1칸(상단): 배팅종목 아이콘 — 가로 중앙정렬 -->
+            <div class="hud-zone hud-zone-mode" id="hudZoneMode">
+              <div class="hud-bet-icons" id="modeIcons" hidden></div>
+              <div class="hud-text hud-mode-text" id="modeLabel">게임을 선택해주세요</div>
             </div>
-            <div class="user-footer">
-              <div class="user-display" id="headerUserName">—</div>
-              <div class="user-money"><span data-i18n="balance">잔액</span> <strong id="headerBalance">0u</strong></div>
+            <!-- 금색 하단 칸: 배당률 | 배팅금액 -->
+            <div class="hud-zone hud-zone-meta">
+              <div class="hud-meta-slot hud-slot-odds">
+                <div class="hud-meta-label" data-i18n="hudOdds">배당률</div>
+                <div class="hud-text hud-odds-text" id="oddsValue">—</div>
+              </div>
+              <div class="hud-meta-slot hud-slot-amount">
+                <div class="hud-meta-label" data-i18n="hudAmount">배팅금액</div>
+                <div class="hud-text hud-amount-text draft-amount-num" id="draftAmount">0u</div>
+              </div>
+            </div>
+            <!-- 블루 3칸: 매장ID | 보유머니 | 포인트 -->
+            <div class="hud-blue">
+              <div class="hud-text hud-store" id="headerUserName">—</div>
+              <div class="hud-text hud-money" id="headerBalance">0u</div>
+              <div class="hud-text hud-point" id="headerPoint">p: 0</div>
             </div>
           </div>
         </aside>
