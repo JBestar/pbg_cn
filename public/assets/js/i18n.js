@@ -28,10 +28,21 @@
         loginSession: '세션이 만료되었습니다. 다시 로그인하세요',
         loginPartial: '로그인됨 (일부 데이터 로드 실패)',
         ownerPickTab: '개봉기록',
-        patternTitle: '파워볼 홀/짝 패턴 분석',
-        patternTitleUo: '파워볼 언더/오버 패턴 분석',
-        patternTitleSumOe: '일반볼 홀/짝 패턴 분석',
-        patternTitleSumUo: '일반볼 언더/오버 패턴 분석',
+        patternTitle: '제1번방 P/B 패턴 분석',
+        patternTitleUo: '제2번방 P/B 패턴 분석',
+        patternTitleSumOe: '제3번방 P/B 패턴 분석',
+        patternTitleSumUo: '제4번방 P/B 패턴 분석',
+        patternTitleSuffix: '패턴 분석',
+        room1: '제1번',
+        room2: '제2번',
+        room3: '제3번',
+        room4: '제4번',
+        room1Title: '제1번방',
+        room2Title: '제2번방',
+        room3Title: '제3번방',
+        room4Title: '제4번방',
+        markP: 'P',
+        markB: 'B',
         patternLoading: '불러오는 중…',
         patternFail: '불러오기 실패',
         patternEmpty: '패턴 데이터 없음',
@@ -56,22 +67,22 @@
         langSwitched: '언어: 한국어',
       },
       modes: {
-        1: '파워볼 홀',
-        2: '파워볼 짝',
-        3: '파워볼 언더',
-        4: '파워볼 오버',
-        5: '파워볼 홀+언더',
-        6: '파워볼 짝+언더',
-        7: '파워볼 홀+오버',
-        8: '파워볼 짝+오버',
-        9: '일반볼 홀',
-        10: '일반볼 짝',
-        11: '일반볼 언더',
-        12: '일반볼 오버',
-        13: '일반볼 홀+언더',
-        14: '일반볼 짝+언더',
-        15: '일반볼 홀+오버',
-        16: '일반볼 짝+오버',
+        1: '제1번 P',
+        2: '제1번 B',
+        3: '제2번 P',
+        4: '제2번 B',
+        5: '제1번 P + 제2번 P',
+        6: '제1번 B + 제2번 P',
+        7: '제1번 P + 제2번 B',
+        8: '제1번 B + 제2번 B',
+        9: '제3번 P',
+        10: '제3번 B',
+        11: '제4번 P',
+        12: '제4번 B',
+        13: '제3번 P + 제4번 P',
+        14: '제3번 B + 제4번 P',
+        15: '제3번 P + 제4번 B',
+        16: '제3번 B + 제4번 B',
         30: '파워볼 0',
         31: '파워볼 1',
         32: '파워볼 2',
@@ -84,7 +95,7 @@
         39: '파워볼 9',
       },
       states: { 1: '대기', 2: '낙첨', 3: '당첨', 4: '취소' },
-      pattern: { odd: '홀', even: '짝', under: '언더', over: '오버' },
+      pattern: { odd: 'P', even: 'B', under: 'P', over: 'B' },
       msg: {
         selectAmount: '금액을 선택하세요',
         selectMode: '배팅 항목을 선택하세요',
@@ -135,10 +146,21 @@
         loginSession: '会话已过期，请重新登录',
         loginPartial: '已登录（部分数据加载失败）',
         ownerPickTab: '开奖记录',
-        patternTitle: '功率球 单/双 图案分析',
-        patternTitleUo: '功率球大小图案分析',
-        patternTitleSumOe: '普通球 单/双 图案分析',
-        patternTitleSumUo: '普通球大小图案分析',
+        patternTitle: '第一号 蓝/红 图案分析',
+        patternTitleUo: '第二号 蓝/红 图案分析',
+        patternTitleSumOe: '第三号 蓝/红 图案分析',
+        patternTitleSumUo: '第四号 蓝/红 图案分析',
+        patternTitleSuffix: '图案分析',
+        room1: '第一号',
+        room2: '第二号',
+        room3: '第三号',
+        room4: '第四号',
+        room1Title: '第一号',
+        room2Title: '第二号',
+        room3Title: '第三号',
+        room4Title: '第四号',
+        markP: '蓝',
+        markB: '红',
         patternLoading: '加载中…',
         patternFail: '加载失败',
         patternEmpty: '暂无图案数据',
@@ -163,22 +185,22 @@
         langSwitched: '语言：中文',
       },
       modes: {
-        1: '功率球 单',
-        2: '功率球 双',
-        3: '功率球 小',
-        4: '功率球 大',
-        5: '功率球 单+小',
-        6: '功率球 双+小',
-        7: '功率球 单+大',
-        8: '功率球 双+大',
-        9: '普通球 单',
-        10: '普通球 双',
-        11: '普通球 小',
-        12: '普通球 大',
-        13: '普通球 单+小',
-        14: '普通球 双+小',
-        15: '普通球 单+大',
-        16: '普通球 双+大',
+        1: '第一号 蓝',
+        2: '第一号 红',
+        3: '第二号 蓝',
+        4: '第二号 红',
+        5: '第一号 蓝 + 第二号 蓝',
+        6: '第一号 红 + 第二号 蓝',
+        7: '第一号 蓝 + 第二号 红',
+        8: '第一号 红 + 第二号 红',
+        9: '第三号 蓝',
+        10: '第三号 红',
+        11: '第四号 蓝',
+        12: '第四号 红',
+        13: '第三号 蓝 + 第四号 蓝',
+        14: '第三号 红 + 第四号 蓝',
+        15: '第三号 蓝 + 第四号 红',
+        16: '第三号 红 + 第四号 红',
         30: '功率球 0',
         31: '功率球 1',
         32: '功率球 2',
@@ -191,7 +213,7 @@
         39: '功率球 9',
       },
       states: { 1: '等待', 2: '未中', 3: '已中', 4: '取消' },
-      pattern: { odd: '单', even: '双', under: '小', over: '大' },
+      pattern: { odd: '蓝', even: '红', under: '蓝', over: '红' },
       msg: {
         selectAmount: '请选择金额',
         selectMode: '请选择投注项目',
@@ -242,10 +264,21 @@
         loginSession: 'Session expired. Please log in again',
         loginPartial: 'Logged in (some data failed to load)',
         ownerPickTab: 'Draw history',
-        patternTitle: 'Powerball Odd/Even Pattern',
-        patternTitleUo: 'Powerball Under/Over Pattern',
-        patternTitleSumOe: 'Number Sum Odd/Even Pattern',
-        patternTitleSumUo: 'Number Sum Under/Over Pattern',
+        patternTitle: 'Room1 P/B Pattern',
+        patternTitleUo: 'Room2 P/B Pattern',
+        patternTitleSumOe: 'Room3 P/B Pattern',
+        patternTitleSumUo: 'Room4 P/B Pattern',
+        patternTitleSuffix: 'Pattern',
+        room1: 'Room1',
+        room2: 'Room2',
+        room3: 'Room3',
+        room4: 'Room4',
+        room1Title: 'Room1',
+        room2Title: 'Room2',
+        room3Title: 'Room3',
+        room4Title: 'Room4',
+        markP: 'P',
+        markB: 'B',
         patternLoading: 'Loading…',
         patternFail: 'Failed to load',
         patternEmpty: 'No pattern data',
@@ -270,22 +303,22 @@
         langSwitched: 'Language: English',
       },
       modes: {
-        1: 'PB Odd',
-        2: 'PB Even',
-        3: 'PB Under',
-        4: 'PB Over',
-        5: 'PB Odd+Under',
-        6: 'PB Even+Under',
-        7: 'PB Odd+Over',
-        8: 'PB Even+Over',
-        9: 'Sum Odd',
-        10: 'Sum Even',
-        11: 'Sum Under',
-        12: 'Sum Over',
-        13: 'Sum Odd+Under',
-        14: 'Sum Even+Under',
-        15: 'Sum Odd+Over',
-        16: 'Sum Even+Over',
+        1: 'Room1 P',
+        2: 'Room1 B',
+        3: 'Room2 P',
+        4: 'Room2 B',
+        5: 'Room1 P + Room2 P',
+        6: 'Room1 B + Room2 P',
+        7: 'Room1 P + Room2 B',
+        8: 'Room1 B + Room2 B',
+        9: 'Room3 P',
+        10: 'Room3 B',
+        11: 'Room4 P',
+        12: 'Room4 B',
+        13: 'Room3 P + Room4 P',
+        14: 'Room3 B + Room4 P',
+        15: 'Room3 P + Room4 B',
+        16: 'Room3 B + Room4 B',
         30: 'PB 0',
         31: 'PB 1',
         32: 'PB 2',
@@ -298,7 +331,7 @@
         39: 'PB 9',
       },
       states: { 1: 'Wait', 2: 'Lose', 3: 'Win', 4: 'Cancel' },
-      pattern: { odd: 'Odd', even: 'Even', under: 'Under', over: 'Over' },
+      pattern: { odd: 'P', even: 'B', under: 'P', over: 'B' },
       msg: {
         selectAmount: 'Select an amount',
         selectMode: 'Select a bet mode',
@@ -368,6 +401,72 @@
         if (attr && key && p.ui[key] != null) el.setAttribute(attr, p.ui[key]);
       });
     });
+    applyPatternTitles();
+  }
+
+  function markSpan(isP) {
+    var ui = pack().ui;
+    var t = isP ? (ui.markP || 'P') : (ui.markB || 'B');
+    var cls = isP ? 'mk-p' : 'mk-b';
+    return '<span class="' + cls + '">' + t + '</span>';
+  }
+
+  function roomName(n) {
+    var ui = pack().ui;
+    return ui['room' + n] || ('Room' + n);
+  }
+
+  function roomTitle(n) {
+    var ui = pack().ui;
+    return ui['room' + n + 'Title'] || roomName(n);
+  }
+
+  function roomPartHtml(n, isP) {
+    return roomName(n) + ' ' + markSpan(isP);
+  }
+
+  /** Colored HTML for bet mode label (modes 1–16, 30–39) */
+  function formatModeHtml(mode) {
+    var m = Number(mode);
+    var map = {
+      1: [1, true], 2: [1, false], 3: [2, true], 4: [2, false],
+      5: [[1, true], [2, true]], 6: [[1, false], [2, true]],
+      7: [[1, true], [2, false]], 8: [[1, false], [2, false]],
+      9: [3, true], 10: [3, false], 11: [4, true], 12: [4, false],
+      13: [[3, true], [4, true]], 14: [[3, false], [4, true]],
+      15: [[3, true], [4, false]], 16: [[3, false], [4, false]],
+    };
+    if (m >= 30 && m <= 39) {
+      var plain = (I18N.modes && I18N.modes[m]) || ('#' + m);
+      return plain;
+    }
+    var spec = map[m];
+    if (!spec) return (I18N.modes && I18N.modes[m]) || ('#' + m);
+    if (Array.isArray(spec[0])) {
+      return roomPartHtml(spec[0][0], spec[0][1]) + ' + ' + roomPartHtml(spec[1][0], spec[1][1]);
+    }
+    return roomPartHtml(spec[0], spec[1]);
+  }
+
+  function formatPatternTitleHtml(roomN) {
+    var ui = pack().ui;
+    var suffix = ui.patternTitleSuffix || '';
+    return roomTitle(roomN) + ' '
+      + markSpan(true) + '/' + markSpan(false)
+      + (suffix ? ' ' + suffix : '');
+  }
+
+  function applyPatternTitles() {
+    var ids = [
+      ['patternTitleText', 1],
+      ['patternTitleUoText', 2],
+      ['patternTitleSumOeText', 3],
+      ['patternTitleSumUoText', 4],
+    ];
+    ids.forEach(function (pair) {
+      var el = document.getElementById(pair[0]);
+      if (el) el.innerHTML = formatPatternTitleHtml(pair[1]);
+    });
   }
 
   function setLang(lang) {
@@ -423,6 +522,9 @@
     cycleLangFromI: cycleLangFromI,
     pack: pack,
     applyStatic: applyStatic,
+    formatModeHtml: formatModeHtml,
+    formatPatternTitleHtml: formatPatternTitleHtml,
+    applyPatternTitles: applyPatternTitles,
     formatDateLabel: formatDateLabel,
     formatRoundLabel: formatRoundLabel,
     currency: PACKS.ko.currency,

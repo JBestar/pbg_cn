@@ -527,9 +527,9 @@
       body.innerHTML = '<tr><td colspan="5" class="bet-empty">' + (ui.betEmpty || '') + '</td></tr>';
       return;
     }
-    /* cab-bot bet area ≈ 10 data rows (no scroll) */
-    if (rows.length > 10) {
-      rows = rows.slice(0, 10);
+    /* cab-bot bet area: 8 data rows (no scroll) */
+    if (rows.length > 8) {
+      rows = rows.slice(0, 8);
     }
     let stripe = 0;
     let prevRound = null;
@@ -540,11 +540,14 @@
       }
       prevRound = round;
       const cls = b.state === 1 ? 'state-wait' : b.state === 3 ? 'state-win' : b.state === 2 ? 'state-lose' : 'state-cancel';
-      const label = I18N.modes[b.mode] || b.label || '';
+      const plain = I18N.modes[b.mode] || b.label || '';
+      const labelHtml = (I18N.formatModeHtml)
+        ? I18N.formatModeHtml(b.mode)
+        : plain;
       const stateLabel = (I18N.states && I18N.states[b.state]) || b.state_label || '';
       return '<tr class="round-stripe-' + stripe + '">' +
         '<td>' + b.round + '</td>' +
-        '<td title="' + String(label).replace(/"/g, '&quot;') + '">' + label + '</td>' +
+        '<td class="bet-mode-cell" title="' + String(plain).replace(/"/g, '&quot;') + '">' + labelHtml + '</td>' +
         '<td>' + fmtMoney(b.amount) + '</td>' +
         '<td>' + fmtMoney(b.win_amount) + '</td>' +
         '<td><span class="' + cls + '">' + stateLabel + '</span></td>' +
@@ -553,7 +556,7 @@
   }
 
   async function refreshBets() {
-    const json = await api('history', { qs: '&limit=10' });
+    const json = await api('history', { qs: '&limit=8' });
     if (json.status !== 'success') return;
     state.lastBets = json.data || [];
     renderBetRows(state.lastBets);

@@ -1,5 +1,5 @@
 /**
- * powerball chatRoom resultList — i18n-aware draw history (num + rs only)
+ * powerball chatRoom resultList — CSS 4분원 (스프라이트 대체) + pb-num
  */
 window.PBG_OwnerPick = (function () {
   var lastNewestRound = null;
@@ -13,6 +13,17 @@ window.PBG_OwnerPick = (function () {
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  function lang() {
+    return (window.PBG_I18N && window.PBG_I18N.lang) || 'ko';
+  }
+
+  /** 홀·언더 → P/蓝, 짝·오버 → B/红 */
+  function markLabel(isP) {
+    var L = lang();
+    if (L === 'zh') return isP ? '蓝' : '红';
+    return isP ? 'P' : 'B';
   }
 
   function dateLabel(drawnAt, fallback) {
@@ -30,10 +41,45 @@ window.PBG_OwnerPick = (function () {
   }
 
   function emptyText() {
-    var lang = window.PBG_I18N && window.PBG_I18N.lang;
-    if (lang === 'zh') return '暂无开奖记录';
-    if (lang === 'en') return 'No draw history';
+    var L = lang();
+    if (L === 'zh') return '暂无开奖记录';
+    if (L === 'en') return 'No draw history';
     return '개봉기록 없음';
+  }
+
+  function readyText() {
+    var L = lang();
+    if (L === 'zh') return '等待';
+    if (L === 'en') return 'Wait';
+    return '대기';
+  }
+
+  /**
+   * pick_sprite_key 5글자: [pb_oe][sum_oe][pb_uo][sum_uo][size]
+   * oe: o=홀/P, e=짝/B | uo: u=언더/P, o=오버/B
+   */
+  function rsCssFromKey(sk) {
+    sk = String(sk || 'oouus');
+    if (!/^[oeumsb]{5}$/.test(sk)) sk = 'oouus';
+    function oe(ch) {
+      var isP = ch === 'o';
+      return { cls: isP ? 'p' : 'b', t: markLabel(isP) };
+    }
+    function uo(ch) {
+      var isP = ch === 'u';
+      return { cls: isP ? 'p' : 'b', t: markLabel(isP) };
+    }
+    var tl = oe(sk.charAt(0));
+    var tr = oe(sk.charAt(1));
+    var bl = uo(sk.charAt(2));
+    var br = uo(sk.charAt(3));
+    return ''
+      + '<div class="rs-disk" aria-hidden="true">'
+      + '<span class="rs-q tl ' + tl.cls + '">' + escHtml(tl.t) + '</span>'
+      + '<span class="rs-q tr ' + tr.cls + '">' + escHtml(tr.t) + '</span>'
+      + '<span class="rs-q bl ' + bl.cls + '">' + escHtml(bl.t) + '</span>'
+      + '<span class="rs-q br ' + br.cls + '">' + escHtml(br.t) + '</span>'
+      + '</div>';
   }
 
   function completedRowHtml(d) {
@@ -44,13 +90,9 @@ window.PBG_OwnerPick = (function () {
     var sumRaw = d.ball_sum;
     var rawSk = String(d.pick_sprite_key != null ? d.pick_sprite_key : 'oouus');
     var sk = rawSk;
-    if (!/^[oeumsb]{5}$/.test(sk)) {
-      sk = 'oouus';
-    }
+    if (!/^[oeumsb]{5}$/.test(sk)) sk = 'oouus';
     var pbNum = (pbRaw != null && pbRaw !== '') ? String(parseInt(pbRaw, 10)) : '';
-    if (pbNum !== '' && (isNaN(pbNum) || parseInt(pbNum, 10) < 0)) {
-      pbNum = '';
-    }
+    if (pbNum !== '' && (isNaN(pbNum) || parseInt(pbNum, 10) < 0)) pbNum = '';
     var pbBadge = pbNum !== ''
       ? '<span class="pb-num" aria-label="powerball">' + escHtml(pbNum) + '</span>'
       : '';
@@ -60,7 +102,7 @@ window.PBG_OwnerPick = (function () {
       + ' data-ball-sum="' + escHtml(String(sumRaw != null ? sumRaw : '')) + '"'
       + ' data-drawn-at="' + escHtml(String(d.drawn_at || '')) + '">'
       + '<div class="num">' + dl + '<br>' + escHtml(roundLabel(r)) + '</div>'
-      + '<div class="rs ' + escHtml(sk) + '">' + pbBadge + '</div>'
+      + '<div class="rs rs-css ' + escHtml(sk) + '">' + rsCssFromKey(sk) + pbBadge + '</div>'
       + '</li>';
   }
 
@@ -69,7 +111,9 @@ window.PBG_OwnerPick = (function () {
     var dl = escHtml(dateLabel(drawnAt, dateFallback));
     return '<li id="pick-' + nr + '" class="" style="display:list-item;">'
       + '<div class="num">' + dl + '<br>' + escHtml(roundLabel(nr)) + '</div>'
-      + '<div class="rs ready"></div>'
+      + '<div class="rs rs-css ready"><div class="rs-disk rs-ready">'
+      + '<span class="rs-ready-txt">' + escHtml(readyText()) + '</span>'
+      + '</div></div>'
       + '</li>';
   }
 
@@ -93,12 +137,6 @@ window.PBG_OwnerPick = (function () {
     });
   }
 
-  /**
-   * @param {Array} draws newest-first
-   * @param {number} nextRound
-   * @param {string} nextDateLabel fallback
-   * @param {string} [nextDrawnAt]
-   */
   function render(draws, nextRound, nextDateLabel, nextDrawnAt) {
     var list = document.getElementById('resultList');
     if (!list) return;

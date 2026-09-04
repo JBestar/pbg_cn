@@ -730,12 +730,13 @@ html[lang="en"] .hud-blue .hud-store {
 .panel.bet-history h2,
 .panel.bet-history .bet-history-title {
   margin: 0;
-  padding: 8px 10px;
-  height: 36px;
+  padding: 0 10px;
+  height: 70px;
+  line-height: 70px;
   box-sizing: border-box;
   border-bottom: 1px solid #c9a227;
   border-radius: 0;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-align: center;
@@ -768,7 +769,7 @@ html[lang="en"] .hud-blue .hud-store {
   color: #5F6164;
 }
 .bet-history col.col-round { width: 4.8em; }
-.bet-history col.col-mode { width: 7.5em; }
+.bet-history col.col-mode { width: 11em; }
 .bet-history col.col-result { width: 3.6em; }
 .bet-history col.col-amount,
 .bet-history col.col-payout { width: auto; }
@@ -776,7 +777,7 @@ html[lang="en"] .hud-blue .hud-store {
 .bet-history th,
 .bet-history td {
   padding: 5px 4px;
-  height: 42px;
+  height: 47px;
   border-bottom: 1px solid #e4e4e4;
   text-align: center;
   vertical-align: middle;
@@ -785,7 +786,7 @@ html[lang="en"] .hud-blue .hud-store {
   white-space: nowrap;
 }
 .bet-history thead th {
-  height: 32px;
+  height: 42px;
 }
 .bet-history th {
   color: #5F6164;
@@ -796,10 +797,16 @@ html[lang="en"] .hud-blue .hud-store {
   top: 0;
   z-index: 1;
 }
-.bet-history td:nth-child(2) {
+.bet-history td:nth-child(2),
+.bet-history .bet-mode-cell {
   text-align: left;
   padding-left: 6px;
+  white-space: normal;
+  line-height: 1.25;
+  font-size: 0.72rem;
 }
+.bet-history .mk-p { color: #1265cd; font-weight: 800; }
+.bet-history .mk-b { color: #cd1212; font-weight: 800; }
 .bet-history tbody tr.round-stripe-0 {
   background: #ffffff;
 }

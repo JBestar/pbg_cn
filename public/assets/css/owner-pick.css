@@ -69,8 +69,12 @@ body.chat-popup-window .ownerPickStyleRoot .resultBox .content .chat-popup-resul
 
 body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li {
   box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center;
+  flex-wrap: nowrap;
   height: 60px !important;
-  padding: 0 4px 0 6px !important;
+  /* 좌·우 여백: 오른쪽을 넉넉히 두어 원이 패널 끝에 붙지 않게 */
+  padding: 0 20px 0 14px !important;
   margin: 0 !important;
   overflow: visible;
 }
@@ -82,10 +86,15 @@ body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li 
 }
 
 body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .num {
-  width: 140px !important;
-  max-width: 140px;
-  font-size: 11px;
-  line-height: 1.25;
+  display: block !important;
+  flex: 0 0 108px;
+  width: 108px !important;
+  max-width: 108px;
+  height: auto !important;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+  letter-spacing: 0.3px;
   overflow: hidden;
 }
 
@@ -94,6 +103,61 @@ body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li 
   height: 60px !important;
   position: relative;
   overflow: visible;
+  background-image: none !important;
+  background: transparent !important;
+}
+
+/* CSS 4분원 — num 오른쪽 한 줄; 수동 간격 조절은 margin-left */
+body.chat-popup-window .ownerPickStyleRoot .resultBox .content ul.resultList li .rs.rs-css {
+  display: flex !important;
+  flex: 0 0 68px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px; /* ← num↔원 간격 (키우면 멀어짐) */
+}
+.rs-disk {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  box-sizing: border-box;
+  border: 1px solid #2a2a2a;
+  flex-shrink: 0;
+}
+.rs-q {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: tahoma, "Microsoft YaHei", "PingFang SC", sans-serif;
+  line-height: 1;
+  box-sizing: border-box;
+}
+.rs-q.tl,
+.rs-q.tr { border-bottom: 1px solid #111; }
+.rs-q.tl,
+.rs-q.bl { border-right: 1px solid #111; }
+.rs-q.p { background: #1265cd; }
+.rs-q.b { background: #cd1212; }
+html[lang="zh-CN"] .rs-q { font-size: 10px; }
+
+.rs-disk.rs-ready {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #5a5a5a;
+  border-color: #3a3a3a;
+}
+.rs-ready-txt {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: tahoma, "Microsoft YaHei", sans-serif;
 }
 
 /*
