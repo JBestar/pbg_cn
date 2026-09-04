@@ -273,10 +273,10 @@ function spanGray(t, size) { return spanCls('spanGray', t, size); }
 
 function betMarks() {
     return {
-        odd: adminT('mark_odd', '홀'),
-        even: adminT('mark_even', '짝'),
-        under: adminT('mark_under', '언더'),
-        over: adminT('mark_over', '오버'),
+        odd: adminT('mark_odd', 'P'),
+        even: adminT('mark_even', 'B'),
+        under: adminT('mark_under', 'P'),
+        over: adminT('mark_over', 'B'),
         big: adminT('mark_big', '대'),
         mid: adminT('mark_mid', '중'),
         small: adminT('mark_small', '소'),
@@ -284,225 +284,121 @@ function betMarks() {
         power: adminT('mark_power', '파워'),
         pOdd: adminT('mark_power_odd', '파워홀'),
         pEven: adminT('mark_power_even', '파워짝'),
-        normal: adminT('mark_normal', '일반')
+        normal: adminT('mark_normal', '일반'),
+        p: adminT('mark_p', 'P'),
+        b: adminT('mark_b', 'B'),
+        room1: adminT('room1', '제1번'),
+        room2: adminT('room2', '제2번'),
+        room3: adminT('room3', '제3번'),
+        room4: adminT('room4', '제4번'),
     };
 }
 
+function roomPartHtml(roomKey, isP) {
+    var m = betMarks();
+    var room = m[roomKey] || roomKey;
+    var mark = isP ? m.p : m.b;
+    return room + ' ' + (isP ? spanBlue(mark) : spanRed(mark));
+}
+
+function roomPartText(roomKey, isP) {
+    var m = betMarks();
+    var room = m[roomKey] || roomKey;
+    var mark = isP ? m.p : m.b;
+    return room + ' ' + mark;
+}
+
 function getBetTypeText(type) {
+    var t = parseInt(type);
+    /* terminal modes 1–16 */
+    var term = {
+        1: function () { return roomPartText('room1', true); },
+        2: function () { return roomPartText('room1', false); },
+        3: function () { return roomPartText('room2', true); },
+        4: function () { return roomPartText('room2', false); },
+        5: function () { return roomPartText('room1', true) + ' + ' + roomPartText('room2', true); },
+        6: function () { return roomPartText('room1', false) + ' + ' + roomPartText('room2', true); },
+        7: function () { return roomPartText('room1', true) + ' + ' + roomPartText('room2', false); },
+        8: function () { return roomPartText('room1', false) + ' + ' + roomPartText('room2', false); },
+        9: function () { return roomPartText('room3', true); },
+        10: function () { return roomPartText('room3', false); },
+        11: function () { return roomPartText('room4', true); },
+        12: function () { return roomPartText('room4', false); },
+        13: function () { return roomPartText('room3', true) + ' + ' + roomPartText('room4', true); },
+        14: function () { return roomPartText('room3', false) + ' + ' + roomPartText('room4', true); },
+        15: function () { return roomPartText('room3', true) + ' + ' + roomPartText('room4', false); },
+        16: function () { return roomPartText('room3', false) + ' + ' + roomPartText('room4', false); },
+    };
+    if (term[t]) return '[' + term[t]() + ']   ';
+    if (t >= 30 && t <= 39) {
+        return '[' + (betMarks().pb || '파워볼') + ' ' + (t - 30) + '] ';
+    }
 
-    switch (parseInt(type)) {
-        case 0:
-            return '[홀]   ';
-        case 1:
-            return '[짝]   ';
-        case 2:
-            return '[언더]   ';
-        case 3:
-            return '[오버]   ';
-        case 4:
-            return '[홀 + 언더]   ';
-        case 5:
-            return '[짝 + 언더]   ';
-        case 6:
-            return '[홀 + 오버]   ';
-        case 7:
-            return '[짝 + 오버]   ';
-        case 8:
-            return '[대]   ';
-        case 9:
-            return '[중]   ';
-        case 10:
-            return '[소]   ';
-        case 11:
-            return '[홀 + 대]   ';
-        case 12:
-            return '[홀 + 중]   ';
-        case 13:
-            return '[홀 + 소]   ';
-        case 14:
-            return '[짝 + 대]   ';
-        case 15:
-            return '[짝 + 중]   ';
-        case 16:
-            return '[짝 + 소]   ';
-        case 17:
-            return '[파워볼 홀]   ';
-        case 18:
-            return '[파워볼 짝]   ';
-        case 19:
-            return '[파워볼 언더]   ';
-        case 20:
-            return '[파워볼 오버]   ';
-        case 21:
-            return '[파워 홀 + 언더]   ';
-        case 22:
-            return '[파워 짝 + 언더]   ';
-        case 23:
-            return '[파워 홀 + 오버]   ';
-        case 24:
-            return '[파워 짝 + 오버]   ';
-
-        case 33:
-            return '[홀 + 언더 + 파홀]';
-        case 34:
-            return '[홀 + 언더 + 파짝]';
-        case 35:
-            return '[홀 + 오버 + 파홀]';
-        case 36:
-            return '[홀 + 오버 + 파짝]';
-        case 37:
-            return '[짝 + 언더 + 파홀]';
-        case 38:
-            return '[짝 + 언더 + 파짝]';
-        case 39:
-            return '[짝 + 오버 + 파홀]';
-        case 40:
-            return '[짝 + 오버 + 파짝]';
-
-        case 41:
-            return '[파워 0] ';
-        case 42:
-            return '[파워 1] ';
-        case 43:
-            return '[파워 2] ';
-        case 44:
-            return '[파워 3] ';
-        case 45:
-            return '[파워 4] ';
-        case 46:
-            return '[파워 5] ';
-        case 47:
-            return '[파워 6] ';
-        case 48:
-            return '[파워 7] ';
-        case 49:
-            return '[파워 8] ';
-        case 50:
-            return '[파워 9] ';
-
+    /* legacy tiger admin codes (if any remain) */
+    switch (t) {
+        case 0: return '[' + roomPartText('room3', true) + ']   ';
+        case 17: return '[' + roomPartText('room1', true) + ']   ';
+        case 18: return '[' + roomPartText('room1', false) + ']   ';
+        case 19: return '[' + roomPartText('room2', true) + ']   ';
+        case 20: return '[' + roomPartText('room2', false) + ']   ';
+        case 21: return '[' + roomPartText('room1', true) + ' + ' + roomPartText('room2', true) + ']   ';
+        case 22: return '[' + roomPartText('room1', false) + ' + ' + roomPartText('room2', true) + ']   ';
+        case 23: return '[' + roomPartText('room1', true) + ' + ' + roomPartText('room2', false) + ']   ';
+        case 24: return '[' + roomPartText('room1', false) + ' + ' + roomPartText('room2', false) + ']   ';
+        case 41: case 42: case 43: case 44: case 45:
+        case 46: case 47: case 48: case 49: case 50:
+            return '[' + (betMarks().power || '파워') + ' ' + (t - 41) + '] ';
         default:
             return '';
     }
 }
 
 function getBetTypeTextOrg(type) {
-    var m = betMarks();
-    switch (parseInt(type)) {
-        case 0: return m.odd;
-        case 1: return m.even;
-        case 2: return m.under;
-        case 3: return m.over;
-        case 4: return m.odd + ' + ' + m.under;
-        case 5: return m.even + ' + ' + m.under;
-        case 6: return m.odd + ' + ' + m.over;
-        case 7: return m.even + ' + ' + m.over;
-        case 8: return m.big;
-        case 9: return m.mid;
-        case 10: return m.small;
-        case 11: return m.odd + ' + ' + m.big;
-        case 12: return m.odd + ' + ' + m.mid;
-        case 13: return m.odd + ' + ' + m.small;
-        case 14: return m.even + ' + ' + m.big;
-        case 15: return m.even + ' + ' + m.mid;
-        case 16: return m.even + ' + ' + m.small;
-        case 17: return m.pb + ' ' + m.odd;
-        case 18: return m.pb + ' ' + m.even;
-        case 19: return m.pb + ' ' + m.under;
-        case 20: return m.pb + ' ' + m.over;
-        case 21: return m.power + ' ' + m.odd + ' + ' + m.under;
-        case 22: return m.power + ' ' + m.even + ' + ' + m.under;
-        case 23: return m.power + ' ' + m.odd + ' + ' + m.over;
-        case 24: return m.power + ' ' + m.even + ' + ' + m.over;
-        case 25: return m.power + ' ' + m.odd + ' + ' + m.normal + ' ' + m.odd;
-        case 26: return m.power + ' ' + m.odd + ' + ' + m.normal + ' ' + m.even;
-        case 27: return m.power + ' ' + m.even + ' + ' + m.normal + ' ' + m.odd;
-        case 28: return m.power + ' ' + m.even + ' + ' + m.normal + ' ' + m.even;
-        case 29: return m.power + ' ' + m.under + ' + ' + m.normal + ' ' + m.under;
-        case 30: return m.power + ' ' + m.under + ' + ' + m.normal + ' ' + m.over;
-        case 31: return m.power + ' ' + m.over + ' + ' + m.normal + ' ' + m.under;
-        case 32: return m.power + ' ' + m.over + ' + ' + m.normal + ' ' + m.over;
-        case 33: return m.odd + ' + ' + m.under + ' + ' + m.pOdd;
-        case 34: return m.odd + ' + ' + m.under + ' + ' + m.pEven;
-        case 35: return m.odd + ' + ' + m.over + ' + ' + m.pOdd;
-        case 36: return m.odd + ' + ' + m.over + ' + ' + m.pEven;
-        case 37: return m.even + ' + ' + m.under + ' + ' + m.pOdd;
-        case 38: return m.even + ' + ' + m.under + ' + ' + m.pEven;
-        case 39: return m.even + ' + ' + m.over + ' + ' + m.pOdd;
-        case 40: return m.even + ' + ' + m.over + ' + ' + m.pEven;
-        case 41: return m.power + ' 0';
-        case 42: return m.power + ' 1';
-        case 43: return m.power + ' 2';
-        case 44: return m.power + ' 3';
-        case 45: return m.power + ' 4';
-        case 46: return m.power + ' 5';
-        case 47: return m.power + ' 6';
-        case 48: return m.power + ' 7';
-        case 49: return m.power + ' 8';
-        case 50: return m.power + ' 9';
-        default:
-            return '';
-    }
+    var plain = getBetTypeText(type);
+    return String(plain).replace(/^\[/, '').replace(/\]\s*$/, '').trim();
 }
 
 function getBetTypeHtml(type) {
-    var m = betMarks();
-    switch (parseInt(type)) {
-        case 0: return spanBlue(m.odd, 'bw-oe');
-        case 1: return spanRed(m.even, 'bw-oe');
-        case 2: return spanUnOverBlue(m.under, 'bw-uo');
-        case 3: return spanUnOverRed(m.over, 'bw-uo');
-        case 4: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanUnOverBlue(m.under, 'bw-uo');
-        case 5: return spanRed(m.even, 'bw-oe') + ' + ' + spanUnOverBlue(m.under, 'bw-uo');
-        case 6: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanUnOverRed(m.over, 'bw-uo');
-        case 7: return spanRed(m.even, 'bw-oe') + ' + ' + spanUnOverRed(m.over, 'bw-uo');
-        case 8: return spanGreen(m.big, 'bw-lms');
-        case 9: return spanGreen(m.mid, 'bw-lms');
-        case 10: return spanGreen(m.small, 'bw-lms');
-        case 11: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanGreen(m.big, 'bw-lms');
-        case 12: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanGreen(m.mid, 'bw-lms');
-        case 13: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanGreen(m.small, 'bw-lms');
-        case 14: return spanRed(m.even, 'bw-oe') + ' + ' + spanGreen(m.big, 'bw-lms');
-        case 15: return spanRed(m.even, 'bw-oe') + ' + ' + spanGreen(m.mid, 'bw-lms');
-        case 16: return spanRed(m.even, 'bw-oe') + ' + ' + spanGreen(m.small, 'bw-lms');
-        case 17: return spanBlue(m.pb + ' ' + m.odd, 'bw-pb-oe');
-        case 18: return spanRed(m.pb + ' ' + m.even, 'bw-pb-oe');
-        case 19: return spanUnOverBlue(m.pb + ' ' + m.under, 'bw-pb-uo');
-        case 20: return spanUnOverRed(m.pb + ' ' + m.over, 'bw-pb-uo');
-        case 21: return spanBlue(m.power + ' ' + m.odd, 'bw-pw-oe') + ' + ' + spanUnOverBlue(m.under, 'bw-uo');
-        case 22: return spanRed(m.power + ' ' + m.even, 'bw-pw-oe') + ' + ' + spanUnOverBlue(m.under, 'bw-uo');
-        case 23: return spanBlue(m.power + ' ' + m.odd, 'bw-pw-oe') + ' + ' + spanUnOverRed(m.over, 'bw-uo');
-        case 24: return spanRed(m.power + ' ' + m.even, 'bw-pw-oe') + ' + ' + spanUnOverRed(m.over, 'bw-uo');
-        case 25: return spanBlue(m.power + ' ' + m.odd, 'bw-pw-oe') + ' + ' + spanBlue(m.normal + ' ' + m.odd, 'bw-nm-oe');
-        case 26: return spanBlue(m.power + ' ' + m.odd, 'bw-pw-oe') + ' + ' + spanRed(m.normal + ' ' + m.even, 'bw-nm-oe');
-        case 27: return spanRed(m.power + ' ' + m.even, 'bw-pw-oe') + ' + ' + spanBlue(m.normal + ' ' + m.odd, 'bw-nm-oe');
-        case 28: return spanRed(m.power + ' ' + m.even, 'bw-pw-oe') + ' + ' + spanRed(m.normal + ' ' + m.even, 'bw-nm-oe');
-        case 29: return spanUnOverBlue(m.power + ' ' + m.under, 'bw-pw-uo') + ' + ' + spanUnOverBlue(m.normal + ' ' + m.under, 'bw-nm-uo');
-        case 30: return spanUnOverBlue(m.power + ' ' + m.under, 'bw-pw-uo') + ' + ' + spanUnOverRed(m.normal + ' ' + m.over, 'bw-nm-uo');
-        case 31: return spanUnOverRed(m.power + ' ' + m.over, 'bw-pw-uo') + ' + ' + spanUnOverBlue(m.normal + ' ' + m.under, 'bw-nm-uo');
-        case 32: return spanUnOverRed(m.power + ' ' + m.over, 'bw-pw-uo') + ' + ' + spanUnOverRed(m.normal + ' ' + m.over, 'bw-nm-uo');
-        case 33: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanUnOverBlue(m.under, 'bw-uo') + ' + ' + spanBlue(m.pOdd, 'bw-p-oe');
-        case 34: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanUnOverBlue(m.under, 'bw-uo') + ' + ' + spanRed(m.pEven, 'bw-p-oe');
-        case 35: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanUnOverRed(m.over, 'bw-uo') + ' + ' + spanBlue(m.pOdd, 'bw-p-oe');
-        case 36: return spanBlue(m.odd, 'bw-oe') + ' + ' + spanUnOverRed(m.over, 'bw-uo') + ' + ' + spanRed(m.pEven, 'bw-p-oe');
-        case 37: return spanRed(m.even, 'bw-oe') + ' + ' + spanUnOverBlue(m.under, 'bw-uo') + ' + ' + spanBlue(m.pOdd, 'bw-p-oe');
-        case 38: return spanRed(m.even, 'bw-oe') + ' + ' + spanUnOverBlue(m.under, 'bw-uo') + ' + ' + spanRed(m.pEven, 'bw-p-oe');
-        case 39: return spanRed(m.even, 'bw-oe') + ' + ' + spanUnOverRed(m.over, 'bw-uo') + ' + ' + spanBlue(m.pOdd, 'bw-p-oe');
-        case 40: return spanRed(m.even, 'bw-oe') + ' + ' + spanUnOverRed(m.over, 'bw-uo') + ' + ' + spanRed(m.pEven, 'bw-p-oe');
-        case 41: return m.power + ' 0';
-        case 42: return m.power + ' 1';
-        case 43: return m.power + ' 2';
-        case 44: return m.power + ' 3';
-        case 45: return m.power + ' 4';
-        case 46: return m.power + ' 5';
-        case 47: return m.power + ' 6';
-        case 48: return m.power + ' 7';
-        case 49: return m.power + ' 8';
-        case 50: return m.power + ' 9';
+    var t = parseInt(type);
+    var term = {
+        1: function () { return roomPartHtml('room1', true); },
+        2: function () { return roomPartHtml('room1', false); },
+        3: function () { return roomPartHtml('room2', true); },
+        4: function () { return roomPartHtml('room2', false); },
+        5: function () { return roomPartHtml('room1', true) + ' + ' + roomPartHtml('room2', true); },
+        6: function () { return roomPartHtml('room1', false) + ' + ' + roomPartHtml('room2', true); },
+        7: function () { return roomPartHtml('room1', true) + ' + ' + roomPartHtml('room2', false); },
+        8: function () { return roomPartHtml('room1', false) + ' + ' + roomPartHtml('room2', false); },
+        9: function () { return roomPartHtml('room3', true); },
+        10: function () { return roomPartHtml('room3', false); },
+        11: function () { return roomPartHtml('room4', true); },
+        12: function () { return roomPartHtml('room4', false); },
+        13: function () { return roomPartHtml('room3', true) + ' + ' + roomPartHtml('room4', true); },
+        14: function () { return roomPartHtml('room3', false) + ' + ' + roomPartHtml('room4', true); },
+        15: function () { return roomPartHtml('room3', true) + ' + ' + roomPartHtml('room4', false); },
+        16: function () { return roomPartHtml('room3', false) + ' + ' + roomPartHtml('room4', false); },
+    };
+    if (term[t]) return term[t]();
+    if (t >= 30 && t <= 39) {
+        return (betMarks().pb || '파워볼') + ' ' + (t - 30);
+    }
+    switch (t) {
+        case 0: return roomPartHtml('room3', true);
+        case 17: return roomPartHtml('room1', true);
+        case 18: return roomPartHtml('room1', false);
+        case 19: return roomPartHtml('room2', true);
+        case 20: return roomPartHtml('room2', false);
+        case 21: return roomPartHtml('room1', true) + ' + ' + roomPartHtml('room2', true);
+        case 22: return roomPartHtml('room1', false) + ' + ' + roomPartHtml('room2', true);
+        case 23: return roomPartHtml('room1', true) + ' + ' + roomPartHtml('room2', false);
+        case 24: return roomPartHtml('room1', false) + ' + ' + roomPartHtml('room2', false);
+        case 41: case 42: case 43: case 44: case 45:
+        case 46: case 47: case 48: case 49: case 50:
+            return (betMarks().power || '파워') + ' ' + (t - 41);
         default:
-            return '';
+            return getBetTypeTextOrg(t);
     }
 }
-
 
 function getResultWin(status, no, bLast) {
     if (status == 0) {
@@ -643,48 +539,31 @@ function getRoundResultHtml(round_result, mode) {
     var tHtml = "";
     if (round_result == null)
         return tHtml;
-    var m = betMarks();
     switch (mode) {
         case 1:
-            if (round_result == 'P') {
-                tHtml = spanBlue(m.pb + ' ' + m.odd, 'bw-pb-oe') + '&nbsp;';
-            } else if (round_result == 'B') {
-                tHtml = spanRed(m.pb + ' ' + m.even, 'bw-pb-oe') + '&nbsp;';
-            }
+            if (round_result == 'P') tHtml = roomPartHtml('room1', true) + '&nbsp;';
+            else if (round_result == 'B') tHtml = roomPartHtml('room1', false) + '&nbsp;';
             break;
         case 2:
-            if (round_result == 'P') {
-                tHtml = spanUnOverBlue(m.pb + ' ' + m.under, 'bw-pb-uo') + '&nbsp;';
-            } else if (round_result == 'B') {
-                tHtml = spanUnOverRed(m.pb + ' ' + m.over, 'bw-pb-uo') + '&nbsp;';
-            }
+            if (round_result == 'P') tHtml = roomPartHtml('room2', true) + '&nbsp;';
+            else if (round_result == 'B') tHtml = roomPartHtml('room2', false) + '&nbsp;';
             break;
         case 3:
-            if (round_result == 'P') {
-                tHtml = spanBlue(m.odd, 'bw-oe') + '&nbsp;';
-            } else if (round_result == 'B') {
-                tHtml = spanRed(m.even, 'bw-oe') + '&nbsp;';
-            }
+            if (round_result == 'P') tHtml = roomPartHtml('room3', true) + '&nbsp;';
+            else if (round_result == 'B') tHtml = roomPartHtml('room3', false) + '&nbsp;';
             break;
         case 4:
-            if (round_result == 'P') {
-                tHtml = spanUnOverBlue(m.under, 'bw-uo') + '&nbsp;';
-            } else if (round_result == 'B') {
-                tHtml = spanUnOverRed(m.over, 'bw-uo') + '&nbsp;';
-            }
+            if (round_result == 'P') tHtml = roomPartHtml('room4', true) + '&nbsp;';
+            else if (round_result == 'B') tHtml = roomPartHtml('room4', false) + '&nbsp;';
             break;
         case 5:
-            if (round_result == 'L') {
-                tHtml = spanGreen(m.big, 'bw-lms') + '&nbsp;&nbsp;';
-            } else if (round_result == 'M') {
-                tHtml = spanGreen(m.mid, 'bw-lms') + '&nbsp;';
-            } else if (round_result == 'S') {
-                tHtml = spanGreen(m.small, 'bw-lms') + '&nbsp;';
-            }
+            var m = betMarks();
+            if (round_result == 'L') tHtml = spanGreen(m.big, 'bw-lms') + '&nbsp;&nbsp;';
+            else if (round_result == 'M') tHtml = spanGreen(m.mid, 'bw-lms') + '&nbsp;';
+            else if (round_result == 'S') tHtml = spanGreen(m.small, 'bw-lms') + '&nbsp;';
             break;
     }
     return tHtml;
-
 }
 
 

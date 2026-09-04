@@ -1,5 +1,4 @@
 
-
     <div class="divTitle"><?= lang('Admin.menu_game_result') ?></div>
     <div class="divSearch">
     &nbsp;&nbsp;<?= lang('Admin.label_game_type') ?> : <select id="selectGameType" style="padding:2px 15px; min-height:24px;" name="selectGameType" onchange="changeGame();">
@@ -12,7 +11,6 @@
 		
 	</div>
     <div class="divList">
-		<div class="divSearch"><?= lang('Admin.hint_sum_range') ?></div>
 		<table class="default_table">
             <tbody>
                 <tr id="theadRow">
@@ -20,8 +18,7 @@
                     <th><?= lang('Admin.th_day_round') ?></th>
                     <th><?= lang('Admin.th_draw_nums') ?></th>
                     <th><?= lang('Admin.th_num_sum') ?></th>
-                    <th><?= lang('Admin.th_result') ?></th>
-                    <th><?= lang('Admin.th_close_time') ?></th>
+                    <th><?= lang('Admin.th_time') ?></th>
                     <th><?= lang('Admin.th_bet_count') ?></th>
                     <th><?= lang('Admin.th_bet_amount') ?></th>
                     <th><?= lang('Admin.th_win_amount') ?></th>
@@ -39,12 +36,7 @@
                 <tr>
                     <td id="tdPageNation" align="center" height="50">
                         <a class="light-theme" id="aPagePrev" href="javascript:prevPage();"><span class="light-theme"><<</span></a>
-                        <span id="spanPaginationNum">
-                            <!--
-                            <a class="light-theme" ><span class="current">1</span></a>
-                            <a class="light-theme" ><span class="light-theme">2</span></a>
-                            -->
-                        </span>
+                        <span id="spanPaginationNum"></span>
                         <a class="light-theme" id="aPageNext" href="javascript:nextPage();"><span class="light-theme">>></span></a>
                     </td>
                 </tr>
@@ -53,12 +45,10 @@
 
 	</div>
 
-
-<!-- <div class="divContent"> -->    
 </div>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/game_result.js?v=1"></script>
+    <script src="/assets/js/game_result.js?v=2"></script>
 <?php else :?>
     <script src="/assets/js/game_result.js?v=<?=time();?>"></script>
 <?php endif ?>

@@ -278,16 +278,20 @@ class Api extends BaseController
 			if( !$this->member_model->permittedMember($objMember) ){
 				$result->status = STATUS_FAIL;
 			} else {
-				if($objMember->mb_level == LEVEL_AGENCY)
+				if($objMember->mb_level == LEVEL_AGENCY) {
 					$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
-				else {
-
+				} else if (!empty($arrReqData['mb_uid'])) {
 					$objSelMember = $this->member_model->getByUid($arrReqData['mb_uid']);
-					if(!is_null($objSelMember) ){
-						$arrReqData['mb_uid'] = "";
-						$arrReqData['mb_emp_fid'] = $objSelMember->mb_fid;
+					if (!is_null($objSelMember)) {
+						if ((int)$objSelMember->mb_level === LEVEL_AGENCY) {
+							$arrReqData['mb_uid'] = '';
+							$arrReqData['mb_emp_fid'] = $objSelMember->mb_fid;
+						} else {
+							// 매장 선택: bets.mb_uid 필터
+							$arrReqData['mb_uid'] = $objSelMember->mb_uid;
+							unset($arrReqData['mb_emp_fid']);
+						}
 					}
-
 				}
 				$arrAcc = $moneyhist_model->getAccList($arrReqData);
 				
@@ -889,6 +893,30 @@ class Api extends BaseController
 		echo json_encode($result);
 
     }
+
+	/** 배팅내역 — 하부 매장별 합계 (포인트 = mb_point) */
+	public function store_bet_summary()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objMember = $this->member_model->getAllByUid($uid);
+			if ($objMember->mb_level == LEVEL_AGENCY) {
+				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
+			} else if ($objMember->mb_level == LEVEL_EMPLOYEE) {
+				$arrReqData['mb_uid'] = $objMember->mb_uid;
+			}
+			$pbbet_model = new PbBet_Model();
+			$result->data = $pbbet_model->getStoreBetSummary($arrReqData);
+			$result->status = STATUS_SUCCESS;
+		}
+		echo json_encode($result);
+	}
 
 	public function edit_bet(){
 		$jsonData = $_REQUEST['json_'];

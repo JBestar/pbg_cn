@@ -471,37 +471,36 @@ class MoneyHist_Model extends Model {
         }
 
         
-        $where = " ( bet_state = ".BET_LOSS." OR bet_state = ".BET_WIN." ) AND bet_time >= '".$startDate."' ";    
-        $where .= " AND bet_time <= '".$endDate." 23:59:59' ";    
+        $where = " ( state = 2 OR state = 3 ) AND created_at >= '".$startDate."' ";    
+        $where .= " AND created_at <= '".$endDate." 23:59:59' ";    
         
         if(array_key_exists('mb_uid', $arrRqData) && strlen($arrRqData['mb_uid']) > 0){
-            $where .= " AND bet_mb_uid = '".$arrRqData['mb_uid']."' ";    
+            $where .= " AND mb_uid = '".$this->mDb->escapeString($arrRqData['mb_uid'])."' ";    
         }
         if(array_key_exists('mb_emp_fid', $arrRqData)){
-            $where .= " AND bet_emp_fid = '".$arrRqData['mb_emp_fid']."' ";    
+            $where .= " AND emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";    
         }
 
-        $tbBetName = "bet_powerball"; 
-        $strSql = " SELECT CAST(bet_time AS DATE) AS bet_date, SUM(bet_money) AS bet_sum , SUM(bet_win_money) AS win_sum , ";
-        $strSql.= " SUM(bet_empl_amount) AS empl_sum , SUM(bet_agen_amount) AS agen_sum ";
-        //$strSql.= ", bet_emp_fid ";
-        $strSql.= " FROM ".$tbBetName;
-        $strSql.= " WHERE ".$where;
-        $strSql.= " GROUP BY CAST(bet_time AS DATE)";
-        //$strSql.= ", bet_emp_fid ";
+        try {
+            $strSql = " SELECT CAST(created_at AS DATE) AS bet_date, SUM(amount) AS bet_sum , SUM(win_amount) AS win_sum ";
+            $strSql.= " FROM bets ";
+            $strSql.= " WHERE ".$where;
+            $strSql.= " GROUP BY CAST(created_at AS DATE)";
 
-        $arrResult = $this->mDb->query($strSql)->getResult();
+            $arrResult = $this->mDb->query($strSql)->getResult();
 
-        foreach ($arrResult as $objResult) {
-            if(!array_key_exists($objResult->bet_date, $arrAcc))
-                continue;
+            foreach ($arrResult as $objResult) {
+                if(!array_key_exists($objResult->bet_date, $arrAcc))
+                    continue;
                 $arrAcc[$objResult->bet_date]->money_bet += $objResult->bet_sum;
                 $arrAcc[$objResult->bet_date]->money_win += $objResult->win_sum;
-                $arrAcc[$objResult->bet_date]->point_empl += $objResult->empl_sum;
-                $arrAcc[$objResult->bet_date]->point_agen += $objResult->agen_sum;
-                
+                // 일자별 포인트는 member.mb_point(보유)로 집계하지 않음 — 배팅내역에서 표시
+                $arrAcc[$objResult->bet_date]->point_empl += 0;
+                $arrAcc[$objResult->bet_date]->point_agen += 0;
+            }
+        } catch (\Exception $e) {
+            // bets 집계 실패 시 날짜 뼈대만 유지
         }
-
 
         return $arrAcc;
     }

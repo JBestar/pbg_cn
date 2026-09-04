@@ -24,18 +24,6 @@ class PbBet_Model extends Model {
     }
 
     /** Terminal mode (1–16) → admin display mode for getBetTypeTextOrg */
-    private function mapModeToAdmin($mode)
-    {
-        $mode = (int)$mode;
-        $map = [
-            1 => 17, 2 => 18, 3 => 19, 4 => 20,
-            5 => 21, 6 => 22, 7 => 23, 8 => 24,
-            9 => 0, 10 => 1, 11 => 2, 12 => 3,
-            13 => 4, 14 => 5, 15 => 6, 16 => 7,
-        ];
-        return isset($map[$mode]) ? $map[$mode] : $mode;
-    }
-
     /** Terminal state 1 wait / 2 lose / 3 win / 4 cancel → admin 0/1/2/3 */
     private function mapStateToAdmin($state)
     {
@@ -101,7 +89,7 @@ class PbBet_Model extends Model {
         $o->bet_round_date = substr((string)$row['created_at'], 0, 10);
         $o->bet_time = $row['created_at'];
         $o->bet_game = GAME_POWER_BALL;
-        $o->bet_mode = $this->mapModeToAdmin($row['mode']);
+        $o->bet_mode = (int)$row['mode'];
         $o->bet_target = $row['target'];
         $o->bet_ratio = $row['ratio'];
         $o->bet_money = (float)$row['amount'];
@@ -110,6 +98,7 @@ class PbBet_Model extends Model {
         $o->bet_after_money = (float)$row['after_money'];
         $o->mb_uid = $row['mb_uid'];
         $o->mb_nickname = isset($row['mb_nickname']) ? $row['mb_nickname'] : '';
+        $o->mb_point = isset($row['mb_point']) ? (float)$row['mb_point'] : 0;
         $o->mb_ip_last = isset($row['mb_ip_last']) ? $row['mb_ip_last'] : '';
         $o->mb_emp_nickname = isset($row['mb_emp_nickname']) ? $row['mb_emp_nickname'] : '';
         $o->mb_emp_fid = (int)$row['emp_fid'];
@@ -243,7 +232,7 @@ class PbBet_Model extends Model {
             }
             $where = $this->buildWhere($arrRqData);
             $nStartRow = ($page - 1) * $cntPer;
-            $sql = "SELECT b.*, m.mb_nickname, m.mb_ip_last, emp.mb_nickname AS mb_emp_nickname,
+            $sql = "SELECT b.*, m.mb_nickname, m.mb_point, m.mb_ip_last, emp.mb_nickname AS mb_emp_nickname,
                     d.round AS draw_round, d.ball1, d.ball2, d.ball3, d.ball4, d.ball5, d.powerball, d.ball_sum
                     FROM bets b
                     LEFT JOIN member m ON m.mb_uid = b.mb_uid
@@ -297,6 +286,55 @@ class PbBet_Model extends Model {
                     WHERE {$where}
                     GROUP BY b.mb_uid
                     ORDER BY MAX(b.id) DESC";
+            return $this->mDb->query($sql)->getResult();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * 배팅내역 매장 단위 합계. 포인트 = member.mb_point, 총판포인트 = 상위 총판 mb_point.
+     */
+    function getStoreBetSummary($arrRqData)
+    {
+        try {
+            $whereMember = " m.mb_level = " . LEVEL_EMPLOYEE . " AND m.mb_state_delete = 0 ";
+            if (array_key_exists('mb_emp_fid', $arrRqData)) {
+                $whereMember .= " AND m.mb_emp_fid = '" . intval($arrRqData['mb_emp_fid']) . "' ";
+            }
+            if (!empty($arrRqData['mb_uid'])) {
+                $whereMember .= " AND m.mb_uid = '" . $this->mDb->escapeString($arrRqData['mb_uid']) . "' ";
+            }
+
+            $whereBet = " b.state IN (2, 3) ";
+            if (!empty($arrRqData['start'])) {
+                $whereBet .= " AND b.created_at >= '" . $this->mDb->escapeString($arrRqData['start']) . "' ";
+            }
+            if (!empty($arrRqData['end'])) {
+                $whereBet .= " AND b.created_at <= '" . $this->mDb->escapeString($arrRqData['end']) . " 23:59:59' ";
+            }
+            if (isset($arrRqData['round_id']) && strlen((string)$arrRqData['round_id']) > 0) {
+                $whereBet .= " AND b.round = '" . $this->mDb->escapeString($arrRqData['round_id']) . "' ";
+            }
+
+            $sql = "SELECT m.mb_fid, m.mb_uid, m.mb_nickname, m.mb_money, m.mb_point,
+                    IFNULL(agen.mb_point, 0) AS agen_point,
+                    IFNULL(bt.bet_sum, 0) AS bet_sum,
+                    IFNULL(bt.win_sum, 0) AS win_sum,
+                    IFNULL(bt.win_rounds, 0) AS win_rounds
+                    FROM member m
+                    LEFT JOIN member agen ON agen.mb_fid = m.mb_emp_fid
+                    LEFT JOIN (
+                        SELECT mb_uid,
+                               SUM(amount) AS bet_sum,
+                               SUM(win_amount) AS win_sum,
+                               COUNT(DISTINCT CASE WHEN state = 3 THEN round END) AS win_rounds
+                        FROM bets b
+                        WHERE {$whereBet}
+                        GROUP BY mb_uid
+                    ) bt ON bt.mb_uid = m.mb_uid
+                    WHERE {$whereMember}
+                    ORDER BY m.mb_uid ASC";
             return $this->mDb->query($sql)->getResult();
         } catch (\Exception $e) {
             return [];

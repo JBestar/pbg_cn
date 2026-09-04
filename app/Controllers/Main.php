@@ -178,6 +178,31 @@ class Main extends BaseController
 		}
 	}
 
+	/** 배팅내역 상세보기 팝업 */
+	public function bet_detail()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->request->getGet('uid');
+		$start = $this->request->getGet('start');
+		$end = $this->request->getGet('end');
+		if (!$start) {
+			$start = date('Y-m-d');
+		}
+		if (!$end) {
+			$end = date('Y-m-d');
+		}
+		$siteName = $this->confsite_model->getSiteName();
+		echo view('main/bet_detail', [
+			'site_name' => $siteName,
+			'detail_uid' => (string)$uid,
+			'start' => $start,
+			'end' => $end,
+		]);
+	}
+
 	public function bet_sum()
 	{	
 		if(!is_login())
