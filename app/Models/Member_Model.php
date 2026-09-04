@@ -26,6 +26,16 @@ class Member_Model extends Model {
         return password_hash((string)$plain, PASSWORD_DEFAULT);
     }
 
+    /** 관리자(level>=9)만 해시, 총판·매장은 평문 저장 */
+    public static function storePassword($plain, $level)
+    {
+        $level = (int)$level;
+        if ($level >= LEVEL_ADMIN) {
+            return self::hashPassword($plain);
+        }
+        return (string)$plain;
+    }
+
     public static function verifyPassword($plain, $hash)
     {
         $hash = (string)$hash;
@@ -33,11 +43,16 @@ class Member_Model extends Model {
         if ($hash === '') {
             return false;
         }
-        // Support legacy plain-text rows during transition
         if (strpos($hash, '$2y$') === 0 || strpos($hash, '$2a$') === 0 || strpos($hash, '$argon') === 0) {
             return password_verify($plain, $hash);
         }
         return hash_equals($hash, $plain);
+    }
+
+    public static function isHashedPassword($stored)
+    {
+        $s = (string)$stored;
+        return strpos($s, '$2y$') === 0 || strpos($s, '$2a$') === 0 || strpos($s, '$argon') === 0;
     }
 
     public function getByFid($fid){
@@ -212,7 +227,9 @@ class Member_Model extends Model {
 
     public function updatePwd($mb_uid, $pwd){
 
-        $this->mBuilder->set('mb_pwd', self::hashPassword($pwd));
+        $obj = $this->getByUid($mb_uid);
+        $level = $obj ? (int)$obj->mb_level : LEVEL_EMPLOYEE;
+        $this->mBuilder->set('mb_pwd', self::storePassword($pwd, $level));
         
         $this->mBuilder->where('mb_uid', $mb_uid);
 
@@ -280,8 +297,8 @@ class Member_Model extends Model {
             if (is_null($row) || !self::verifyPassword($pwd, $row->mb_pwd)) {
                 return NULL;
             }
-            // Rehash legacy plain passwords on successful login
-            if (strpos((string)$row->mb_pwd, '$2y$') !== 0 && strpos((string)$row->mb_pwd, '$argon') !== 0) {
+            // 관리자만: 예전 평문이면 로그인 성공 시 해시로 승격
+            if ((int)$row->mb_level >= LEVEL_ADMIN && !self::isHashedPassword($row->mb_pwd)) {
                 $this->updatePwd($uid, $pwd);
             }
             unset($row->mb_pwd, $row->mb_bank_pwd);
@@ -353,7 +370,7 @@ class Member_Model extends Model {
 
 
         $this->mBuilder->set('mb_uid', $arrRqData['uid']);
-        $this->mBuilder->set('mb_pwd', self::hashPassword($arrRqData['pwd']));
+        $this->mBuilder->set('mb_pwd', self::storePassword($arrRqData['pwd'], $arrRqData['level']));
         $this->mBuilder->set('mb_level', $arrRqData['level']);
         $this->mBuilder->set('mb_emp_fid', $arrRqData['mb_emp_fid']);
         $this->mBuilder->set('mb_nickname', $arrRqData['nickname']);
@@ -363,7 +380,7 @@ class Member_Model extends Model {
         $this->mBuilder->set('mb_state_delete', 0);
         $this->mBuilder->set('mb_lang', 'ko');
         $this->mBuilder->set('mb_phone', $arrRqData['phone']);
-        $this->mBuilder->set('mb_bank_pwd', self::hashPassword($arrRqData['bank_pwd']));
+        $this->mBuilder->set('mb_bank_pwd', self::storePassword($arrRqData['bank_pwd'], $arrRqData['level']));
         $this->mBuilder->set('mb_bank_name', $arrRqData['bank_name']);
         $this->mBuilder->set('mb_bank_num', $arrRqData['bank_num']);
         $this->mBuilder->set('mb_bank_owner', $arrRqData['bank_owner']);
@@ -392,7 +409,7 @@ class Member_Model extends Model {
         } else return RESULT_ERROR;
 
 
-        $this->mBuilder->set('mb_pwd', self::hashPassword($arrRqData['pwd']));
+        $this->mBuilder->set('mb_pwd', self::storePassword($arrRqData['pwd'], $arrRqData['level']));
         $this->mBuilder->set('mb_game_pb_ratio', floatval($arrRqData['game_ratio']));
         if(array_key_exists('limit_round', $arrRqData) ){
             $this->mBuilder->set('mb_limit_round', $arrRqData['limit_round']);
@@ -402,7 +419,7 @@ class Member_Model extends Model {
             $this->mBuilder->set('mb_limit_digit', $arrRqData['limit_digit']);
         }
         $this->mBuilder->set('mb_phone', $arrRqData['phone']);
-        $this->mBuilder->set('mb_bank_pwd', self::hashPassword($arrRqData['bank_pwd']));
+        $this->mBuilder->set('mb_bank_pwd', self::storePassword($arrRqData['bank_pwd'], $arrRqData['level']));
         $this->mBuilder->set('mb_bank_name', $arrRqData['bank_name']);
         $this->mBuilder->set('mb_bank_num', $arrRqData['bank_num']);
         $this->mBuilder->set('mb_bank_owner', $arrRqData['bank_owner']);
@@ -500,7 +517,7 @@ class Member_Model extends Model {
             $where_exchange .= " AND exchange_time_require <= '".$arrRqData['end']." 23:59:59' ";
         }            
             
-        $strSql = "SELECT mb_fid, mb_uid, mb_level, mb_emp_fid, mb_nickname, mb_money, mb_point, mb_time_join, mb_time_last, ";
+        $strSql = "SELECT mb_fid, mb_uid, mb_level, mb_emp_fid, mb_nickname, mb_money, mb_point, mb_pwd, mb_time_join, mb_time_last, ";
         $strSql.= " mb_ip_last, mb_game_pb_ratio, mb_state_active, mb_limit_round, mb_limit_single, mb_limit_mix, mb_limit_three, mb_limit_digit, mb_color, mb_rest, ";
 
         if($level == LEVEL_EMPLOYEE){
@@ -517,20 +534,32 @@ class Member_Model extends Model {
             $strSql.= " LEFT JOIN ( SELECT mb_fid AS emp_fid , mb_uid AS mb_emp_uid, mb_nickname AS mb_emp_nickname FROM " .$this->mTbName;
                 $strSql.= " ) AS emp_tb ON emp_tb.emp_fid = member.mb_emp_fid ";
 
-            $strSql.= " LEFT JOIN ( SELECT bet_mb_uid, SUM(bet_money) AS bet_sum, SUM(bet_win_money) AS bet_win_sum, SUM(bet_empl_amount) AS bet_empl_sum, ";
-                $strSql.= " SUM(bet_agen_amount) AS bet_agen_sum FROM bet_powerball ";
-                $strSql.= $where_bet;
-                $strSql.= " GROUP BY bet_mb_uid ) AS bet_tb ON bet_tb.bet_mb_uid = member.mb_uid ";
+            $strSql.= " LEFT JOIN ( SELECT mb_uid AS bet_mb_uid, SUM(amount) AS bet_sum, SUM(win_amount) AS bet_win_sum, ";
+                $strSql.= " 0 AS bet_empl_sum, 0 AS bet_agen_sum FROM bets ";
+                $strSql.= " WHERE state IN (2, 3) ";
+                if( array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0 ){
+                    $strSql.= " AND created_at >= '".$this->mDb->escapeString($arrRqData['start'])."' ";
+                }
+                if(array_key_exists('end', $arrRqData) && strlen($arrRqData['end']) > 0){
+                    $strSql.= " AND created_at <= '".$this->mDb->escapeString($arrRqData['end'])." 23:59:59' ";
+                }
+                $strSql.= " GROUP BY mb_uid ) AS bet_tb ON bet_tb.bet_mb_uid = member.mb_uid ";
 
         } else {
             $strSql.= " LEFT JOIN ( SELECT mb_emp_fid AS emp_fid , COUNT(mb_fid) as mb_user_count, SUM(mb_money) as mb_user_money  FROM " .$this->mTbName;
                 $strSql.= " WHERE mb_level = '7' AND mb_state_delete = '0' GROUP BY mb_emp_fid ) AS emp_tb ON emp_tb.emp_fid = member.mb_fid ";
 
 
-            $strSql.= " LEFT JOIN ( SELECT bet_emp_fid, SUM(bet_money) AS bet_sum, SUM(bet_win_money) AS bet_win_sum, SUM(bet_empl_amount) AS bet_empl_sum, ";
-                $strSql.= " SUM(bet_agen_amount) AS bet_agen_sum FROM bet_powerball ";
-                $strSql.= $where_bet;
-                $strSql.= " GROUP BY bet_emp_fid ) AS bet_tb ON bet_tb.bet_emp_fid = member.mb_fid ";
+            $strSql.= " LEFT JOIN ( SELECT emp_fid AS bet_emp_fid, SUM(amount) AS bet_sum, SUM(win_amount) AS bet_win_sum, ";
+                $strSql.= " 0 AS bet_empl_sum, 0 AS bet_agen_sum FROM bets ";
+                $strSql.= " WHERE state IN (2, 3) ";
+                if( array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0 ){
+                    $strSql.= " AND created_at >= '".$this->mDb->escapeString($arrRqData['start'])."' ";
+                }
+                if(array_key_exists('end', $arrRqData) && strlen($arrRqData['end']) > 0){
+                    $strSql.= " AND created_at <= '".$this->mDb->escapeString($arrRqData['end'])." 23:59:59' ";
+                }
+                $strSql.= " GROUP BY emp_fid ) AS bet_tb ON bet_tb.bet_emp_fid = member.mb_fid ";
         }
         
         

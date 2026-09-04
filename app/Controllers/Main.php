@@ -275,6 +275,45 @@ class Main extends BaseController
 		}
 	}
 
+	public function store_reg()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		echo view('main/store_reg');
+	}
+
+	public function store_edit()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$fid = (int)$this->request->getGet('fid');
+		echo view('main/store_edit', ['edit_fid' => $fid]);
+	}
+
+	public function store_charge()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = (string)$this->request->getGet('uid');
+		echo view('main/store_charge', ['target_uid' => $uid]);
+	}
+
+	public function store_recover()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = (string)$this->request->getGet('uid');
+		echo view('main/store_recover', ['target_uid' => $uid]);
+	}
+
 	public function charge_list()
 	{	
 		if(!is_login())
