@@ -51,7 +51,6 @@
         <div class="spanLeftMenu"><i class="fas fa-gamepad"></i> <?= lang('Admin.menu_game') ?></div>
         <div id="spanMainMenu1" class="spanLeftSubMenu <?=$menuitem_2?>" onclick="clickMenu('game_result');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_game_result') ?></div>
         <div id="spanMainMenu2" class="spanLeftSubMenu <?=$menuitem_3?>" onclick="clickMenu('bet_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_bet_list') ?></div>
-        <div id="spanMainMenu3" class="spanLeftSubMenu <?=$menuitem_4?>" onclick="clickMenu('bet_sum');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_bet_sum') ?></div>
 
         <div class="spanLeftMenu"><i class="fas fa-sort-amount-down"></i> <?= lang('Admin.menu_sub') ?></div>
     <?php if($mb_level == LEVEL_AGENCY) { ?>

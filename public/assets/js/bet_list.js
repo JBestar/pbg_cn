@@ -29,8 +29,10 @@ function showPage(arrInfo) {
             tHtml += "<td class=\"tdDate\">" + (parseInt(r.win_rounds, 10) || 0) + "</td>";
             tHtml += "<td class=\"tdMoney\">" + Math.round(point).toLocaleString() + "</td>";
             tHtml += "<td class=\"tdMoney\">" + Math.round(agenPoint).toLocaleString() + "</td>";
+            var detailLabel = (window.ADMIN_I18N && window.ADMIN_I18N.th_detail_view)
+                ? window.ADMIN_I18N.th_detail_view : '상세보기';
             tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn-detail-view\" onclick=\"openBetDetail('"
-                + escAttr(r.mb_uid) + "');\">상세보기</button></td>";
+                + escAttr(r.mb_uid) + "');\">" + esc(detailLabel) + "</button></td>";
             tHtml += "</tr>";
         }
     }
