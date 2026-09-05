@@ -399,4 +399,49 @@ class PbBet_Model extends Model {
             return [];
         }
     }
+
+    /**
+     * 본사 전용 — 총판별 배팅 합계 (하부 매장 bets 합산)
+     */
+    function getAgencyBetSummary($arrRqData)
+    {
+        try {
+            $whereMember = " m.mb_level = " . LEVEL_AGENCY . " AND m.mb_state_delete = 0 ";
+            if (!empty($arrRqData['mb_uid'])) {
+                $whereMember .= " AND m.mb_uid = '" . $this->mDb->escapeString($arrRqData['mb_uid']) . "' ";
+            }
+
+            $whereBet = " b.state IN (2, 3) ";
+            if (!empty($arrRqData['start'])) {
+                $whereBet .= " AND b.created_at >= '" . $this->mDb->escapeString($arrRqData['start']) . "' ";
+            }
+            if (!empty($arrRqData['end'])) {
+                $whereBet .= " AND b.created_at <= '" . $this->mDb->escapeString($arrRqData['end']) . " 23:59:59' ";
+            }
+            if (isset($arrRqData['round_id']) && strlen((string)$arrRqData['round_id']) > 0) {
+                $whereBet .= " AND b.round = '" . $this->mDb->escapeString($arrRqData['round_id']) . "' ";
+            }
+
+            $sql = "SELECT m.mb_fid, m.mb_uid, m.mb_nickname, m.mb_money, m.mb_point,
+                    m.mb_point AS agen_point,
+                    IFNULL(bt.bet_sum, 0) AS bet_sum,
+                    IFNULL(bt.win_sum, 0) AS win_sum,
+                    IFNULL(bt.win_rounds, 0) AS win_rounds
+                    FROM member m
+                    LEFT JOIN (
+                        SELECT b.emp_fid,
+                               SUM(b.amount) AS bet_sum,
+                               SUM(b.win_amount) AS win_sum,
+                               COUNT(DISTINCT CASE WHEN b.state = 3 THEN b.round END) AS win_rounds
+                        FROM bets b
+                        WHERE {$whereBet}
+                        GROUP BY b.emp_fid
+                    ) bt ON bt.emp_fid = m.mb_fid
+                    WHERE {$whereMember}
+                    ORDER BY m.mb_uid ASC";
+            return $this->mDb->query($sql)->getResult();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
 }

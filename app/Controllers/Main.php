@@ -157,9 +157,13 @@ class Main extends BaseController
 			$arrItem['menuitem_2'] = " spanActiveMenu";
 			$arrItem['mb_level'] = $objMember->mb_level;
 
+			$viewName = ($objMember->mb_level == LEVEL_AGENCY)
+				? 'main/game_result_agency'
+				: 'main/game_result_hq';
+
 			echo view('main/main_header', array("site_name"=>$siteName));
 			echo view('main/main_menu', $arrItem);		
-			echo view('main/game_result', [
+			echo view($viewName, [
 				'arrMember' => $arrMember,
 				'adminLevel' => $objMember->mb_level,
 			]);		
@@ -182,9 +186,15 @@ class Main extends BaseController
 			$arrItem['menuitem_3'] = " spanActiveMenu";
 			$arrItem['mb_level'] = $objMember->mb_level;
 
+			$viewName = ($objMember->mb_level == LEVEL_AGENCY)
+				? 'main/bet_list'
+				: 'main/bet_list_hq';
+
 			echo view('main/main_header', array("site_name"=>$siteName));
 			echo view('main/main_menu', $arrItem);		
-			echo view('main/bet_list');		
+			echo view($viewName, [
+				'adminLevel' => $objMember->mb_level,
+			]);		
 			echo view('main/main_footer');	
 		}
 	}

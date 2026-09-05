@@ -1,3 +1,4 @@
+/** 총판 게임결과 — 하부 전체 회차별 정산 */
 $(document).ready(function() {
     reqCount();
 });
@@ -31,11 +32,7 @@ function showPage(arrInfo) {
             tHtml += '<td class="tdMoney">' + pointSum.toLocaleString() + '</td>';
             var profit = betSum - winSum - pointSum;
             tHtml += '<td class="tdMoney">';
-            if (profit >= 0) {
-                tHtml += '<font color="#0000fe">';
-            } else {
-                tHtml += '<font color="#fe0000">';
-            }
+            tHtml += profit >= 0 ? '<font color="#0000fe">' : '<font color="#fe0000">';
             tHtml += profit.toLocaleString() + '</font></td>';
             tHtml += '</tr>';
         }
@@ -43,25 +40,21 @@ function showPage(arrInfo) {
     $('#tbodyList').html(tHtml);
 }
 
-function reqSearch() {
-    reqCount();
-}
+function reqSearch() { reqCount(); }
 
 function buildFilter() {
     return {
         game: 0,
         start: $('#inputDateS').val(),
         end: $('#inputDateE').val(),
-        round_id: $('#inputGameNo').val(),
-        mb_uid: $('#selectLevel').val() || ''
+        round_id: $('#inputGameNo').val()
     };
 }
 
 function reqCount() {
-    var objData = buildFilter();
     $.ajax({
         url: '/api/pbround_count',
-        data: { json_: JSON.stringify(objData) },
+        data: { json_: JSON.stringify(buildFilter()) },
         type: 'post',
         dataType: 'json',
         success: function(jResult) {

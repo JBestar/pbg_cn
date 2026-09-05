@@ -1,17 +1,7 @@
-
+<?php /** 총판 게임결과 — 기간·회차만, 하부 매장 합산 */ ?>
     <div class="divTitle"><?= lang('Admin.menu_game_result') ?></div>
     <div class="divSearch">
-        <select id="selectLevel" style="padding:2px 10px; min-width:150px; min-height:24px;" name="selectLevel">
-        <?php if ($adminLevel == LEVEL_AGENCY) { ?>
-            <option value=""><?= lang('Admin.opt_stats_store') ?></option>
-        <?php } else { ?>
-            <option value=""><?= lang('Admin.opt_stats_agency') ?></option>
-        <?php } ?>
-        <?php foreach ($arrMember as $objSub): ?>
-            <option value="<?= esc($objSub->mb_uid) ?>"><?= esc($objSub->mb_uid) ?> (<?= esc($objSub->mb_nickname) ?>)</option>
-        <?php endforeach; ?>
-        </select>
-        &nbsp;&nbsp;&nbsp;<?= lang('Admin.label_period') ?> :
+        &nbsp;&nbsp;<?= lang('Admin.label_period') ?> :
         <input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
         <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
         &nbsp;&nbsp;&nbsp;<span id="spanGameRound"><?= lang('Admin.label_game_round') ?></span> :
@@ -52,7 +42,7 @@
 </div>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/game_result.js?v=3"></script>
+    <script src="/assets/js/game_result_agency.js?v=1"></script>
 <?php else :?>
-    <script src="/assets/js/game_result.js?v=<?=time();?>"></script>
+    <script src="/assets/js/game_result_agency.js?v=<?=time();?>"></script>
 <?php endif ?>

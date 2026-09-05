@@ -797,21 +797,14 @@ class Api extends BaseController
 
     }
 
-	/** 게임결과: 총판/매장 필터 → emp_fid 스코프 */
+	/** 게임결과: 총판/본사 스코프 (총판은 본인 하부만, 본사는 선택 총판) */
 	private function applyRoundScope(array &$arrReqData)
 	{
 		$uid = $this->session->uid;
 		$objMember = $this->member_model->getAllByUid($uid);
 		if ($objMember->mb_level == LEVEL_AGENCY) {
 			$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
-			if (!empty($arrReqData['mb_uid'])) {
-				$objSel = $this->member_model->getByUid($arrReqData['mb_uid']);
-				if (!is_null($objSel) && (int)$objSel->mb_emp_fid === (int)$objMember->mb_fid) {
-					// 매장 선택: bets.mb_uid 필터는 PbRound에 없으므로 emp는 유지, store uid는 betJoin에 추가 필요
-					$arrReqData['store_uid'] = $objSel->mb_uid;
-				}
-			}
-			unset($arrReqData['mb_uid']);
+			unset($arrReqData['mb_uid'], $arrReqData['store_uid']);
 			return;
 		}
 		if ($objMember->mb_level > LEVEL_AGENCY && !empty($arrReqData['mb_uid'])) {
@@ -942,11 +935,14 @@ class Api extends BaseController
 
     }
 
-	/** 배팅내역 — 하부 매장별 합계 (포인트 = mb_point) */
+	/** 배팅내역 — 하부 매장별 합계 (총판 / 본사 총판상세) */
 	public function store_bet_summary()
 	{
 		$jsonData = $_REQUEST['json_'];
 		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
 
 		$result = new \StdClass;
 		if (!is_login()) {
@@ -956,12 +952,53 @@ class Api extends BaseController
 			$objMember = $this->member_model->getAllByUid($uid);
 			if ($objMember->mb_level == LEVEL_AGENCY) {
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
+			} else if ($objMember->mb_level > LEVEL_AGENCY) {
+				// 본사: agency_uid → 해당 총판 하부 매장
+				if (!empty($arrReqData['agency_uid'])) {
+					$objAgen = $this->member_model->getByUid($arrReqData['agency_uid']);
+					if (is_null($objAgen) || (int)$objAgen->mb_level !== LEVEL_AGENCY) {
+						$result->status = STATUS_FAIL;
+						echo json_encode($result);
+						return;
+					}
+					$arrReqData['mb_emp_fid'] = $objAgen->mb_fid;
+				} else {
+					$result->status = STATUS_FAIL;
+					echo json_encode($result);
+					return;
+				}
 			} else if ($objMember->mb_level == LEVEL_EMPLOYEE) {
 				$arrReqData['mb_uid'] = $objMember->mb_uid;
 			}
 			$pbbet_model = new PbBet_Model();
 			$result->data = $pbbet_model->getStoreBetSummary($arrReqData);
 			$result->status = STATUS_SUCCESS;
+		}
+		echo json_encode($result);
+	}
+
+	/** 본사 전용 — 총판별 배팅 합계 */
+	public function agency_bet_summary()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objMember = $this->member_model->getAllByUid($uid);
+			if ($objMember->mb_level <= LEVEL_AGENCY) {
+				$result->status = STATUS_FAIL;
+			} else {
+				$pbbet_model = new PbBet_Model();
+				$result->data = $pbbet_model->getAgencyBetSummary($arrReqData);
+				$result->status = STATUS_SUCCESS;
+			}
 		}
 		echo json_encode($result);
 	}
