@@ -577,6 +577,7 @@
       '超过最大投注': 'MAX_BET',
       '机器不存在': 'MACHINE_NOT_FOUND',
       '没有可取消的投注': 'NO_CANCEL',
+      '没有可转换的积分': 'NO_POINT',
     };
     const mapped = json && json.message ? cnMap[json.message] : '';
     if (mapped && msg[mapped]) return msg[mapped];
@@ -626,6 +627,27 @@
       }
       toast(I18N.msg.cancelOk + ' ' + fmtMoney(json.data.refunded));
       await Promise.all([refreshStatus(), refreshBets()]);
+    } finally {
+      state.busy = false;
+    }
+  }
+
+  async function convertPoints() {
+    if (state.busy) return;
+    state.busy = true;
+    try {
+      const json = await api('point_convert', { body: {} });
+      if (json.status !== 'success') {
+        toast(apiErrorMsg(json, 'pointFail'));
+        return;
+      }
+      var converted = (json.data && json.data.converted != null) ? json.data.converted : 0;
+      var msg = (I18N.msg && I18N.msg.pointOk) ? I18N.msg.pointOk : '포인트 전환 완료';
+      toast(msg + ' ' + fmtMoney(converted));
+      if (json.data && json.data.balance != null) {
+        state.balance = json.data.balance;
+      }
+      await refreshStatus();
     } finally {
       state.busy = false;
     }
@@ -683,6 +705,11 @@
     if (code === 'KeyZ') {
       e.preventDefault();
       placeBet();
+      return;
+    }
+    if (code === 'F1') {
+      e.preventDefault();
+      convertPoints();
       return;
     }
     if (code === 'Escape') {

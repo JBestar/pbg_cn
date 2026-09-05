@@ -57,6 +57,9 @@ try {
         case 'fetch_draw':
             api_fetch_draw();
             break;
+        case 'point_convert':
+            api_point_convert();
+            break;
         default:
             pbg_json(['status' => 'fail', 'message' => 'unknown action'], 400);
     }
@@ -116,6 +119,7 @@ function api_login()
                 'uid' => $member['mb_uid'],
                 'name' => $member['mb_nickname'],
                 'balance' => (float)$member['mb_money'],
+                'point' => (float)$member['mb_point'],
                 'level' => (int)$member['mb_level'],
             ],
         ],
@@ -145,6 +149,7 @@ function api_me()
             'uid' => $m['mb_uid'],
             'name' => $m['mb_nickname'],
             'balance' => (float)$m['mb_money'],
+            'point' => (float)$m['mb_point'],
         ],
     ]);
 }
@@ -163,11 +168,13 @@ function api_status()
                 'code' => $m['mb_uid'],
                 'name' => $m['mb_nickname'],
                 'balance' => (float)$m['mb_money'],
+                'point' => (float)$m['mb_point'],
             ],
             'member' => [
                 'uid' => $m['mb_uid'],
                 'name' => $m['mb_nickname'],
                 'balance' => (float)$m['mb_money'],
+                'point' => (float)$m['mb_point'],
             ],
             'round' => $round,
             'odds' => [
@@ -664,6 +671,64 @@ function api_cancel()
                 'cancelled' => count($bets),
                 'refunded' => $refunded,
                 'balance' => $bal,
+            ],
+        ]);
+    } catch (Throwable $e) {
+        $db->rollback();
+        throw $e;
+    }
+}
+
+/** F1: 포인트 전액 → 게임머니 (money_history type 10) */
+function api_point_convert()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        pbg_json(['status' => 'fail', 'message' => 'POST required'], 405);
+    }
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $db = pbg_db();
+    $db->begin_transaction();
+    try {
+        $fid = (int)$member['mb_fid'];
+        $stmt = pbg_prepare($db, 'SELECT mb_money, mb_point, mb_emp_fid, mb_uid FROM member WHERE mb_fid=? FOR UPDATE');
+        $stmt->bind_param('i', $fid);
+        $stmt->execute();
+        $row = pbg_stmt_fetch_one($stmt);
+        $stmt->close();
+        if (!$row) {
+            throw new RuntimeException('member lock failed');
+        }
+        $point = (float)$row['mb_point'];
+        if ($point <= 0) {
+            $db->rollback();
+            pbg_json(['status' => 'fail', 'code' => 'NO_POINT', 'message' => '没有可转换的积分']);
+        }
+        $bal = (float)$row['mb_money'];
+        $after = $bal + $point;
+        $zero = 0.0;
+        $upd = $db->prepare('UPDATE member SET mb_money=?, mb_point=? WHERE mb_fid=?');
+        $upd->bind_param('ddi', $after, $zero, $fid);
+        $upd->execute();
+        $upd->close();
+
+        $empFid = (int)$row['mb_emp_fid'];
+        $mbUid = (string)$row['mb_uid'];
+        $type = 10; // POINTCHANGE_EXCHANGE
+        $h = $db->prepare(
+            'INSERT INTO money_history (money_mb_fid, money_mb_uid, money_mb_emp_fid, money_amount, money_before, money_after, money_change_type, money_update_time) VALUES (?,?,?,?,?,?,?,NOW())'
+        );
+        $h->bind_param('isidddi', $fid, $mbUid, $empFid, $point, $bal, $after, $type);
+        $h->execute();
+        $h->close();
+
+        $db->commit();
+        pbg_json([
+            'status' => 'success',
+            'data' => [
+                'balance' => $after,
+                'point' => 0,
+                'converted' => $point,
             ],
         ]);
     } catch (Throwable $e) {
