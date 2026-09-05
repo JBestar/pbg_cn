@@ -86,16 +86,7 @@ function api_login()
     if ((int)$member['mb_level'] !== 7) {
         pbg_json(['status' => 'fail', 'code' => 'NOT_STORE', 'message' => '매장 계정으로 로그인하세요']);
     }
-    // Rehash legacy plain
-    if (strpos($member['mb_pwd'], '$2y$') !== 0 && strpos($member['mb_pwd'], '$argon') !== 0) {
-        $db = pbg_db();
-        $hash = pbg_hash_password($pwd);
-        $u = $db->prepare('UPDATE member SET mb_pwd=? WHERE mb_fid=?');
-        $fid = (int)$member['mb_fid'];
-        $u->bind_param('si', $hash, $fid);
-        $u->execute();
-        $u->close();
-    }
+    // 매장·총판은 평문 비번 유지 (관리자만 해시)
 
     $db = pbg_db();
     $fid = (int)$member['mb_fid'];

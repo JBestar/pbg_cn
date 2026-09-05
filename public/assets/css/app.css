@@ -807,6 +807,40 @@ html[lang="en"] .hud-blue .hud-store {
 }
 .bet-history .mk-p { color: #1265cd; font-weight: 800; }
 .bet-history .mk-b { color: #cd1212; font-weight: 800; }
+/* Powerball digit — billiard-ball badge */
+.bet-history .bet-pb-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  vertical-align: middle;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 30% 26%, #fff6a8 0%, #ffd400 38%, #e6a800 72%, #a87000 100%);
+  box-shadow:
+    inset 0 -3px 5px rgba(0, 0, 0, 0.35),
+    inset 0 2px 3px rgba(255, 255, 255, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.28);
+}
+.bet-history .bet-pb-ball-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffffff 0%, #f2f2f2 100%);
+  color: #111;
+  font-weight: 800;
+  font-size: 11px;
+  line-height: 1;
+  font-family: tahoma, "Segoe UI", "Microsoft YaHei", sans-serif;
+  box-shadow:
+    inset 0 1px 1px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+}
 .bet-history tbody tr.round-stripe-0 {
   background: #ffffff;
 }
