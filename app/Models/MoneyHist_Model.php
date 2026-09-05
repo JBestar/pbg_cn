@@ -577,5 +577,132 @@ class MoneyHist_Model extends Model {
         return $objAcc;
     }
 
+    /**
+     * 매장/총판 충환전 집계
+     * $scope: 'store' | 'agency'
+     */
+    function getCeSummary($arrRqData, $scope = 'store')
+    {
+        $level = ($scope === 'agency') ? LEVEL_AGENCY : LEVEL_EMPLOYEE;
+        $types = ($scope === 'agency')
+            ? [MONEYCHANGE_CHARGE, MONEYCHANGE_EXCHANGE, MONEYCHANGE_PRESENT, MONEYCHANGE_RECOVERY, POINTCHANGE_EXCHANGE]
+            : [MONEYCHANGE_PRESENT, MONEYCHANGE_RECOVERY, POINTCHANGE_EXCHANGE];
+
+        $whereMember = " m.mb_level = '".$level."' AND m.mb_state_delete = '0' ";
+        if (array_key_exists('mb_emp_fid', $arrRqData) && intval($arrRqData['mb_emp_fid']) > 0) {
+            $whereMember .= " AND m.mb_emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";
+        }
+        if (array_key_exists('self_uid', $arrRqData) && strlen($arrRqData['self_uid']) > 0) {
+            $whereMember .= " AND m.mb_uid = ".$this->mDb->escape($arrRqData['self_uid'])." ";
+        }
+        if (array_key_exists('mb_uid', $arrRqData) && strlen(trim($arrRqData['mb_uid'])) > 0) {
+            $whereMember .= " AND m.mb_uid LIKE ".$this->mDb->escape('%'.trim($arrRqData['mb_uid']).'%')." ";
+        }
+
+        $whereHist = "1=1";
+        if (array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0) {
+            $whereHist .= " AND h.money_update_time >= ".$this->mDb->escape($arrRqData['start'])." ";
+        }
+        if (array_key_exists('end', $arrRqData) && strlen($arrRqData['end']) > 0) {
+            $whereHist .= " AND h.money_update_time <= ".$this->mDb->escape($arrRqData['end'].' 23:59:59')." ";
+        }
+        $typeIn = implode(',', array_map('intval', $types));
+        $whereHist .= " AND h.money_change_type IN (".$typeIn.") ";
+
+        $chargeTypes = ($scope === 'agency')
+            ? [MONEYCHANGE_CHARGE, MONEYCHANGE_PRESENT]
+            : [MONEYCHANGE_PRESENT];
+        $exchangeTypes = ($scope === 'agency')
+            ? [MONEYCHANGE_EXCHANGE, MONEYCHANGE_RECOVERY]
+            : [MONEYCHANGE_RECOVERY];
+
+        $chargeCase = "CASE WHEN h.money_change_type IN (".implode(',', array_map('intval', $chargeTypes)).") THEN ABS(h.money_amount) ELSE 0 END";
+        $exchangeCase = "CASE WHEN h.money_change_type IN (".implode(',', array_map('intval', $exchangeTypes)).") THEN ABS(h.money_amount) ELSE 0 END";
+        $pointCase = "CASE WHEN h.money_change_type = '".POINTCHANGE_EXCHANGE."' THEN ABS(h.money_amount) ELSE 0 END";
+
+        $strSql = " SELECT m.mb_uid, m.mb_nickname, ";
+        $strSql.= " COALESCE(SUM(".$chargeCase."), 0) AS charge_sum, ";
+        $strSql.= " COALESCE(SUM(".$exchangeCase."), 0) AS exchange_sum, ";
+        $strSql.= " COALESCE(SUM(".$pointCase."), 0) AS point_sum ";
+        $strSql.= " FROM member m ";
+        $strSql.= " LEFT JOIN ".$this->mTbName." h ON h.money_mb_uid = m.mb_uid AND ".$whereHist;
+        $strSql.= " WHERE ".$whereMember;
+        $strSql.= " GROUP BY m.mb_uid, m.mb_nickname ";
+        $strSql.= " ORDER BY m.mb_uid ASC ";
+
+        $rows = $this->mDb->query($strSql)->getResult();
+        $out = [];
+        foreach ($rows as $row) {
+            $charge = intval($row->charge_sum);
+            $exchange = intval($row->exchange_sum);
+            $point = intval($row->point_sum);
+            $obj = new \StdClass;
+            $obj->mb_uid = $row->mb_uid;
+            $obj->mb_nickname = $row->mb_nickname;
+            $obj->charge_sum = $charge;
+            $obj->exchange_sum = $exchange;
+            $obj->point_sum = $point;
+            $obj->diff_sum = $charge - $exchange - $point;
+            $out[] = $obj;
+        }
+        return $out;
+    }
+
+    /**
+     * 아이디별 충환전 상세
+     * $scope: 'store' | 'agency'
+     */
+    function getCeDetail($arrRqData, $scope = 'store')
+    {
+        $types = ($scope === 'agency')
+            ? [MONEYCHANGE_CHARGE, MONEYCHANGE_EXCHANGE, MONEYCHANGE_PRESENT, MONEYCHANGE_RECOVERY, POINTCHANGE_EXCHANGE]
+            : [MONEYCHANGE_PRESENT, MONEYCHANGE_RECOVERY, POINTCHANGE_EXCHANGE];
+
+        $where = " h.money_mb_uid = ".$this->mDb->escape($arrRqData['mb_uid'])." ";
+        $where .= " AND h.money_change_type IN (".implode(',', array_map('intval', $types)).") ";
+        if (array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0) {
+            $where .= " AND h.money_update_time >= ".$this->mDb->escape($arrRqData['start'])." ";
+        }
+        if (array_key_exists('end', $arrRqData) && strlen($arrRqData['end']) > 0) {
+            $where .= " AND h.money_update_time <= ".$this->mDb->escape($arrRqData['end'].' 23:59:59')." ";
+        }
+        if (array_key_exists('mb_emp_fid', $arrRqData) && intval($arrRqData['mb_emp_fid']) > 0) {
+            $where .= " AND m.mb_emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";
+        }
+
+        $chargeTypes = ($scope === 'agency')
+            ? [MONEYCHANGE_CHARGE, MONEYCHANGE_PRESENT]
+            : [MONEYCHANGE_PRESENT];
+        $exchangeTypes = ($scope === 'agency')
+            ? [MONEYCHANGE_EXCHANGE, MONEYCHANGE_RECOVERY]
+            : [MONEYCHANGE_RECOVERY];
+
+        $strSql = " SELECT h.money_fid, h.money_mb_uid, m.mb_nickname, ";
+        $strSql.= " h.money_before, h.money_after, h.money_amount, h.money_change_type, h.money_update_time ";
+        $strSql.= " FROM ".$this->mTbName." h ";
+        $strSql.= " INNER JOIN member m ON m.mb_uid = h.money_mb_uid ";
+        $strSql.= " WHERE ".$where;
+        $strSql.= " ORDER BY h.money_update_time DESC, h.money_fid DESC ";
+
+        $rows = $this->mDb->query($strSql)->getResult();
+        $out = [];
+        foreach ($rows as $row) {
+            $type = intval($row->money_change_type);
+            $amt = abs(intval($row->money_amount));
+            $obj = new \StdClass;
+            $obj->money_fid = $row->money_fid;
+            $obj->mb_uid = $row->money_mb_uid;
+            $obj->mb_nickname = $row->mb_nickname;
+            $obj->money_before = intval($row->money_before);
+            $obj->money_after = intval($row->money_after);
+            $obj->charge_amount = in_array($type, $chargeTypes, true) ? $amt : 0;
+            $obj->exchange_amount = in_array($type, $exchangeTypes, true) ? $amt : 0;
+            $obj->point_amount = ($type === POINTCHANGE_EXCHANGE) ? $amt : 0;
+            $obj->money_update_time = $row->money_update_time;
+            $out[] = $obj;
+        }
+        return $out;
+    }
+
 
 }

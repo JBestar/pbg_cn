@@ -314,94 +314,106 @@ class Main extends BaseController
 		echo view('main/store_recover', ['target_uid' => $uid]);
 	}
 
+	/** 매장 충환전 내역 */
+	public function store_ce_list()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->session->uid;
+		$objMember = $this->member_model->getByUid($uid);
+		$siteName = $this->confsite_model->getSiteName();
+		$arrItem = getSidebarArray();
+		$arrItem['menuitem_6'] = " spanActiveMenu";
+		$arrItem['mb_level'] = $objMember->mb_level;
+
+		echo view('main/main_header', array("site_name" => $siteName));
+		echo view('main/main_menu', $arrItem);
+		echo view('main/store_ce_list');
+		echo view('main/main_footer');
+	}
+
+	/** 총판 충환전 내역 */
+	public function agency_ce_list()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->session->uid;
+		$objMember = $this->member_model->getByUid($uid);
+		$siteName = $this->confsite_model->getSiteName();
+		$arrItem = getSidebarArray();
+		$arrItem['menuitem_7'] = " spanActiveMenu";
+		$arrItem['mb_level'] = $objMember->mb_level;
+
+		echo view('main/main_header', array("site_name" => $siteName));
+		echo view('main/main_menu', $arrItem);
+		echo view('main/agency_ce_list');
+		echo view('main/main_footer');
+	}
+
+	/** 매장 충환전 상세 팝업 */
+	public function store_ce_detail()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->request->getGet('uid');
+		$start = $this->request->getGet('start') ?: date('Y-m-d', strtotime('-6 months'));
+		$end = $this->request->getGet('end') ?: date('Y-m-d');
+		echo view('main/ce_detail', [
+			'detail_uid' => (string)$uid,
+			'start' => $start,
+			'end' => $end,
+			'scope' => 'store',
+			'title_key' => 'title_store_ce_detail',
+		]);
+	}
+
+	/** 총판 충환전 상세 팝업 */
+	public function agency_ce_detail()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->request->getGet('uid');
+		$start = $this->request->getGet('start') ?: date('Y-m-d', strtotime('-6 months'));
+		$end = $this->request->getGet('end') ?: date('Y-m-d');
+		echo view('main/ce_detail', [
+			'detail_uid' => (string)$uid,
+			'start' => $start,
+			'end' => $end,
+			'scope' => 'agency',
+			'title_key' => 'title_agency_ce_detail',
+		]);
+	}
+
+	/** @deprecated 사이드바에서 제거됨 — 매장 충환전으로 리다이렉트 */
 	public function charge_list()
-	{	
-		if(!is_login())
-		{
-			$this->response->redirect('/pages/login');			
-		}
-		else {
-			$uid = $this->session->uid;
-            $objMember = $this->member_model->getByUid($uid);
-
-        	$siteName = $this->confsite_model->getSiteName();
-			$arrItem = getSidebarArray();
-			$arrItem['menuitem_6'] = " spanActiveMenu";
-			$arrItem['mb_level'] = $objMember->mb_level;
-
-			echo view('main/main_header', array("site_name"=>$siteName));
-			echo view('main/main_menu', $arrItem);		
-			echo view('main/charge_list');
-			echo view('main/main_footer');	
-		}
+	{
+		$this->response->redirect('/Main/store_ce_list');
 	}
 
+	/** @deprecated 사이드바에서 제거됨 — 총판 충환전으로 리다이렉트 */
 	public function exchange_list()
-	{	
-		if(!is_login())
-		{
-			$this->response->redirect('/pages/login');			
-		}
-		else {
-			$uid = $this->session->uid;
-            $objMember = $this->member_model->getByUid($uid);
-
-        	$siteName = $this->confsite_model->getSiteName();
-			$arrItem = getSidebarArray();
-			$arrItem['menuitem_7'] = " spanActiveMenu";
-			$arrItem['mb_level'] = $objMember->mb_level;
-
-			echo view('main/main_header', array("site_name"=>$siteName));
-			echo view('main/main_menu', $arrItem);		
-			echo view('main/exchange_list');
-			echo view('main/main_footer');
-		}	
+	{
+		$this->response->redirect('/Main/agency_ce_list');
 	}
 
-	
+	/** @deprecated */
 	public function money_log()
-	{	
-		if(!is_login())
-		{
-			$this->response->redirect('/pages/login');			
-		}
-		else {
-			$uid = $this->session->uid;
-            $objMember = $this->member_model->getByUid($uid);
-
-        	$siteName = $this->confsite_model->getSiteName();
-			$arrItem = getSidebarArray();
-			$arrItem['menuitem_8'] = " spanActiveMenu";
-			$arrItem['mb_level'] = $objMember->mb_level;
-			
-			echo view('main/main_header', array("site_name"=>$siteName));
-			echo view('main/main_menu', $arrItem);		
-			echo view('main/money_log');
-			echo view('main/main_footer');	
-		}
+	{
+		$this->response->redirect('/Main/store_ce_list');
 	}
 
-	
+	/** @deprecated */
 	public function moneylog_list()
-	{	
-		if(!is_login())
-		{
-			$this->response->redirect('/pages/login');			
-		}
-		else {
-			$uid = $this->session->uid;
-            $objMember = $this->member_model->getByUid($uid);
-
-        	$siteName = $this->confsite_model->getSiteName();
-			$arrItem = getSidebarArray();
-			$arrItem['menuitem_8'] = " spanActiveMenu";
-			$arrItem['mb_level'] = $objMember->mb_level;
-			
-			echo view('main/main_header', array("site_name"=>$siteName));
-			echo view('main/main_menu', $arrItem);		
-			echo view('main/moneylog_list');
-			echo view('main/main_footer');	
-		}
+	{
+		$this->response->redirect('/Main/agency_ce_list');
 	}
 
 	public function memo_list()

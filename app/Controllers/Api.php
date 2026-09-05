@@ -1891,6 +1891,101 @@ class Api extends BaseController
 
 	//------------------------------------
 
+	/** 매장 충환전 집계 */
+	public function store_ce_summary()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objMember = $this->member_model->getByUid($uid);
+			if ($objMember->mb_level == LEVEL_AGENCY) {
+				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
+			}
+			$moneyhist_model = new MoneyHist_Model();
+			$result->data = $moneyhist_model->getCeSummary($arrReqData, 'store');
+			$result->status = STATUS_SUCCESS;
+		}
+		echo json_encode($result);
+	}
+
+	/** 총판 충환전 집계 */
+	public function agency_ce_summary()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objMember = $this->member_model->getByUid($uid);
+			if ($objMember->mb_level == LEVEL_AGENCY) {
+				$arrReqData['self_uid'] = $objMember->mb_uid;
+			}
+			$moneyhist_model = new MoneyHist_Model();
+			$result->data = $moneyhist_model->getCeSummary($arrReqData, 'agency');
+			$result->status = STATUS_SUCCESS;
+		}
+		echo json_encode($result);
+	}
+
+	/** 충환전 상세 (store|agency) */
+	public function ce_detail()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objAdmin = $this->member_model->getByUid($uid);
+			$scope = (isset($arrReqData['scope']) && $arrReqData['scope'] === 'agency') ? 'agency' : 'store';
+			$targetUid = isset($arrReqData['mb_uid']) ? trim($arrReqData['mb_uid']) : '';
+
+			if ($targetUid === '') {
+				$result->status = STATUS_FAIL;
+				$result->code = RESULT_FAIL;
+			} else {
+				$objTarget = $this->member_model->getByUid($targetUid);
+				$ok = !is_null($objTarget);
+				if ($ok && $objAdmin->mb_level == LEVEL_AGENCY) {
+					if ($scope === 'store') {
+						$ok = ($objTarget->mb_emp_fid == $objAdmin->mb_fid);
+						$arrReqData['mb_emp_fid'] = $objAdmin->mb_fid;
+					} else {
+						$ok = ($objTarget->mb_uid === $objAdmin->mb_uid);
+					}
+				}
+				if (!$ok) {
+					$result->status = STATUS_FAIL;
+					$result->code = RESULT_FAIL;
+				} else {
+					$moneyhist_model = new MoneyHist_Model();
+					$result->data = $moneyhist_model->getCeDetail($arrReqData, $scope);
+					$result->status = STATUS_SUCCESS;
+				}
+			}
+		}
+		echo json_encode($result);
+	}
+
 	public function moneylog_count()
 	{
 		$jsonData = $_REQUEST['json_'];

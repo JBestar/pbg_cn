@@ -60,22 +60,13 @@
     <?php }  ?>
 
         <div class="spanLeftMenu"><i class="fas fa-won-sign"></i> <?= lang('Admin.menu_money') ?></div>
-        <div id="spanMainMenu8" class="spanLeftSubMenu <?=$menuitem_6?>" onclick="clickMenu('charge_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_charge') ?>&nbsp;&nbsp;
-            <span id="spanChargeCnt" class="badge" style="background-color: rgb(153, 153, 153);">0</span>
-        </div>
-        <div id="spanMainMenu9" class="spanLeftSubMenu <?=$menuitem_7?>" onclick="clickMenu('exchange_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_exchange') ?>&nbsp;&nbsp;
-            <span id="spanExchangeCnt" class="badge" style="background-color: rgb(153, 153, 153);">0</span>
-        </div>
-        <?php if($mb_level == LEVEL_AGENCY) { ?>
-            <div id="spanMainMenu10" class="spanLeftSubMenu <?=$menuitem_8?>" onclick="clickMenu('money_log');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_money_log') ?></div>
-        <?php } else if($mb_level > LEVEL_AGENCY) { ?>
-            <div id="spanMainMenu10" class="spanLeftSubMenu <?=$menuitem_8?>" onclick="clickMenu('moneylog_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_money_log') ?></div>
-        <?php }  ?>
+        <div id="spanMainMenu8" class="spanLeftSubMenu <?=$menuitem_6?>" onclick="clickMenu('store_ce_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_store_ce') ?></div>
+        <div id="spanMainMenu9" class="spanLeftSubMenu <?=$menuitem_7?>" onclick="clickMenu('agency_ce_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_agency_ce') ?></div>
 
         <?php if($mb_level == LEVEL_AGENCY) { ?>
         <div class="spanLeftMenu"><i class="fas fa-sticky-note"></i> <?= lang('Admin.menu_memo') ?></div>
-        <div id="spanMainMenu8" class="spanLeftSubMenu <?=$menuitem_9?>" onclick="clickMenu('memo_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_memo_list') ?>&nbsp;&nbsp;</div>
-        <div id="spanMainMenu9" class="spanLeftSubMenu <?=$menuitem_10?>" onclick="clickMenu('qna_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_qna') ?>&nbsp;&nbsp;
+        <div id="spanMainMenu11" class="spanLeftSubMenu <?=$menuitem_9?>" onclick="clickMenu('memo_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_memo_list') ?>&nbsp;&nbsp;</div>
+        <div id="spanMainMenu12" class="spanLeftSubMenu <?=$menuitem_10?>" onclick="clickMenu('qna_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_qna') ?>&nbsp;&nbsp;
             <span id="spanQnaCnt" class="badge" style="background-color: rgb(153, 153, 153);">0</span>
         </div>
         <?php }  ?>
