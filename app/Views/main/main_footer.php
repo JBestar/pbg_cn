@@ -1,6 +1,10 @@
 
 
 
+        </div><!-- .divContent -->
+        </div><!-- .admin-main -->
+        </div><!-- .admin-app -->
+
         <div class="layui-layer-shade" id="layui-layer-shade" times="1" style=" display:none; z-index:90000; background-color:#000; opacity:0.3; filter:alpha(opacity=30);">
         </div>
         <div class="layui-layer layui-layer-dialog layer-anim" id="layui-layer" type="dialog" times="1" showtime="0" contype="string" 

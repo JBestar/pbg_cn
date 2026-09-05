@@ -216,14 +216,141 @@ a:active {
 }
 
 .divContent {
-    position: absolute;
-    left: 220px;
-    top: 30px;
-    width: calc(100% - 220px);
-    height: calc(100% - 30px);
-    border: 0px;
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    border: 0;
     overflow: auto;
-    /*background-color: #c1c1c1;*/
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ===== Admin responsive shell ===== */
+.admin-body {
+    overflow-x: hidden;
+}
+.admin-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+.admin-topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 36px;
+    padding: 4px 8px;
+    background-color: #283744;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: bold;
+    z-index: 1100;
+    flex-shrink: 0;
+}
+.admin-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 4px;
+    background: #39435c;
+    color: #fff;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.admin-topbar-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.admin-topbar-item {
+    white-space: nowrap;
+}
+.admin-topbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+.admin-action-btn {
+    display: inline-block;
+    min-width: 72px;
+    height: 24px;
+    line-height: 24px;
+    padding: 0 8px;
+    border: none;
+    border-radius: 3px;
+    color: #fefefe;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+}
+.admin-action-green { background-color: #1b6b2c; }
+.admin-action-blue { background-color: #0070bd; }
+.admin-action-red { background-color: #cb251d; }
+.admin-lang-select {
+    height: 24px;
+    font-size: 12px;
+}
+.admin-maintain-btn {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 0 10px;
+    height: 22px;
+    line-height: 22px;
+    vertical-align: middle;
+    background-color: #e67e22;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+}
+.admin-nav-overlay {
+    display: none;
+}
+.admin-main {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+}
+.admin-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background-color: #39435c;
+    color: #ffffff;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+}
+.admin-sidebar .spanLeftMenu,
+.admin-sidebar .spanLeftSubMenu {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+}
+.admin-account-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.admin-account-wrap .default_table {
+    min-width: 960px;
 }
 
 .default_table {
@@ -285,18 +412,28 @@ td {
     font-weight: normal;
     color: #010101;
     padding-left: 5px;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
 }
 
 .inputDate {
     width: 120px;
+    max-width: 100%;
     text-align: center;
 }
 
 .divList {
     position: relative;
     width: calc(100% - 18px);
+    max-width: 100%;
     margin: 5px 5px 5px 5px;
     border: 3px solid #014e02;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
 }
 
 .divPaging {
@@ -377,7 +514,8 @@ body.lang-en .bw-lms { min-width: 3.2em; }
 
 /* Lang select: BareunDotum lacks Han glyphs — force CJK-capable stack; option text dark on white when open */
 #adminLangSelect {
-    width: 100%;
+    width: auto;
+    min-width: 88px;
     height: 24px;
     line-height: 24px;
     border: 0;
@@ -391,4 +529,123 @@ body.lang-en .bw-lms { min-width: 3.2em; }
     color: #111;
     background: #fff;
     font-family: 'Microsoft YaHei', 'SimSun', 'Malgun Gothic', 'BareunDotum', sans-serif !important;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .admin-sidebar {
+        width: 200px;
+    }
+    .default_table {
+        font-size: 11px;
+    }
+    .divTitle {
+        font-size: 18px;
+    }
+}
+
+/* Phone / small tablet — drawer nav */
+@media (max-width: 768px) {
+    .admin-menu-btn {
+        display: inline-flex;
+    }
+    .admin-topbar {
+        padding: 6px 8px;
+        gap: 8px;
+    }
+    .admin-topbar-info {
+        flex: 1 1 calc(100% - 48px);
+        order: 2;
+        font-size: 12px;
+        gap: 4px 8px;
+    }
+    .admin-topbar-actions {
+        order: 3;
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+    .admin-topbar-ip {
+        display: none;
+    }
+    .admin-action-btn {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .admin-nav-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1190;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+    body.admin-menu-open .admin-nav-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(280px, 86vw);
+        z-index: 1200;
+        transform: translateX(-105%);
+        transition: transform 0.22s ease;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.35);
+        padding-top: 8px;
+    }
+    body.admin-menu-open .admin-sidebar {
+        transform: translateX(0);
+    }
+    body.admin-menu-open {
+        overflow: hidden;
+    }
+    .divContent {
+        width: 100%;
+        padding-bottom: 24px;
+    }
+    .divList {
+        width: calc(100% - 10px);
+        margin: 5px;
+    }
+    .divList .default_table {
+        min-width: 640px;
+        width: max-content;
+        max-width: none;
+    }
+    .divSearch {
+        line-height: 1.6;
+        padding: 6px 8px;
+    }
+    .divSearch .inputDate,
+    .divSearch input[type="text"],
+    .divSearch select {
+        max-width: 100%;
+    }
+    .divTitle {
+        font-size: 17px;
+        line-height: 1.4;
+        padding: 6px 8px;
+    }
+    /* Layer dialogs on small screens */
+    #layui-layer {
+        left: 5% !important;
+        right: 5% !important;
+        width: auto !important;
+        max-width: 90vw;
+        top: 20% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-topbar-item {
+        white-space: normal;
+    }
+    .admin-account-wrap .default_table {
+        min-width: 720px;
+    }
 }

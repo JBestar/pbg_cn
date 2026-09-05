@@ -3,7 +3,7 @@
 	<head>
         <meta content="IE=11.0000" http-equiv="X-UA-Compatible">
         <meta charset="utf-8">
-	    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	    <meta content="width=device-width, initial-scale=1" name="viewport">
 		
 		<title><?=$site_name?> <?= lang('Admin.admin_suffix') ?></title>
 
@@ -11,7 +11,7 @@
         <link rel="stylesheet" href="/assets/css/lib/jquery-ui.css">
         <link rel="stylesheet" href="/assets/css/lib/all.css">
 
-        <link rel="stylesheet" href="/assets/css/main.css?v=2">
+        <link rel="stylesheet" href="/assets/css/main.css?v=3">
         <link rel="stylesheet" href="/assets/css/button1.css">
         <link rel="stylesheet" href="/assets/css/button2.css">
         <link rel="stylesheet" href="/assets/css/simplePagination.css">        
@@ -26,7 +26,7 @@
         <script src="/assets/js/lib/sweetalert2.min.js"></script> -->
         <script src="/assets/js/lib/sweetalert2.all.min.js"></script>
 
-        <script src="/assets/js/header.js?v=2"></script>
+        <script src="/assets/js/header.js?v=3"></script>
         <script src="/assets/js/util.js?v=4"></script>
         <script src="/assets/js/window.js"></script>
         <script>
@@ -63,4 +63,5 @@
         </script>
     </head>
 
-    <body class="lang-<?= esc(service('request')->getLocale() ?: 'ko') ?>" style="margin:0px; padding:0px; background-color:#f5f5f5;">
+    <body class="lang-<?= esc(service('request')->getLocale() ?: 'ko') ?> admin-body" style="margin:0px; padding:0px; background-color:#f5f5f5;">
+    <div class="admin-app">

@@ -8,13 +8,28 @@ $(document).ready(function() {
     setTimeout(function() { reqAccount(); }, 500);
     setTimeout(function() { reqWaitTransfer(); }, 1000);
     startWorker();
+
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') closeAdminMenu();
+    });
 });
 
 
 function clickMenu(menuPage) {
-
+    closeAdminMenu();
     location.href = '/Main/' + menuPage;
+}
 
+function toggleAdminMenu() {
+    document.body.classList.toggle('admin-menu-open');
+}
+
+function closeAdminMenu() {
+    document.body.classList.remove('admin-menu-open');
+}
+
+function openAdminMenu() {
+    document.body.classList.add('admin-menu-open');
 }
 
 function logOut() {
