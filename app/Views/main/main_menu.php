@@ -73,6 +73,7 @@
         <div class="spanLeftMenu"><i class="fas fa-won-sign"></i> <?= lang('Admin.menu_money') ?></div>
         <div id="spanMainMenu8" class="spanLeftSubMenu <?=$menuitem_6?>" onclick="clickMenu('store_ce_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_store_ce') ?></div>
         <div id="spanMainMenu9" class="spanLeftSubMenu <?=$menuitem_7?>" onclick="clickMenu('agency_ce_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_agency_ce') ?></div>
+        <div id="spanMainMenuPt" class="spanLeftSubMenu <?=$menuitem_11?>" onclick="clickMenu('point_convert_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_point_convert') ?></div>
 
         <div id="spanMainMenu10" class="spanLeftMenu <?=$menuitem_8?>" onclick="clickMenu('cancel_list');"><i class="fas fa-ban"></i> <?= lang('Admin.menu_cancel') ?></div>
 

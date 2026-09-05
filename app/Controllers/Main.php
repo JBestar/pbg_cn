@@ -397,6 +397,26 @@ class Main extends BaseController
 		echo view('main/main_footer');
 	}
 
+	/** 포인트 전환기록 */
+	public function point_convert_list()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->session->uid;
+		$objMember = $this->member_model->getByUid($uid);
+		$siteName = $this->confsite_model->getSiteName();
+		$arrItem = getSidebarArray();
+		$arrItem['menuitem_11'] = " spanActiveMenu";
+		$arrItem['mb_level'] = $objMember->mb_level;
+
+		echo view('main/main_header', array("site_name" => $siteName));
+		echo view('main/main_menu', $arrItem);
+		echo view('main/point_convert_list');
+		echo view('main/main_footer');
+	}
+
 	/** 매장 충환전 상세 팝업 */
 	public function store_ce_detail()
 	{

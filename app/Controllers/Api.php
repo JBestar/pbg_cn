@@ -2111,6 +2111,58 @@ class Api extends BaseController
 		echo json_encode($result);
 	}
 
+	/** 포인트 전환기록 건수 */
+	public function point_convert_count()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objMember = $this->member_model->getByUid($uid);
+			if ($objMember->mb_level == LEVEL_AGENCY) {
+				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
+			}
+			$moneyhist_model = new MoneyHist_Model();
+			$result->data = $moneyhist_model->searchPointConvertCount($arrReqData);
+			$result->status = STATUS_SUCCESS;
+		}
+		echo json_encode($result);
+	}
+
+	/** 포인트 전환기록 목록 */
+	public function point_convert_page()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objMember = $this->member_model->getByUid($uid);
+			if ($objMember->mb_level == LEVEL_AGENCY) {
+				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
+			}
+			$page = isset($arrReqData['page']) ? intval($arrReqData['page']) : 1;
+			$cntper = isset($arrReqData['cntper']) ? intval($arrReqData['cntper']) : 50;
+			$moneyhist_model = new MoneyHist_Model();
+			$result->data = $moneyhist_model->searchPointConvertList($arrReqData, $page, $cntper);
+			$result->status = STATUS_SUCCESS;
+		}
+		echo json_encode($result);
+	}
+
 	public function moneylog_count()
 	{
 		$jsonData = $_REQUEST['json_'];

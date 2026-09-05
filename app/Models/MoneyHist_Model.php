@@ -750,4 +750,67 @@ class MoneyHist_Model extends Model {
     }
 
 
+    /**
+     * 포인트전환(type=10) 건수. 총판: mb_emp_fid로 하부 매장만.
+     */
+    function searchPointConvertCount($arrRqData)
+    {
+        try {
+            $where = "h.money_change_type = '".intval(POINTCHANGE_EXCHANGE)."' ";
+            if (array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0) {
+                $where .= " AND h.money_update_time >= ".$this->mDb->escape($arrRqData['start'])." ";
+            }
+            if (array_key_exists('end', $arrRqData) && strlen($arrRqData['end']) > 0) {
+                $where .= " AND h.money_update_time <= ".$this->mDb->escape($arrRqData['end'].' 23:59:59')." ";
+            }
+            if (array_key_exists('mb_uid', $arrRqData) && strlen(trim($arrRqData['mb_uid'])) > 0) {
+                $where .= " AND h.money_mb_uid LIKE ".$this->mDb->escape('%'.trim($arrRqData['mb_uid']).'%')." ";
+            }
+            if (array_key_exists('mb_emp_fid', $arrRqData) && intval($arrRqData['mb_emp_fid']) > 0) {
+                $where .= " AND m.mb_emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";
+            }
+            $sql = "SELECT COUNT(*) AS cnt FROM ".$this->mTbName." h "
+                ." INNER JOIN member m ON m.mb_fid = h.money_mb_fid "
+                ." WHERE ".$where;
+            $row = $this->mDb->query($sql)->getRow();
+            return $row ? intval($row->cnt) : 0;
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    function searchPointConvertList($arrRqData, $page, $cntPer = 50)
+    {
+        try {
+            if ($page < 1 || $cntPer < 1) {
+                return [];
+            }
+            $where = "h.money_change_type = '".intval(POINTCHANGE_EXCHANGE)."' ";
+            if (array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0) {
+                $where .= " AND h.money_update_time >= ".$this->mDb->escape($arrRqData['start'])." ";
+            }
+            if (array_key_exists('end', $arrRqData) && strlen($arrRqData['end']) > 0) {
+                $where .= " AND h.money_update_time <= ".$this->mDb->escape($arrRqData['end'].' 23:59:59')." ";
+            }
+            if (array_key_exists('mb_uid', $arrRqData) && strlen(trim($arrRqData['mb_uid'])) > 0) {
+                $where .= " AND h.money_mb_uid LIKE ".$this->mDb->escape('%'.trim($arrRqData['mb_uid']).'%')." ";
+            }
+            if (array_key_exists('mb_emp_fid', $arrRqData) && intval($arrRqData['mb_emp_fid']) > 0) {
+                $where .= " AND m.mb_emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";
+            }
+            $offset = $cntPer * ($page - 1);
+            $sql = "SELECT h.money_fid, h.money_mb_uid, m.mb_nickname, "
+                ." h.money_amount, h.money_before, h.money_after, h.money_update_time "
+                ." FROM ".$this->mTbName." h "
+                ." INNER JOIN member m ON m.mb_fid = h.money_mb_fid "
+                ." WHERE ".$where
+                ." ORDER BY h.money_fid DESC "
+                ." LIMIT ".intval($cntPer)." OFFSET ".intval($offset);
+            return $this->mDb->query($sql)->getResult();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+
 }
