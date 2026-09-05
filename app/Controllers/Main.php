@@ -314,6 +314,26 @@ class Main extends BaseController
 		echo view('main/store_recover', ['target_uid' => $uid]);
 	}
 
+	/** 구매취소내역 */
+	public function cancel_list()
+	{
+		if (!is_login()) {
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->session->uid;
+		$objMember = $this->member_model->getByUid($uid);
+		$siteName = $this->confsite_model->getSiteName();
+		$arrItem = getSidebarArray();
+		$arrItem['menuitem_8'] = " spanActiveMenu";
+		$arrItem['mb_level'] = $objMember->mb_level;
+
+		echo view('main/main_header', array("site_name" => $siteName));
+		echo view('main/main_menu', $arrItem);
+		echo view('main/cancel_list');
+		echo view('main/main_footer');
+	}
+
 	/** 매장 충환전 내역 */
 	public function store_ce_list()
 	{

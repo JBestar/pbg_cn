@@ -63,6 +63,8 @@
         <div id="spanMainMenu8" class="spanLeftSubMenu <?=$menuitem_6?>" onclick="clickMenu('store_ce_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_store_ce') ?></div>
         <div id="spanMainMenu9" class="spanLeftSubMenu <?=$menuitem_7?>" onclick="clickMenu('agency_ce_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_agency_ce') ?></div>
 
+        <div id="spanMainMenu10" class="spanLeftMenu <?=$menuitem_8?>" onclick="clickMenu('cancel_list');"><i class="fas fa-ban"></i> <?= lang('Admin.menu_cancel') ?></div>
+
         <?php if($mb_level == LEVEL_AGENCY) { ?>
         <div class="spanLeftMenu"><i class="fas fa-sticky-note"></i> <?= lang('Admin.menu_memo') ?></div>
         <div id="spanMainMenu11" class="spanLeftSubMenu <?=$menuitem_9?>" onclick="clickMenu('memo_list');"><i class="fa fa-arrow-right"></i> <?= lang('Admin.menu_memo_list') ?>&nbsp;&nbsp;</div>

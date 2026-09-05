@@ -918,6 +918,34 @@ class Api extends BaseController
 		echo json_encode($result);
 	}
 
+	/** 구매취소내역 */
+	public function cancel_list_page()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objMember = $this->member_model->getAllByUid($uid);
+			if ($objMember->mb_level == LEVEL_AGENCY) {
+				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
+			}
+			$page = isset($arrReqData['page']) ? max(1, intval($arrReqData['page'])) : 1;
+			$cntper = isset($arrReqData['cntper']) ? max(1, intval($arrReqData['cntper'])) : 200;
+			$pbbet_model = new PbBet_Model();
+			$result->data = $pbbet_model->searchCancelList($arrReqData, $page, $cntper);
+			$result->count = $pbbet_model->searchCancelCount($arrReqData);
+			$result->status = STATUS_SUCCESS;
+		}
+		echo json_encode($result);
+	}
+
 	public function edit_bet(){
 		$jsonData = $_REQUEST['json_'];
 		$arrReqData = json_decode($jsonData, true);

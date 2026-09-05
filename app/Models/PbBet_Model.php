@@ -88,6 +88,7 @@ class PbBet_Model extends Model {
         $o->bet_round_no = (int)$row['round'];
         $o->bet_round_date = substr((string)$row['created_at'], 0, 10);
         $o->bet_time = $row['created_at'];
+        $o->bet_cancel_time = !empty($row['settled_at']) ? $row['settled_at'] : '';
         $o->bet_game = GAME_POWER_BALL;
         $o->bet_mode = (int)$row['mode'];
         $o->bet_target = $row['target'];
@@ -248,6 +249,64 @@ class PbBet_Model extends Model {
             return $out;
         } catch (\Exception $e) {
             return null;
+        }
+    }
+
+    /** 구매취소내역 (state=4) — 기간은 취소시각(settled_at) 기준 */
+    private function buildCancelWhere($arrRqData)
+    {
+        $where = " b.state = 4 ";
+        if (!empty($arrRqData['start'])) {
+            $where .= " AND COALESCE(b.settled_at, b.created_at) >= '" . $this->mDb->escapeString($arrRqData['start']) . "' ";
+        }
+        if (!empty($arrRqData['end'])) {
+            $where .= " AND COALESCE(b.settled_at, b.created_at) <= '" . $this->mDb->escapeString($arrRqData['end']) . " 23:59:59' ";
+        }
+        if (!empty($arrRqData['mb_uid'])) {
+            $where .= " AND b.mb_uid = '" . $this->mDb->escapeString($arrRqData['mb_uid']) . "' ";
+        }
+        if (array_key_exists('mb_emp_fid', $arrRqData)) {
+            $where .= " AND b.emp_fid = '" . intval($arrRqData['mb_emp_fid']) . "' ";
+        }
+        return $where;
+    }
+
+    function searchCancelCount($arrRqData)
+    {
+        try {
+            $where = $this->buildCancelWhere($arrRqData);
+            $sql = "SELECT COUNT(*) AS cnt FROM bets b WHERE " . $where;
+            $row = $this->mDb->query($sql)->getRow();
+            return $row ? (int)$row->cnt : 0;
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    function searchCancelList($arrRqData, $page = 1, $cntPer = 100)
+    {
+        try {
+            if ($page < 1 || $cntPer < 1) {
+                return [];
+            }
+            $where = $this->buildCancelWhere($arrRqData);
+            $nStartRow = ($page - 1) * $cntPer;
+            $sql = "SELECT b.*, m.mb_nickname, m.mb_point, m.mb_ip_last, emp.mb_nickname AS mb_emp_nickname,
+                    d.round AS draw_round, d.ball1, d.ball2, d.ball3, d.ball4, d.ball5, d.powerball, d.ball_sum
+                    FROM bets b
+                    LEFT JOIN member m ON m.mb_uid = b.mb_uid
+                    LEFT JOIN member emp ON emp.mb_fid = b.emp_fid
+                    LEFT JOIN `{$this->drawDbName}`.draw_results d ON d.round = b.round
+                    WHERE {$where}
+                    ORDER BY COALESCE(b.settled_at, b.created_at) DESC, b.id DESC
+                    LIMIT {$nStartRow}, " . (int)$cntPer;
+            $out = [];
+            foreach ($this->mDb->query($sql)->getResultArray() as $row) {
+                $out[] = $this->mapRow($row);
+            }
+            return $out;
+        } catch (\Exception $e) {
+            return [];
         }
     }
 
