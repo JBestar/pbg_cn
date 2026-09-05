@@ -233,24 +233,36 @@ class Api extends BaseController
 			$objMember = $this->member_model->getAllByUid($uid);
 			$moneyhist_model = new MoneyHist_Model();
 			
+			$emptyDay = function () {
+				$o = new \StdClass;
+				$o->date = date('Y-m-d');
+				$o->money_charge = 0;
+				$o->money_exchange = 0;
+				$o->money_give = 0;
+				$o->money_recovery = 0;
+				$o->money_bet = 0;
+				$o->money_win = 0;
+				$o->point_empl = 0;
+				$o->point_agen = 0;
+				return $o;
+			};
+
 			$sToday = date('Y-m-d');
+			$arrReqData = [];
 			$arrReqData['start'] = $sToday;
 			$arrReqData['end'] = $sToday;
 			if($objMember->mb_level == LEVEL_AGENCY)
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
-			//else $arrReqData['mb_emp_fid'] = 0;
 
-			$arrAcc = [null, null];
+			$arrAcc = [$emptyDay(), null];
 			$arrDateAcc = $moneyhist_model->getAccList($arrReqData);
 			if(array_key_exists($sToday, $arrDateAcc)){
 				$arrAcc[0] = $arrDateAcc[$sToday];
 			}
 			
-			$arrReqData['start'] = date('Y-m')."-1";
-			$tmStart = strtotime($arrReqData['start']);
-			$arrReqData['end'] = date('Y-m-d', strtotime("+1 month", $tmStart));
+			$arrReqData['start'] = date('Y-m-01');
+			$arrReqData['end'] = date('Y-m-t');
 			$arrAcc[1] = $moneyhist_model->getAccRange($arrReqData);
-
 
 			$result->data = $arrAcc;
 			$result->status = STATUS_SUCCESS;
@@ -727,12 +739,19 @@ class Api extends BaseController
 	{
 		$jsonData = $_REQUEST['json_'];
 		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
 
 		$result = new \StdClass;
 		if(!is_login())
 		{
             $result->status = STATUS_LOGOUT;		
         } else {
+			$this->applyRoundScope($arrReqData);
+			if (!isset($arrReqData['game'])) {
+				$arrReqData['game'] = GAME_POWER_BALL;
+			}
 			$pbround_model = new PbRound_Model();
 			$pbround_model->setType($arrReqData['game']);
 			$count = $pbround_model->searchCount($arrReqData);
@@ -749,22 +768,25 @@ class Api extends BaseController
 	{
 		$jsonData = $_REQUEST['json_'];
 		$arrReqData = json_decode($jsonData, true);
+		if (!is_array($arrReqData)) {
+			$arrReqData = [];
+		}
 
 		$result = new \StdClass;
 		if(!is_login())
 		{
             $result->status = STATUS_LOGOUT;		
         } else {
-			
-			$uid = $this->session->uid;
-			$objMember = $this->member_model->getAllByUid($uid);
-			if($objMember->mb_level == LEVEL_AGENCY){
-				$arrReqData['mb_emp_fid'] = $objMember->mb_fid; 
+			$this->applyRoundScope($arrReqData);
+			if (!isset($arrReqData['game'])) {
+				$arrReqData['game'] = GAME_POWER_BALL;
 			}
 
 			$pbround_model = new PbRound_Model();
 			$pbround_model->setType($arrReqData['game']);
-			$arrRound = $pbround_model->searchList($arrReqData, $arrReqData['page'], $arrReqData['cntper']);
+			$page = isset($arrReqData['page']) ? intval($arrReqData['page']) : 1;
+			$cntper = isset($arrReqData['cntper']) ? intval($arrReqData['cntper']) : 20;
+			$arrRound = $pbround_model->searchList($arrReqData, $page, $cntper);
 
 			$result->data = $arrRound;
 			$result->game = intval($arrReqData['game']);
@@ -774,6 +796,32 @@ class Api extends BaseController
 		echo json_encode($result);
 
     }
+
+	/** 게임결과: 총판/매장 필터 → emp_fid 스코프 */
+	private function applyRoundScope(array &$arrReqData)
+	{
+		$uid = $this->session->uid;
+		$objMember = $this->member_model->getAllByUid($uid);
+		if ($objMember->mb_level == LEVEL_AGENCY) {
+			$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
+			if (!empty($arrReqData['mb_uid'])) {
+				$objSel = $this->member_model->getByUid($arrReqData['mb_uid']);
+				if (!is_null($objSel) && (int)$objSel->mb_emp_fid === (int)$objMember->mb_fid) {
+					// 매장 선택: bets.mb_uid 필터는 PbRound에 없으므로 emp는 유지, store uid는 betJoin에 추가 필요
+					$arrReqData['store_uid'] = $objSel->mb_uid;
+				}
+			}
+			unset($arrReqData['mb_uid']);
+			return;
+		}
+		if ($objMember->mb_level > LEVEL_AGENCY && !empty($arrReqData['mb_uid'])) {
+			$objSel = $this->member_model->getByUid($arrReqData['mb_uid']);
+			if (!is_null($objSel) && (int)$objSel->mb_level === LEVEL_AGENCY) {
+				$arrReqData['mb_emp_fid'] = $objSel->mb_fid;
+			}
+			unset($arrReqData['mb_uid']);
+		}
+	}
 
 	public function pbbetlist_count()
 	{

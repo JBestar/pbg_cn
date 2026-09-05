@@ -1,14 +1,22 @@
 
     <div class="divTitle"><?= lang('Admin.menu_game_result') ?></div>
     <div class="divSearch">
-    &nbsp;&nbsp;<?= lang('Admin.label_game_type') ?> : <select id="selectGameType" style="padding:2px 15px; min-height:24px;" name="selectGameType" onchange="changeGame();">
-                    <option value="<?= GAME_POWER_BALL ?>" selected><?= lang('Admin.game_powerball') ?></option>
-    </select>
-    &nbsp;&nbsp;&nbsp;<?= lang('Admin.label_period') ?> : <input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
+        <select id="selectLevel" style="padding:2px 10px; min-width:150px; min-height:24px;" name="selectLevel">
+        <?php if ($adminLevel == LEVEL_AGENCY) { ?>
+            <option value=""><?= lang('Admin.opt_stats_store') ?></option>
+        <?php } else { ?>
+            <option value=""><?= lang('Admin.opt_stats_agency') ?></option>
+        <?php } ?>
+        <?php foreach ($arrMember as $objSub): ?>
+            <option value="<?= esc($objSub->mb_uid) ?>"><?= esc($objSub->mb_uid) ?> (<?= esc($objSub->mb_nickname) ?>)</option>
+        <?php endforeach; ?>
+        </select>
+        &nbsp;&nbsp;&nbsp;<?= lang('Admin.label_period') ?> :
+        <input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
         <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
-        &nbsp;&nbsp;&nbsp;<span id="spanGameRound"><?= lang('Admin.label_game_round') ?></span> : <input type="text" id="inputGameNo" name="inputGameNo" class="inputDate" value="">
+        &nbsp;&nbsp;&nbsp;<span id="spanGameRound"><?= lang('Admin.label_game_round') ?></span> :
+        <input type="text" id="inputGameNo" name="inputGameNo" class="inputDate" value="">
         <input type="submit" class="btn_search" onclick="reqSearch();" value="<?= lang('Admin.btn_search') ?>">
-		
 	</div>
     <div class="divList">
 		<table class="default_table">
@@ -26,9 +34,7 @@
                     <th><?= lang('Admin.th_settle') ?></th>
                 </tr>
             </tbody>
-            <tbody id="tbodyList">
-                
-            </tbody>
+            <tbody id="tbodyList"></tbody>
         </table>
 
         <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -42,13 +48,11 @@
                 </tr>
             </tbody>
         </table>
-
 	</div>
-
 </div>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/game_result.js?v=2"></script>
+    <script src="/assets/js/game_result.js?v=3"></script>
 <?php else :?>
     <script src="/assets/js/game_result.js?v=<?=time();?>"></script>
 <?php endif ?>

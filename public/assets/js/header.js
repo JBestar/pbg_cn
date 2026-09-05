@@ -21,6 +21,32 @@ function logOut() {
     location.replace('/pages/logout');
 }
 
+/** 본사: 상단 사이트 점검 토글 */
+function toggleSiteMaintain() {
+    var $btn = $('#btnSiteMaintain');
+    if (!$btn.length) return;
+    var cur = parseInt($btn.attr('data-lock'), 10) || 0;
+    var next = cur ? 0 : 1;
+    if (next === 0) {
+        if (!confirm('정상운영하시겠습니까?')) return;
+    } else {
+        if (!confirm('점검을 진행하시겠습니까?')) return;
+    }
+    $.ajax({
+        url: '/api/maintain_change',
+        data: { json_: JSON.stringify({ bet_lock: next }) },
+        type: 'post',
+        dataType: 'json',
+        success: function (jResult) {
+            if (jResult.status === 'success') {
+                location.reload();
+            } else if (jResult.status === 'logout') {
+                location.reload();
+            }
+        }
+    });
+}
+
 function showUserInfo(objUser) {
     if (objUser == null)
         return;
@@ -42,44 +68,51 @@ function showAccountInfo(arrInfo) {
     if (mUser != null) {
         mbLevel = mUser.mb_level;
     }
+    if (!arrInfo || arrInfo.length < 2 || !arrInfo[0] || !arrInfo[1]) {
+        return;
+    }
     var tHtml = "";
     var bet_profit = 0,
-        charge_profit = 0;;
-    if (arrInfo.length == 2) {
-        //금일 베팅, 충환전
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_bet).toLocaleString() + "</td>";
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_win).toLocaleString() + "</td>";
-        if (mbLevel == 8)
-            tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].point_agen).toLocaleString() + "</td>";
-        else
-            tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].point_agen + arrInfo[0].point_empl).toLocaleString() + "</td>";
-        bet_profit = Math.abs(arrInfo[0].money_bet) - Math.abs(arrInfo[0].money_win) - Math.abs(arrInfo[0].point_agen) - Math.abs(arrInfo[0].point_empl);
-        tHtml += "<td class=\"tdMoney\">";
-        if (bet_profit >= 0) {
-            tHtml += "<font color=\"#0000fe\">";
-        } else {
-            tHtml += "<font color=\"#fe0000\">";
-        }
-        tHtml += bet_profit.toLocaleString() + "</font></td>";
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_charge).toLocaleString() + "</td>";
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_exchange).toLocaleString() + "</td>";
-        charge_profit = Math.abs(arrInfo[0].money_charge) - Math.abs(arrInfo[0].money_exchange);
-        tHtml += "<td class=\"tdMoney\">" + charge_profit.toLocaleString() + "</td>";
-        //월간 충환전
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[1].money_give).toLocaleString() + "</td>";
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[1].money_recovery).toLocaleString() + "</td>";
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[1].money_charge).toLocaleString() + "</td>";
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[1].money_exchange).toLocaleString() + "</td>";
-        charge_profit = Math.abs(arrInfo[1].money_charge) - Math.abs(arrInfo[1].money_exchange);
-        tHtml += "<td class=\"tdMoney\">";
-        if (charge_profit >= 0) {
-            tHtml += "<font color=\"#0000fe\">";
-        } else {
-            tHtml += "<font color=\"#fe0000\">";
-        }
-        tHtml += charge_profit.toLocaleString() + "</font></td>";
-
+        charge_profit = 0;
+    //금일 베팅, 충환전
+    tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_bet || 0).toLocaleString() + "</td>";
+    tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_win || 0).toLocaleString() + "</td>";
+    if (mbLevel == 8)
+        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].point_agen || 0).toLocaleString() + "</td>";
+    else
+        tHtml += "<td class=\"tdMoney\">" + (Math.abs(arrInfo[0].point_agen || 0) + Math.abs(arrInfo[0].point_empl || 0)).toLocaleString() + "</td>";
+    bet_profit = Math.abs(arrInfo[0].money_bet || 0) - Math.abs(arrInfo[0].money_win || 0) - Math.abs(arrInfo[0].point_agen || 0) - Math.abs(arrInfo[0].point_empl || 0);
+    tHtml += "<td class=\"tdMoney\">";
+    if (bet_profit >= 0) {
+        tHtml += "<font color=\"#0000fe\">";
+    } else {
+        tHtml += "<font color=\"#fe0000\">";
     }
+    tHtml += bet_profit.toLocaleString() + "</font></td>";
+    tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_charge || 0).toLocaleString() + "</td>";
+    tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_exchange || 0).toLocaleString() + "</td>";
+    charge_profit = Math.abs(arrInfo[0].money_charge || 0) - Math.abs(arrInfo[0].money_exchange || 0);
+    tHtml += "<td class=\"tdMoney\">";
+    if (charge_profit >= 0) {
+        tHtml += "<font color=\"#0000fe\">";
+    } else {
+        tHtml += "<font color=\"#fe0000\">";
+    }
+    tHtml += charge_profit.toLocaleString() + "</font></td>";
+    //월간 알충전/회수/충전/환전
+    tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[1].money_give || 0).toLocaleString() + "</td>";
+    tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[1].money_recovery || 0).toLocaleString() + "</td>";
+    tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[1].money_charge || 0).toLocaleString() + "</td>";
+    tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[1].money_exchange || 0).toLocaleString() + "</td>";
+    charge_profit = Math.abs(arrInfo[1].money_charge || 0) - Math.abs(arrInfo[1].money_exchange || 0);
+    tHtml += "<td class=\"tdMoney\">";
+    if (charge_profit >= 0) {
+        tHtml += "<font color=\"#0000fe\">";
+    } else {
+        tHtml += "<font color=\"#fe0000\">";
+    }
+    tHtml += charge_profit.toLocaleString() + "</font></td>";
+
     $('#tbAccount').html(tHtml);
 }
 

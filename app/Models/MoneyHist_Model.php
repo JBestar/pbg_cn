@@ -517,24 +517,27 @@ class MoneyHist_Model extends Model {
         $objAcc->money_recovery = 0;
         $objAcc->money_bet = 0;
         $objAcc->money_win = 0;
+        $objAcc->point_empl = 0;
+        $objAcc->point_agen = 0;
         $objAcc->point_bet = 0;
         
+        $startDate = $arrRqData['start'];
+        $endDate = $arrRqData['end'];
         
-        $where = " money_update_time >= '".$arrRqData['start']."' ";    
-        $where .= " AND money_update_time <= '".$arrRqData['end']." 23:59:59' ";    
+        $where = " money_update_time >= '".$startDate."' ";    
+        $where .= " AND money_update_time <= '".$endDate." 23:59:59' ";    
         
-        if(array_key_exists('mb_uid', $arrRqData)){
+        if(array_key_exists('mb_uid', $arrRqData) && strlen($arrRqData['mb_uid']) > 0){
             $where .= " AND money_mb_uid = '".$arrRqData['mb_uid']."' ";    
         }
         if(array_key_exists('mb_emp_fid', $arrRqData)){
             $where .= " AND money_mb_emp_fid = '".$arrRqData['mb_emp_fid']."' ";    
         }
 
-        //회차한도
-        $strSql = " SELECT money_mb_emp_fid, money_change_type, ";
+        $strSql = " SELECT money_change_type, ";
         $strSql.= " SUM(money_amount) AS money_sum FROM ".$this->mTbName;
         $strSql.= " WHERE ".$where;
-        $strSql.= " GROUP BY money_mb_emp_fid, money_change_type";
+        $strSql.= " GROUP BY money_change_type";
 
         $arrResult = $this->mDb->query($strSql)->getResult();
 
@@ -572,6 +575,25 @@ class MoneyHist_Model extends Model {
                     break;
                     
             }
+        }
+
+        // bets 월간/기간 배팅·당첨
+        try {
+            $whereBet = " ( state = 2 OR state = 3 ) AND created_at >= '".$startDate."' ";
+            $whereBet .= " AND created_at <= '".$endDate." 23:59:59' ";
+            if (array_key_exists('mb_uid', $arrRqData) && strlen($arrRqData['mb_uid']) > 0) {
+                $whereBet .= " AND mb_uid = '".$this->mDb->escapeString($arrRqData['mb_uid'])."' ";
+            }
+            if (array_key_exists('mb_emp_fid', $arrRqData)) {
+                $whereBet .= " AND emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";
+            }
+            $strSql = " SELECT COALESCE(SUM(amount),0) AS bet_sum, COALESCE(SUM(win_amount),0) AS win_sum FROM bets WHERE ".$whereBet;
+            $row = $this->mDb->query($strSql)->getRow();
+            if ($row) {
+                $objAcc->money_bet += (float)$row->bet_sum;
+                $objAcc->money_win += (float)$row->win_sum;
+            }
+        } catch (\Exception $e) {
         }
 
         return $objAcc;

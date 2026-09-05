@@ -39,10 +39,14 @@ class Main extends BaseController
 			$arrItem['menuitem_1'] = " spanActiveMenu";
 			$arrItem['mb_level'] = $objMember->mb_level;
 
-			$siteName = $this->confsite_model->getSiteName(); 
+			$siteName = $this->confsite_model->getSiteName();
+			$viewData = [
+				'arrMember' => $arrMember,
+				'adminLevel' => $objMember->mb_level,
+			];
 			echo view('main/main_header', array("site_name"=>$siteName));
 			echo view('main/main_menu', $arrItem);		
-			echo view('main/term_list', array("arrMember"=>$arrMember, "adminLevel"=>$objMember->mb_level));		
+			echo view('main/term_list', $viewData);		
 			echo view('main/main_footer');	
 		}
 	}
@@ -143,6 +147,10 @@ class Main extends BaseController
 			$uid = $this->session->uid;
             $objMember = $this->member_model->getByUid($uid);
 
+			$arrMember = $this->member_model->getSubs($objMember);
+			if (!is_array($arrMember) && !is_object($arrMember)) {
+				$arrMember = [];
+			}
 
 			$siteName = $this->confsite_model->getSiteName();
 			$arrItem = getSidebarArray();
@@ -151,7 +159,10 @@ class Main extends BaseController
 
 			echo view('main/main_header', array("site_name"=>$siteName));
 			echo view('main/main_menu', $arrItem);		
-			echo view('main/game_result');		
+			echo view('main/game_result', [
+				'arrMember' => $arrMember,
+				'adminLevel' => $objMember->mb_level,
+			]);		
 			echo view('main/main_footer');	
 		}
 	}

@@ -46,6 +46,9 @@ class PbRound_Model extends Model {
         if (array_key_exists('mb_emp_fid', $arrRqData)) {
             $bw .= " AND emp_fid = '" . intval($arrRqData['mb_emp_fid']) . "' ";
         }
+        if (!empty($arrRqData['store_uid'])) {
+            $bw .= " AND mb_uid = '" . $this->mDb->escapeString($arrRqData['store_uid']) . "' ";
+        }
         return " LEFT JOIN (
             SELECT round AS bet_round_fid,
                    COUNT(id) AS bet_count,

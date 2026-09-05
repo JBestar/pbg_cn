@@ -1,7 +1,18 @@
 
     <div style="position:absolute; left:0px; top:0px; width:100%; height:30px; line-height:30px; background-color:#283744; color:#ffffff; margin:0px; text-align:left; font-size:14px; font-weight:bold;">
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<i class="far fa-circle"></i> <span id="spanUserName"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<i class="far fa-circle"></i> <span id="spanUserName"></span>
+    <?php if ($mb_level > LEVEL_AGENCY) {
+        $isMaintainHdr = (new \App\Models\ConfSite_Model())->IsMaintain();
+    ?>
+		<span id="btnSiteMaintain"
+			data-lock="<?= $isMaintainHdr ? '1' : '0' ?>"
+			onclick="toggleSiteMaintain();"
+			style="display:inline-block; margin-left:10px; padding:0 10px; height:22px; line-height:22px; vertical-align:middle; background-color:#e67e22; color:#ffffff; font-size:12px; font-weight:bold; border-radius:3px; cursor:pointer; text-align:center;">
+			<?= $isMaintainHdr ? lang('Admin.opt_site_lock') : lang('Admin.label_site_maintain') ?>
+		</span>
+    <?php } ?>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		
         <i class="far fa-circle"></i> <?= lang('Admin.money_hold') ?> : <span id="spanUserMoney" style="color:#ff0000;">0 원</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<i class="far fa-circle"></i> <?= lang('Admin.point_hold') ?> : <span id="spanUserPoint" style="color:#ff0000;">0 원</span>&nbsp;&nbsp;

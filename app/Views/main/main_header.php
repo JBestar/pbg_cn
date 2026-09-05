@@ -26,7 +26,7 @@
         <script src="/assets/js/lib/sweetalert2.min.js"></script> -->
         <script src="/assets/js/lib/sweetalert2.all.min.js"></script>
 
-        <script src="/assets/js/header.js?v=1"></script>
+        <script src="/assets/js/header.js?v=2"></script>
         <script src="/assets/js/util.js?v=4"></script>
         <script src="/assets/js/window.js"></script>
         <script>
