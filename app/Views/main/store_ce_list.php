@@ -53,9 +53,10 @@ window.ADMIN_I18N.th_total = <?= json_encode(lang('Admin.th_total'), JSON_UNESCA
 window.CE_SCOPE = 'store';
 window.CE_DETAIL_PATH = '/Main/store_ce_detail';
 window.CE_API = '/api/store_ce_summary';
+window.CE_SHOW_GRADE = false;
 </script>
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/ce_list.js?v=1"></script>
+    <script src="/assets/js/ce_list.js?v=2"></script>
 <?php else :?>
     <script src="/assets/js/ce_list.js?v=<?=time();?>"></script>
 <?php endif ?>

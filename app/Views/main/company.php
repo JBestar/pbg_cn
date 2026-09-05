@@ -22,25 +22,16 @@
                     <th><?= lang('Admin.th_level') ?></th>
                     <th><?= lang('Admin.th_uid') ?></th>
                     <th><?= lang('Admin.th_name') ?></th>
+                    <th><?= lang('Admin.th_password') ?></th>
                     <th><?= lang('Admin.money_hold') ?></th>
-                    <th><?= lang('Admin.point_hold') ?></th>                    
-                    <th><?= lang('Admin.th_sub_money_sum') ?></th>
-
-                    <th><?= lang('Admin.th_bet') ?></th>
-                    <th><?= lang('Admin.th_win') ?></th>
-                    <th><?= lang('Admin.th_point') ?></th>
-                    <th><?= lang('Admin.th_bet_pl') ?></th>
-                    <th><?= lang('Admin.th_charge') ?></th>
-                    <th><?= lang('Admin.th_exchange') ?></th>
-                    <th><?= lang('Admin.th_ce_pl') ?></th>
-                    <th><?= lang('Admin.th_egg_in') ?></th>
-                    <th><?= lang('Admin.th_egg_out') ?></th>
-
+                    <th><?= lang('Admin.point_hold') ?></th>
                     <th><?= lang('Admin.th_fee_pct') ?></th>
                     <th><?= lang('Admin.th_store_cnt') ?></th>
                     <th><?= lang('Admin.th_charge_recall') ?></th>
                     <th><?= lang('Admin.th_edit') ?></th>
                     <th><?= lang('Admin.th_delete') ?></th>
+                    <th><?= lang('Admin.th_status') ?></th>
+                    <th><?= lang('Admin.th_join_date') ?></th>
                 </tr>
             </thead>
             <tbody id="tbodyList">
@@ -48,6 +39,23 @@
             </tbody>
         </table>
 	</div>
+
+<style>
+@keyframes onlineBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+}
+.online-blink {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #f8c8d0;
+    color: #c62828;
+    font-weight: 700;
+    font-size: 12px;
+    border-radius: 2px;
+    animation: onlineBlink 2s ease-in-out infinite;
+}
+</style>
 
     <div id="divRegSub" style="position:absolute; left:calc(50% - 300px); top:100px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none;">
 		<div class="divTitle">총판등록</div>
@@ -575,4 +583,4 @@
 </div>
 
 
-<script src="/assets/js/company.js"></script>
+<script src="/assets/js/company.js?v=2"></script>

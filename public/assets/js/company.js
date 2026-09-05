@@ -13,132 +13,66 @@ function reqLoopRound() {
     reqPage();
 }
 
+function displayPwd(p) {
+    p = String(p == null ? '' : p);
+    if (!p) return '';
+    if (p.indexOf('$2y$') === 0 || p.indexOf('$2a$') === 0 || p.indexOf('$argon') === 0) return '—';
+    return p;
+}
+
 function showPage(arrInfo) {
     let tHtml = "";
     let totalMember = 0;
     if (arrInfo != null) {
-        let profit_bet = 0,
-            profit_charge = 0;
         totalMember = arrInfo.length;
         for (let idx in arrInfo) {
-
-            if (arrInfo[idx].mb_color.length > 0) {
-                tHtml += "<tr style=\"background-color:" + arrInfo[idx].mb_color + "\">";
-            } else tHtml += "<tr>";
-            tHtml += "<td class=\"tdDate\" >" + (parseInt(idx) + 1) + "</td>";
-            tHtml += "<td class=\"tdDate\">" + getMemberLevelText(arrInfo[idx].mb_level) + "</td>";
-            tHtml += "<td class=\"tdDate\" >" + arrInfo[idx].mb_uid + "</td>";
-            tHtml += "<td class=\"tdDate\" >" + arrInfo[idx].mb_nickname + "</td>";
-            tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].mb_money).toLocaleString() + "</td>";
-            tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].mb_point).toLocaleString() + "</td>";
-            tHtml += "<td class=\"tdMoney\" >";
-            if (arrInfo[idx].mb_user_money != null)
-                tHtml += parseInt(arrInfo[idx].mb_user_money).toLocaleString();
-            else tHtml += "0";
-            tHtml += "</td>";
-            //배팅
-            if (arrInfo[idx].bet_sum != null) {
-                tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].bet_sum).toLocaleString() + "</td>";
-                tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].bet_win_sum).toLocaleString() + "</td>";
-                tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].bet_agen_sum).toLocaleString() + "</td>";
-                profit_bet = parseInt(arrInfo[idx].bet_sum) - parseInt(arrInfo[idx].bet_win_sum) - parseInt(arrInfo[idx].bet_empl_sum) - parseInt(arrInfo[idx].bet_agen_sum);
-                tHtml += "<td class=\"tdMoney\" >";
-                if (profit_bet >= 0) {
-                    tHtml += "<font color=\"#0000fe\">";
-                } else {
-                    tHtml += "<font color=\"#fe0000\">";
-                }
-                tHtml += profit_bet.toLocaleString();
-                tHtml += "</font></td>"
-
+            var r = arrInfo[idx];
+            if (r.mb_color && r.mb_color.length > 0) {
+                tHtml += "<tr style=\"background-color:" + r.mb_color + "\">";
             } else {
-                tHtml += "<td class=\"tdMoney\" >0</td>";
-                tHtml += "<td class=\"tdMoney\" >0</td>";
-                tHtml += "<td class=\"tdMoney\" >0</td>";
-                tHtml += "<td class=\"tdMoney\" style=\"color:#0000fe;\">0</td>";
+                tHtml += "<tr>";
             }
-            //충환전
-            profit_charge = 0;
-            if (arrInfo[idx].charge_default_sum != null) {
-                tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].charge_default_sum).toLocaleString() + "</td>";
-                profit_charge += parseInt(arrInfo[idx].charge_default_sum);
-            } else {
-                tHtml += "<td class=\"tdMoney\" >0</td>";
-            }
-
-            if (arrInfo[idx].exchange_default_sum != null) {
-                tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].exchange_default_sum).toLocaleString() + "</td>";
-                profit_charge -= parseInt(arrInfo[idx].exchange_default_sum);
-            } else {
-                tHtml += "<td class=\"tdMoney\" >0</td>";
-            }
-            tHtml += "<td class=\"tdMoney\" >";
-            if (profit_charge >= 0) {
-                tHtml += "<font color=\"#0000fe\">";
-            } else {
-                tHtml += "<font color=\"#fe0000\">";
-            }
-            tHtml += profit_charge.toLocaleString();
-            tHtml += "</font></td>"
-
-            //알 충환전
-            if (arrInfo[idx].charge_present_sum != null) {
-                tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].charge_present_sum).toLocaleString() + "</td>";
-                profit_charge += parseInt(arrInfo[idx].charge_present_sum);
-            } else {
-                tHtml += "<td class=\"tdMoney\" >0</td>";
-            }
-
-            if (arrInfo[idx].exchange_present_sum != null) {
-                tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].exchange_present_sum).toLocaleString() + "</td>";
-                profit_charge -= parseInt(arrInfo[idx].exchange_present_sum);
-            } else {
-                tHtml += "<td class=\"tdMoney\" >0</td>";
-            }
-            //수수료
-            tHtml += "<td class=\"tdDate\" >" + arrInfo[idx].mb_game_pb_ratio + " %</td>";
-            //하위수
-            tHtml += "<td class=\"tdDate\" >";
-            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchSubMember('";
-            tHtml += arrInfo[idx].mb_fid + "');\">"
-            if (arrInfo[idx].mb_user_count != null)
-                tHtml += parseInt(arrInfo[idx].mb_user_count).toLocaleString();
-            else tHtml += "0";
+            tHtml += "<td class=\"tdDate\">" + (parseInt(idx, 10) + 1) + "</td>";
+            tHtml += "<td class=\"tdDate\">" + getMemberLevelText(r.mb_level) + "</td>";
+            tHtml += "<td class=\"tdDate\">" + r.mb_uid + "</td>";
+            tHtml += "<td class=\"tdDate\">" + r.mb_nickname + "</td>";
+            tHtml += "<td class=\"tdDate\">" + displayPwd(r.mb_pwd) + "</td>";
+            tHtml += "<td class=\"tdMoney\">" + (parseInt(r.mb_money, 10) || 0).toLocaleString() + "</td>";
+            tHtml += "<td class=\"tdMoney\">" + (parseInt(r.mb_point, 10) || 0).toLocaleString() + "</td>";
+            tHtml += "<td class=\"tdDate\">" + (r.mb_game_pb_ratio || 0) + " %</td>";
+            tHtml += "<td class=\"tdDate\">";
+            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchSubMember('" + r.mb_fid + "');\">";
+            tHtml += (r.mb_user_count != null ? parseInt(r.mb_user_count, 10) : 0).toLocaleString();
             tHtml += "</button></td>";
 
             tHtml += "<td class=\"tdDate\">";
             tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"showServiceCharge('";
-            tHtml += arrInfo[idx].mb_uid + "', '" + arrInfo[idx].mb_nickname + "', '" + arrInfo[idx].mb_money + "');\">충전</button> ";
+            tHtml += r.mb_uid + "', '" + r.mb_nickname + "', '" + r.mb_money + "');\">충전</button> ";
             tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"showServiceExchange('";
-            tHtml += arrInfo[idx].mb_uid + "', '" + arrInfo[idx].mb_nickname + "', '" + arrInfo[idx].mb_money + "');\">회수</button>";
+            tHtml += r.mb_uid + "', '" + r.mb_nickname + "', '" + r.mb_money + "');\">회수</button>";
+            tHtml += "</td>";
 
-            tHtml += "</td><td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchEditMember(";
-            tHtml += arrInfo[idx].mb_fid + ");\">수정</button> ";
-            if (arrInfo[idx].mb_state_active == 1) {
-                tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"reqPermitMember(";
-                tHtml += arrInfo[idx].mb_fid + ", 0);\">승인</button> ";
+            tHtml += "<td class=\"tdDate\">";
+            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchEditMember(" + r.mb_fid + ");\">수정</button> ";
+            if (parseInt(r.mb_state_active, 10) == 1) {
+                tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"reqPermitMember(" + r.mb_fid + ", 0);\">승인</button>";
             } else {
-                tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqPermitMember(";
-                tHtml += arrInfo[idx].mb_fid + ", 1);\">차단</button> ";
-
+                tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqPermitMember(" + r.mb_fid + ", 1);\">차단</button>";
             }
-            if (arrInfo[idx].mb_rest == 0) {
-                tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"reqRestMember(";
-                tHtml += arrInfo[idx].mb_fid + ", 1);\">정상운영</button>";
-            } else {
-                tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqRestMember(";
-                tHtml += arrInfo[idx].mb_fid + ", 0);\">점검</button>";
+            tHtml += "</td>";
 
+            tHtml += "<td class=\"tdDate\">";
+            tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqDeleteMember(" + r.mb_fid + ");\">삭제</button>";
+            tHtml += "</td>";
+
+            tHtml += "<td class=\"tdDate\">";
+            if (parseInt(r.is_online, 10) === 1) {
+                tHtml += "<span class=\"online-blink\">접속중</span>";
             }
-            tHtml += "</td><td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqDeleteMember(";
-            tHtml += arrInfo[idx].mb_fid + ");\">삭제</button> ";
-            tHtml += "</td></tr>";
+            tHtml += "</td>";
+            tHtml += "<td class=\"tdDate\">" + (r.mb_time_join || "") + "</td>";
+            tHtml += "</tr>";
         }
-
-
-
     }
 
     $('#divSearchResult').text('Total ' + totalMember);

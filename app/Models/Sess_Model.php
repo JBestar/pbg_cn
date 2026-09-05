@@ -94,5 +94,23 @@ class Sess_Model extends Model {
         return $this->mBuilder->delete();   //if success, return true
     }
 
+    /** 최근 N초 이내 세션이 있는 uid 목록 (접속중) */
+    public function getOnlineUidMap($withinSeconds = 180)
+    {
+        $map = [];
+        try {
+            $tmLimit = date('Y-m-d H:i:s', time() - (int)$withinSeconds);
+            $sql = "SELECT DISTINCT sess_mb_uid FROM {$this->mTbName}
+                    WHERE sess_update_time >= " . $this->mDb->escape($tmLimit);
+            foreach ($this->mDb->query($sql)->getResult() as $row) {
+                if (!empty($row->sess_mb_uid)) {
+                    $map[$row->sess_mb_uid] = 1;
+                }
+            }
+        } catch (\Exception $e) {
+        }
+        return $map;
+    }
+
 
 }

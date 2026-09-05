@@ -391,7 +391,9 @@ class Main extends BaseController
 
 		echo view('main/main_header', array("site_name" => $siteName));
 		echo view('main/main_menu', $arrItem);
-		echo view('main/agency_ce_list');
+		echo view('main/agency_ce_list', [
+			'show_grade' => ($objMember->mb_level > LEVEL_AGENCY),
+		]);
 		echo view('main/main_footer');
 	}
 

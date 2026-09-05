@@ -342,6 +342,12 @@ class Api extends BaseController
 				}
 
 				$arrMember = $this->member_model->searchList($arrReqData, $level);
+				if ($level === LEVEL_AGENCY && is_array($arrMember)) {
+					$onlineMap = $this->sess_model->getOnlineUidMap(180);
+					foreach ($arrMember as $row) {
+						$row->is_online = isset($onlineMap[$row->mb_uid]) ? 1 : 0;
+					}
+				}
 				$result->data = $arrMember;
 				$result->status = STATUS_SUCCESS;
 				
@@ -2046,6 +2052,9 @@ class Api extends BaseController
 			$objMember = $this->member_model->getByUid($uid);
 			if ($objMember->mb_level == LEVEL_AGENCY) {
 				$arrReqData['self_uid'] = $objMember->mb_uid;
+			} else if ($objMember->mb_level > LEVEL_AGENCY) {
+				// 본사: 알충전/회수/포인트전환(머니)만
+				$arrReqData['hq_ce'] = 1;
 			}
 			$moneyhist_model = new MoneyHist_Model();
 			$result->data = $moneyhist_model->getCeSummary($arrReqData, 'agency');
@@ -2085,6 +2094,9 @@ class Api extends BaseController
 					} else {
 						$ok = ($objTarget->mb_uid === $objAdmin->mb_uid);
 					}
+				}
+				if ($ok && $objAdmin->mb_level > LEVEL_AGENCY && $scope === 'agency') {
+					$arrReqData['hq_ce'] = 1;
 				}
 				if (!$ok) {
 					$result->status = STATUS_FAIL;

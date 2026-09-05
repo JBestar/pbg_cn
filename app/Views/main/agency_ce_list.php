@@ -14,13 +14,16 @@
 		<table class="default_table">
 			<thead>
                 <tr>
+                    <?php if (!empty($show_grade)) { ?>
+                    <th><?= lang('Admin.th_level') ?></th>
+                    <?php } ?>
                     <th><?= lang('Admin.th_uid') ?></th>
                     <th><?= lang('Admin.th_name') ?></th>
                     <th><?= lang('Admin.th_charge_amount') ?></th>
                     <th><?= lang('Admin.th_exchange_recover') ?></th>
-                    <th><?= lang('Admin.th_point_convert_amt') ?></th>
+                    <th><?= lang('Admin.th_point_change_amt') ?></th>
                     <th><?= lang('Admin.th_diff') ?></th>
-                    <th><?= lang('Admin.th_detail_view') ?></th>
+                    <th><?= lang('Admin.th_history_detail') ?></th>
                 </tr>
             </thead>
             <tbody id="tbodyList"></tbody>
@@ -50,12 +53,14 @@
 window.ADMIN_I18N = window.ADMIN_I18N || {};
 window.ADMIN_I18N.th_detail_view = <?= json_encode(lang('Admin.th_detail_view'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.th_total = <?= json_encode(lang('Admin.th_total'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.role_agency = <?= json_encode(lang('Admin.role_agency'), JSON_UNESCAPED_UNICODE) ?>;
 window.CE_SCOPE = 'agency';
 window.CE_DETAIL_PATH = '/Main/agency_ce_detail';
 window.CE_API = '/api/agency_ce_summary';
+window.CE_SHOW_GRADE = <?= !empty($show_grade) ? 'true' : 'false' ?>;
 </script>
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/ce_list.js?v=1"></script>
+    <script src="/assets/js/ce_list.js?v=2"></script>
 <?php else :?>
     <script src="/assets/js/ce_list.js?v=<?=time();?>"></script>
 <?php endif ?>

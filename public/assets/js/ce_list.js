@@ -20,6 +20,13 @@ function fmtMoney(n) {
     return (parseInt(n, 10) || 0).toLocaleString();
 }
 
+function levelText(lv) {
+    if (typeof getMemberLevelText === 'function') {
+        return getMemberLevelText(lv);
+    }
+    return (window.ADMIN_I18N && window.ADMIN_I18N.role_agency) ? window.ADMIN_I18N.role_agency : '총판';
+}
+
 function showPage(arrInfo) {
     var tHtml = '';
     var sumCharge = 0, sumEx = 0, sumPt = 0, sumDiff = 0;
@@ -27,6 +34,8 @@ function showPage(arrInfo) {
         ? window.ADMIN_I18N.th_detail_view : '상세보기';
     var totalLabel = (window.ADMIN_I18N && window.ADMIN_I18N.th_total)
         ? window.ADMIN_I18N.th_total : '합계';
+    var showGrade = !!window.CE_SHOW_GRADE;
+    var colSpanId = showGrade ? 3 : 2;
 
     if (arrInfo != null) {
         for (var idx in arrInfo) {
@@ -43,6 +52,9 @@ function showPage(arrInfo) {
 
             var diffCls = diff >= 0 ? 'td-diff-pos' : 'td-diff-neg';
             tHtml += '<tr>';
+            if (showGrade) {
+                tHtml += '<td class="tdDate">' + esc(levelText(r.mb_level)) + '</td>';
+            }
             tHtml += '<td class="tdDate">' + esc(r.mb_uid) + '</td>';
             tHtml += '<td class="tdDate">' + esc(r.mb_nickname) + '</td>';
             tHtml += '<td class="tdMoney">' + fmtMoney(charge) + '</td>';
@@ -57,7 +69,7 @@ function showPage(arrInfo) {
 
     var sumDiffCls = sumDiff >= 0 ? 'td-diff-pos' : 'td-diff-neg';
     tHtml += '<tr style="background:#f5f5f5;font-weight:bold;">';
-    tHtml += '<td class="tdDate" colspan="2">' + esc(totalLabel) + '</td>';
+    tHtml += '<td class="tdDate" colspan="' + colSpanId + '">' + esc(totalLabel) + '</td>';
     tHtml += '<td class="tdMoney">' + fmtMoney(sumCharge) + '</td>';
     tHtml += '<td class="tdMoney">' + fmtMoney(sumEx) + '</td>';
     tHtml += '<td class="tdMoney">' + fmtMoney(sumPt) + '</td>';
