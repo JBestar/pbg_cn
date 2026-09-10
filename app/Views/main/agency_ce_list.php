@@ -60,7 +60,7 @@ window.CE_API = '/api/agency_ce_summary';
 window.CE_SHOW_GRADE = <?= !empty($show_grade) ? 'true' : 'false' ?>;
 </script>
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/ce_list.js?v=2"></script>
+    <script src="/assets/js/ce_list.js?v=3"></script>
 <?php else :?>
     <script src="/assets/js/ce_list.js?v=<?=time();?>"></script>
 <?php endif ?>

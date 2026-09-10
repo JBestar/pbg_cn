@@ -69,7 +69,7 @@ function showPage(arrInfo) {
                     + r.mb_fid + ', 0);">' + t('btn_approve', '승인') + '</button>';
             } else {
                 tHtml += '<button type="button" class="btn-store-action btn-store-red" onclick="reqPermitMember('
-                    + r.mb_fid + ', 1);">' + t('btn_approve', '승인') + '</button>';
+                    + r.mb_fid + ', 1);">' + t('btn_block', '차단') + '</button>';
             }
             tHtml += '</td>';
             tHtml += '<td class="tdDate">' + (r.mb_time_join || '') + '</td>';

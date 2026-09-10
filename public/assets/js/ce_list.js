@@ -35,7 +35,10 @@ function showPage(arrInfo) {
     var totalLabel = (window.ADMIN_I18N && window.ADMIN_I18N.th_total)
         ? window.ADMIN_I18N.th_total : '합계';
     var showGrade = !!window.CE_SHOW_GRADE;
-    var colSpanId = showGrade ? 3 : 2;
+    var showAgency = !!window.CE_SHOW_AGENCY;
+    var colSpanId = 2;
+    if (showGrade) colSpanId += 1;
+    if (showAgency) colSpanId += 1;
 
     if (arrInfo != null) {
         for (var idx in arrInfo) {
@@ -54,6 +57,9 @@ function showPage(arrInfo) {
             tHtml += '<tr>';
             if (showGrade) {
                 tHtml += '<td class="tdDate">' + esc(levelText(r.mb_level)) + '</td>';
+            }
+            if (showAgency) {
+                tHtml += '<td class="tdDate">' + esc(r.agency_uid || '') + '</td>';
             }
             tHtml += '<td class="tdDate">' + esc(r.mb_uid) + '</td>';
             tHtml += '<td class="tdDate">' + esc(r.mb_nickname) + '</td>';

@@ -58,7 +58,9 @@
             bet_lose: <?= json_encode(lang('Admin.bet_lose'), JSON_UNESCAPED_UNICODE) ?>,
             bet_win: <?= json_encode(lang('Admin.bet_win'), JSON_UNESCAPED_UNICODE) ?>,
             bet_void: <?= json_encode(lang('Admin.bet_void'), JSON_UNESCAPED_UNICODE) ?>,
-            th_detail_view: <?= json_encode(lang('Admin.th_detail_view'), JSON_UNESCAPED_UNICODE) ?>
+            th_detail_view: <?= json_encode(lang('Admin.th_detail_view'), JSON_UNESCAPED_UNICODE) ?>,
+            btn_ok: <?= json_encode(lang('Admin.btn_ok'), JSON_UNESCAPED_UNICODE) ?>,
+            btn_cancel: <?= json_encode(lang('Admin.btn_cancel'), JSON_UNESCAPED_UNICODE) ?>
         };
         </script>
     </head>

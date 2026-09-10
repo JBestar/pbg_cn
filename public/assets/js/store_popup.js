@@ -1,15 +1,36 @@
+var mMaxFeeRatio = null;
+
 function showAlert(msg) {
     if (window.Swal) {
-        Swal.fire({ text: String(msg), confirmButtonText: 'OK' });
+        Swal.fire({
+            text: String(msg),
+            confirmButtonText: i18n('btn_ok', '확인')
+        });
     } else {
         alert(msg);
     }
+}
+
+function i18n(key, fallback) {
+    if (window.ADMIN_I18N && window.ADMIN_I18N[key]) return window.ADMIN_I18N[key];
+    return fallback || key;
+}
+
+function feeOverMsg(max) {
+    return i18n('msg_fee_over', '수수료가 총판 수수료({max}%)를 초과할 수 없습니다.')
+        .replace('{max}', String(max));
+}
+
+function feeMaxHint(max) {
+    return i18n('hint_fee_max', '최대 {max}%').replace('{max}', String(max));
 }
 
 function notifyOpenerRefresh() {
     try {
         if (window.opener && typeof window.opener.refreshStoreList === 'function') {
             window.opener.refreshStoreList();
+        } else if (window.opener && typeof window.opener.reqPage === 'function') {
+            window.opener.reqPage();
         }
     } catch (e) { /* ignore */ }
 }
@@ -21,7 +42,50 @@ function plainOrEmpty(p) {
     return p;
 }
 
-function initStoreReg() {}
+function applyMaxFeeHint(max) {
+    mMaxFeeRatio = parseFloat(max);
+    if (isNaN(mMaxFeeRatio)) mMaxFeeRatio = 0;
+    var $hint = $('#hintFeeMax');
+    if ($hint.length) $hint.text(feeMaxHint(mMaxFeeRatio));
+    var $input = $('#regSubSingleDealRate, #editSubSingleDealRate');
+    if ($input.length) $input.attr('max', mMaxFeeRatio);
+}
+
+function loadMaxFee(done) {
+    $.ajax({
+        url: '/api/assets',
+        type: 'post',
+        dataType: 'json',
+        success: function (jResult) {
+            if (jResult.status === 'logout') {
+                window.close();
+                return;
+            }
+            if (jResult.status === 'success' && jResult.data) {
+                applyMaxFeeHint(jResult.data.mb_game_pb_ratio || 0);
+            }
+            if (typeof done === 'function') done();
+        },
+        error: function () {
+            if (typeof done === 'function') done();
+        }
+    });
+}
+
+function validateFee(gameRatio) {
+    if (mMaxFeeRatio === null) return true;
+    var fee = parseFloat(gameRatio);
+    if (isNaN(fee)) fee = 0;
+    if (fee > mMaxFeeRatio) {
+        showAlert(feeOverMsg(mMaxFeeRatio));
+        return false;
+    }
+    return true;
+}
+
+function initStoreReg() {
+    loadMaxFee();
+}
 
 function reqRegMember() {
     var objData = {
@@ -39,6 +103,7 @@ function reqRegMember() {
         showAlert('아이디, 이름, 비밀번호, 출금 비밀번호는 필수입니다.');
         return;
     }
+    if (!validateFee(objData.game_ratio)) return;
     if (!confirm('OK?')) return;
     $.ajax({
         url: '/api/member_register',
@@ -53,6 +118,7 @@ function reqRegMember() {
             } else if (jResult.status === 'fail') {
                 if (jResult.code == 6) showAlert('ID exists');
                 else if (jResult.code == 7) showAlert('Name exists');
+                else if (jResult.code == 10) showAlert(feeOverMsg(mMaxFeeRatio != null ? mMaxFeeRatio : ''));
                 else showAlert('Fail');
             } else if (jResult.status === 'logout') {
                 window.close();
@@ -64,6 +130,7 @@ function reqRegMember() {
 function initStoreEdit() {
     var fid = window.STORE_EDIT_FID;
     if (!fid) return;
+    loadMaxFee();
     $.ajax({
         url: '/api/member_fetch',
         data: { json_: JSON.stringify({ fid: fid }) },
@@ -118,6 +185,7 @@ function reqEditMember() {
         showAlert('비밀번호, 출금 비밀번호는 필수입니다.');
         return;
     }
+    if (!validateFee(objData.game_ratio)) return;
     if (!confirm('OK?')) return;
     $.ajax({
         url: '/api/member_modify',
@@ -130,7 +198,8 @@ function reqEditMember() {
                 notifyOpenerRefresh();
                 setTimeout(function () { window.close(); }, 500);
             } else if (jResult.status === 'fail') {
-                showAlert('Fail');
+                if (jResult.code == 10) showAlert(feeOverMsg(mMaxFeeRatio != null ? mMaxFeeRatio : ''));
+                else showAlert('Fail');
             } else if (jResult.status === 'logout') {
                 window.close();
             }

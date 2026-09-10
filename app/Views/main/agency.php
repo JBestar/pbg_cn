@@ -53,6 +53,7 @@ window.ADMIN_I18N.btn_egg_charge = <?= json_encode(lang('Admin.btn_egg_charge'),
 window.ADMIN_I18N.btn_egg_recover = <?= json_encode(lang('Admin.btn_egg_recover'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.btn_edit = <?= json_encode(lang('Admin.btn_edit'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.btn_approve = <?= json_encode(lang('Admin.btn_approve'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.btn_block = <?= json_encode(lang('Admin.btn_block'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.level_store = <?= json_encode(lang('Admin.menu_agency'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
 

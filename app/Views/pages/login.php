@@ -47,7 +47,7 @@
         </style>
         <div style="position:absolute; left:calc(50% - 125px); top:calc(50% - 350px); margin: auto; width:250px; border:0px solid red;">
             <p class="tit">PBG</p>
-            <input name="user_id" class="input_login" placeholder="<?= lang('Admin.login_id') ?>" maxlength="50" type="text" id="user_id" value="">
+            <input name="user_id" class="input_login" placeholder="<?= lang('Admin.login_id') ?>" maxlength="50" type="text" id="user_id" value="" autofocus>
             <input name="user_pw" class="input_login" placeholder="<?= lang('Admin.login_pwd') ?>" maxlength="50" type="password" id="user_pw" value="">
             <img id="image_id" name="<?=$captcha?>" src="/download/captcha/<?=$captcha?>.jpg" style="width: 249px; height: 30px; border: 0;" alt=" ">
             <input name="captcha_word" class="input_login" placeholder="보안문자" maxlength="50" type="text" id="captcha_word">
@@ -62,16 +62,27 @@
                 <div id="layui-layer-msg" style="color: #000000; text-align: center;"></div>
             </div>
             <span class="layui-layer-setwin"><a class="layui-layer-ico layui-layer-close layui-layer-close1" href="javascript:closeAlert();"></a></span>
-            <div class="layui-layer-btn layui-layer-btn-"><a class="layui-layer-btn0"  href="javascript:closeAlert();">확인</a></div>
+            <div class="layui-layer-btn layui-layer-btn-"><a class="layui-layer-btn0"  href="javascript:closeAlert();"><?= lang('Admin.btn_ok') ?></a></div>
             <span class="layui-layer-resize"></span>
         </div>     
 
     </body>
     <script>
-        function onEnter()
+        function onEnter(e)
         {
-            if( window.event.keyCode == 13 ) login();
+            e = e || window.event;
+            var key = e.keyCode || e.which;
+            if (key == 13) {
+                if (e.preventDefault) e.preventDefault();
+                login();
+                return false;
+            }
         }
+
+        $(document).ready(function () {
+            $('#user_id').focus();
+            $('#user_id, #user_pw, #captcha_word').on('keydown', onEnter);
+        });
         
         function login()
         {

@@ -39,6 +39,10 @@ body{margin:0;padding:16px 20px;background:#fff;font-size:14px;min-height:360px;
 <button type="button" class="btn_blue" onclick="reqServiceExchange();"><?= lang('Admin.btn_egg_recover') ?></button>
 <button type="button" class="btn_red" onclick="window.close();"><?= lang('Admin.btn_close') ?></button>
 </div>
+<script>
+window.ADMIN_I18N = window.ADMIN_I18N || {};
+window.ADMIN_I18N.btn_ok = <?= json_encode(lang('Admin.btn_ok'), JSON_UNESCAPED_UNICODE) ?>;
+</script>
 <script src="/assets/js/store_popup.js?v=<?= time() ?>"></script>
 <script>initStoreRecover();</script>
 </body>

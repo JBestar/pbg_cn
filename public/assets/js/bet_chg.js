@@ -156,8 +156,8 @@ function chgBet(objBtn){
         title: '유저배팅변경',
         html: sBet+"을 "+ sTarget+"으로 변경하시겠습니까?",
         showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
+        confirmButtonText: (window.ADMIN_I18N && window.ADMIN_I18N.btn_ok) ? window.ADMIN_I18N.btn_ok : '확인',
+        cancelButtonText: (window.ADMIN_I18N && window.ADMIN_I18N.btn_cancel) ? window.ADMIN_I18N.btn_cancel : '취소',
     }).then((result) => {
         // console.log(result);
         if (result.value == true) {

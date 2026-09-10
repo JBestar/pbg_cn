@@ -14,7 +14,7 @@
                 <div id="layui-layer-msg" style="color: #000000; text-align: center;"></div>
             </div>
             <span class="layui-layer-setwin"><a class="layui-layer-ico layui-layer-close layui-layer-close1" href="javascript:closeAlert();"></a></span>
-            <div class="layui-layer-btn layui-layer-btn-"><a class="layui-layer-btn0"  href="javascript:closeAlert();">확인</a></div>
+            <div class="layui-layer-btn layui-layer-btn-"><a class="layui-layer-btn0"  href="javascript:closeAlert();"><?= lang('Admin.btn_ok') ?></a></div>
             <span class="layui-layer-resize"></span>
         </div>
 

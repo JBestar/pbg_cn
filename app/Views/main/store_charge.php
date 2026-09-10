@@ -40,8 +40,10 @@ body{margin:0;padding:16px 20px;background:#fff;font-size:14px;position:relative
 <button type="button" class="btn_red" onclick="window.close();"><?= lang('Admin.btn_close') ?></button>
 </div>
 <script>
+window.ADMIN_I18N = window.ADMIN_I18N || {};
+window.ADMIN_I18N.btn_ok = <?= json_encode(lang('Admin.btn_ok'), JSON_UNESCAPED_UNICODE) ?>;
 window.MSG_CHARGE_NEED = <?= json_encode(lang('Admin.label_charge_egg') . '?', JSON_UNESCAPED_UNICODE) ?>;
-window.MSG_CHARGE_OK = <?= json_encode('OK', JSON_UNESCAPED_UNICODE) ?>;
+window.MSG_CHARGE_OK = <?= json_encode(lang('Admin.btn_ok'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
 <script src="/assets/js/store_popup.js?v=<?= time() ?>"></script>
 <script>initStoreCharge();</script>

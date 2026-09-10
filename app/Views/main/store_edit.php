@@ -14,6 +14,7 @@ body{margin:0;padding:16px 20px;background:#fff;font-size:14px;}
 .popup-table td{border:0;padding:6px 4px;vertical-align:middle;}
 .popup-table td.lbl{width:130px;}
 .popup-table input[type=text],.popup-table input[type=password]{width:140px;padding:4px 6px;}
+.hint{color:#666;font-size:12px;margin-left:6px;}
 .actions{text-align:center;padding-top:16px;}
 .btn_green{background:#2e7d32;color:#fff;border:none;padding:8px 20px;cursor:pointer;border-radius:4px;}
 .btn_red{background:#e53935;color:#fff;border:none;padding:8px 20px;cursor:pointer;border-radius:4px;}
@@ -38,7 +39,7 @@ body{margin:0;padding:16px 20px;background:#fff;font-size:14px;}
 <tr><td class="lbl"><?= lang('Admin.th_mix_limit_short') ?></td><td><input type="text" id="editSubLimitMix"></td></tr>
 <tr><td class="lbl"><?= lang('Admin.th_mix_limit') ?>3</td><td><input type="text" id="editSubLimitThree"></td></tr>
 <tr><td class="lbl"><?= lang('Admin.th_digit_limit') ?></td><td><input type="text" id="editSubLimitDigit"></td></tr>
-<tr><td class="lbl"><?= lang('Admin.label_fee') ?></td><td><input type="text" id="editSubSingleDealRate"> %</td></tr>
+<tr><td class="lbl"><?= lang('Admin.label_fee') ?></td><td><input type="text" id="editSubSingleDealRate"> % <span class="hint" id="hintFeeMax"></span></td></tr>
 </table>
 <div class="actions">
 <button type="button" class="btn_green" onclick="reqEditMember();"><?= lang('Admin.btn_change') ?></button>
@@ -46,6 +47,10 @@ body{margin:0;padding:16px 20px;background:#fff;font-size:14px;}
 </div>
 <script>
 window.STORE_EDIT_FID = <?= json_encode((int)$edit_fid) ?>;
+window.ADMIN_I18N = window.ADMIN_I18N || {};
+window.ADMIN_I18N.btn_ok = <?= json_encode(lang('Admin.btn_ok'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.hint_fee_max = <?= json_encode(lang('Admin.hint_fee_max'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.msg_fee_over = <?= json_encode(lang('Admin.msg_fee_over'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
 <script src="/assets/js/store_popup.js?v=<?= time() ?>"></script>
 <script>initStoreEdit();</script>

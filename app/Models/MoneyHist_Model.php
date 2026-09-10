@@ -667,15 +667,29 @@ class MoneyHist_Model extends Model {
         $exchangeCase = "CASE WHEN h.money_change_type IN (".implode(',', array_map('intval', $exchangeTypes)).") THEN ABS(h.money_amount) ELSE 0 END";
         $pointCase = "CASE WHEN h.money_change_type IN (".implode(',', array_map('intval', $pointTypes)).") THEN ABS(h.money_amount) ELSE 0 END";
 
+        $joinAgency = ($scope === 'store');
         $strSql = " SELECT m.mb_uid, m.mb_nickname, m.mb_level, ";
+        if ($joinAgency) {
+            $strSql.= " agen.mb_uid AS agency_uid, ";
+        }
         $strSql.= " COALESCE(SUM(".$chargeCase."), 0) AS charge_sum, ";
         $strSql.= " COALESCE(SUM(".$exchangeCase."), 0) AS exchange_sum, ";
         $strSql.= " COALESCE(SUM(".$pointCase."), 0) AS point_sum ";
         $strSql.= " FROM member m ";
+        if ($joinAgency) {
+            $strSql.= " LEFT JOIN member agen ON agen.mb_fid = m.mb_emp_fid ";
+        }
         $strSql.= " LEFT JOIN ".$this->mTbName." h ON h.money_mb_uid = m.mb_uid AND ".$whereHist;
         $strSql.= " WHERE ".$whereMember;
         $strSql.= " GROUP BY m.mb_uid, m.mb_nickname, m.mb_level ";
-        $strSql.= " ORDER BY m.mb_uid ASC ";
+        if ($joinAgency) {
+            $strSql.= ", agen.mb_uid ";
+        }
+        $strSql.= " ORDER BY ";
+        if ($joinAgency) {
+            $strSql.= " agen.mb_uid ASC, ";
+        }
+        $strSql.= " m.mb_uid ASC ";
 
         $rows = $this->mDb->query($strSql)->getResult();
         $out = [];
@@ -687,6 +701,9 @@ class MoneyHist_Model extends Model {
             $obj->mb_uid = $row->mb_uid;
             $obj->mb_nickname = $row->mb_nickname;
             $obj->mb_level = intval($row->mb_level);
+            if ($joinAgency) {
+                $obj->agency_uid = isset($row->agency_uid) ? $row->agency_uid : '';
+            }
             $obj->charge_sum = $charge;
             $obj->exchange_sum = $exchange;
             $obj->point_sum = $point;

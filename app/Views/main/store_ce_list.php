@@ -14,7 +14,12 @@
 		<table class="default_table">
 			<thead>
                 <tr>
+                    <?php if (!empty($show_agency)) { ?>
+                    <th><?= lang('Admin.role_agency') ?></th>
+                    <th><?= lang('Admin.role_store') ?></th>
+                    <?php } else { ?>
                     <th><?= lang('Admin.th_uid') ?></th>
+                    <?php } ?>
                     <th><?= lang('Admin.th_name') ?></th>
                     <th><?= lang('Admin.th_charge_amount') ?></th>
                     <th><?= lang('Admin.th_exchange_recover') ?></th>
@@ -54,9 +59,10 @@ window.CE_SCOPE = 'store';
 window.CE_DETAIL_PATH = '/Main/store_ce_detail';
 window.CE_API = '/api/store_ce_summary';
 window.CE_SHOW_GRADE = false;
+window.CE_SHOW_AGENCY = <?= !empty($show_agency) ? 'true' : 'false' ?>;
 </script>
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/ce_list.js?v=2"></script>
+    <script src="/assets/js/ce_list.js?v=3"></script>
 <?php else :?>
     <script src="/assets/js/ce_list.js?v=<?=time();?>"></script>
 <?php endif ?>

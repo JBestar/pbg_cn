@@ -4,6 +4,10 @@ $(document).ready(function() {
 
 });
 
+function t(key, fallback) {
+    return (window.ADMIN_I18N && window.ADMIN_I18N[key]) ? window.ADMIN_I18N[key] : fallback;
+}
+
 function reqSearch() {
     reqPage();
 }
@@ -47,27 +51,33 @@ function showPage(arrInfo) {
 
             tHtml += "<td class=\"tdDate\">";
             tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"showServiceCharge('";
-            tHtml += r.mb_uid + "', '" + r.mb_nickname + "', '" + r.mb_money + "');\">충전</button> ";
+            tHtml += r.mb_uid + "', '" + r.mb_nickname + "', '" + r.mb_money + "');\">"
+                + t('btn_egg_charge', '충전') + "</button> ";
             tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"showServiceExchange('";
-            tHtml += r.mb_uid + "', '" + r.mb_nickname + "', '" + r.mb_money + "');\">회수</button>";
+            tHtml += r.mb_uid + "', '" + r.mb_nickname + "', '" + r.mb_money + "');\">"
+                + t('btn_egg_recover', '회수') + "</button>";
             tHtml += "</td>";
 
             tHtml += "<td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchEditMember(" + r.mb_fid + ");\">수정</button> ";
+            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchEditMember(" + r.mb_fid + ");\">"
+                + t('btn_edit', '수정') + "</button> ";
             if (parseInt(r.mb_state_active, 10) == 1) {
-                tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"reqPermitMember(" + r.mb_fid + ", 0);\">승인</button>";
+                tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"reqPermitMember(" + r.mb_fid + ", 0);\">"
+                    + t('btn_approve', '승인') + "</button>";
             } else {
-                tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqPermitMember(" + r.mb_fid + ", 1);\">차단</button>";
+                tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqPermitMember(" + r.mb_fid + ", 1);\">"
+                    + t('btn_block', '차단') + "</button>";
             }
             tHtml += "</td>";
 
             tHtml += "<td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqDeleteMember(" + r.mb_fid + ");\">삭제</button>";
+            tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqDeleteMember(" + r.mb_fid + ");\">"
+                + t('btn_delete', '삭제') + "</button>";
             tHtml += "</td>";
 
             tHtml += "<td class=\"tdDate\">";
             if (parseInt(r.is_online, 10) === 1) {
-                tHtml += "<span class=\"online-blink\">접속중</span>";
+                tHtml += "<span class=\"online-blink\">" + t('status_online', '접속중') + "</span>";
             }
             tHtml += "</td>";
             tHtml += "<td class=\"tdDate\">" + (r.mb_time_join || "") + "</td>";
@@ -625,11 +635,11 @@ function showSubMember(arrInfo, objEmp) {
             tHtml += "<td class=\"tdDate\">";
             tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"showServiceCharge('";
             tHtml += arrInfo[idx].mb_uid + "', '" + arrInfo[idx].mb_nickname + "', '" + arrInfo[idx].mb_money;
-            tHtml += "', '" + objEmp.mb_fid + "');\">충전</button> ";
+            tHtml += "', '" + objEmp.mb_fid + "');\">" + t('btn_egg_charge', '충전') + "</button> ";
 
             tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"showServiceExchange('";
             tHtml += arrInfo[idx].mb_uid + "', '" + arrInfo[idx].mb_nickname + "', '" + arrInfo[idx].mb_money
-            tHtml += "', '" + objEmp.mb_fid + "');\">회수</button>";
+            tHtml += "', '" + objEmp.mb_fid + "');\">" + t('btn_egg_recover', '회수') + "</button>";
             tHtml += "</td></tr>";
         }
     }

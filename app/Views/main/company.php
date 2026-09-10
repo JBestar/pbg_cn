@@ -261,8 +261,8 @@
             <button class="btn_search" onclick="serviceChargeMoney(0);">초기화</button>
         </div>
 
-        <button class="btn_blue" style="position:absolute; left:240px; top:150px;" onclick="reqServiceCharge();">충전</button>&nbsp;
-        <button class="btn_red" style="position:absolute; left:300px; top:150px;" onclick="closeServiceCharge();">닫기</button>
+        <button class="btn_blue" style="position:absolute; left:240px; top:150px;" onclick="reqServiceCharge();"><?= lang('Admin.btn_egg_charge') ?></button>&nbsp;
+        <button class="btn_red" style="position:absolute; left:300px; top:150px;" onclick="closeServiceCharge();"><?= lang('Admin.btn_close') ?></button>
 
     </div>
 </div>
@@ -297,8 +297,8 @@
             <button class="btn_search" onclick="serviceExchangeMoney(0);">초기화</button>
         </div>
 
-        <button class="btn_blue" style="position:absolute; left:240px; top:150px;" onclick="reqServiceExchange();">회수</button>&nbsp;
-        <button class="btn_red" style="position:absolute; left:300px; top:150px;" onclick="closeServiceExchange();">닫기</button>
+        <button class="btn_blue" style="position:absolute; left:240px; top:150px;" onclick="reqServiceExchange();"><?= lang('Admin.btn_egg_recover') ?></button>&nbsp;
+        <button class="btn_red" style="position:absolute; left:300px; top:150px;" onclick="closeServiceExchange();"><?= lang('Admin.btn_close') ?></button>
 
     </div>
 </div>
@@ -583,4 +583,14 @@
 </div>
 
 
-<script src="/assets/js/company.js?v=2"></script>
+<script>
+window.ADMIN_I18N = window.ADMIN_I18N || {};
+window.ADMIN_I18N.btn_egg_charge = <?= json_encode(lang('Admin.btn_egg_charge'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.btn_egg_recover = <?= json_encode(lang('Admin.btn_egg_recover'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.btn_edit = <?= json_encode(lang('Admin.btn_edit'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.btn_approve = <?= json_encode(lang('Admin.btn_approve'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.btn_block = <?= json_encode(lang('Admin.btn_block'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.btn_delete = <?= json_encode(lang('Admin.btn_delete'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.status_online = <?= json_encode(lang('Admin.status_online'), JSON_UNESCAPED_UNICODE) ?>;
+</script>
+<script src="/assets/js/company.js?v=3"></script>
