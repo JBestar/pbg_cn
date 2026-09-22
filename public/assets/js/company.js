@@ -45,7 +45,7 @@ function showPage(arrInfo) {
             tHtml += "<td class=\"tdMoney\">" + fmtPoint(r.mb_point) + "</td>";
             tHtml += "<td class=\"tdDate\">" + (r.mb_game_pb_ratio || 0) + " %</td>";
             tHtml += "<td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchSubMember('" + r.mb_fid + "');\">";
+            tHtml += "<button type=\"button\" class=\"btn_blue btn_chip\" onclick=\"fetchSubMember('" + r.mb_fid + "');\">";
             tHtml += (r.mb_user_count != null ? parseInt(r.mb_user_count, 10) : 0).toLocaleString();
             tHtml += "</button></td>";
 
@@ -649,13 +649,13 @@ function showSubMember(arrInfo, objEmp) {
 
     $('#tSubbodyList').html(tHtml);
 
-
-
+    $('#divSubMemberOverlay').show();
     $('#divSubMember').show();
 }
 
 function closeSubMember() {
     $('#divSubMember').hide();
+    $('#divSubMemberOverlay').hide();
 }
 
 

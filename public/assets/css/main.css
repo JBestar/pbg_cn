@@ -789,6 +789,49 @@ button.btn_search.btn_icon {
     white-space: nowrap;
 }
 
+/* Modal: dim + blur backdrop, solid panel */
+.admin-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+.admin-modal-panel {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(700px, 94vw);
+    max-height: 85vh;
+    overflow: auto;
+    z-index: 2001;
+    background: #f1f5f9;
+    border: 1px solid #94a3b8;
+    border-radius: 12px;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.6) inset,
+        0 24px 48px rgba(15, 23, 42, 0.35);
+}
+.admin-modal-panel > .divTitle {
+    width: auto;
+    margin: 0;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+    color: #f0f9ff;
+    border-radius: 12px 12px 0 0;
+}
+.admin-modal-panel .admin-modal-body,
+.admin-modal-panel > .divInfoBox {
+    width: auto;
+    max-width: none;
+    margin: 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
 .inputDate {
     width: 120px;
     max-width: 100%;

@@ -124,9 +124,10 @@
 </div>
 
 
-<div id="divSubMember" style="position:absolute; left:calc(50% - 350px); top:150px; width:700px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divSubMemberOverlay" class="admin-modal-overlay" style="display:none;" onclick="closeSubMember();"></div>
+<div id="divSubMember" class="admin-modal-panel" style="display:none;">
     <div class="divTitle" id="subTitleId">하위매장</div>
-    <div class="divInfoBox" style="line-height:30px; font-size:14px;">
+    <div class="divInfoBox admin-modal-body" style="line-height:30px; font-size:14px;">
         
         
         <table class="default_table">
@@ -154,7 +155,7 @@
                 
                 <tr>
                     <td style="border:0px; text-align:center;" colspan="3">
-                        <button class="btn_red" onclick="closeSubMember();">닫기</button>
+                        <button type="button" class="btn_red btn_chip" onclick="closeSubMember();">닫기</button>
                     </td>
                 </tr>
             </tbody>
@@ -228,7 +229,7 @@
     </div>
 </div>
 
-<div id="divServiceCharge" style="position:absolute; left:calc(50% - 300px); top:150px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divServiceCharge" style="position:fixed; left:calc(50% - 300px); top:120px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
     <div class="divTitle">알충전</div>
     <div class="divInfoBox" style="height:190px; line-height:34px; font-size:14px;">
 
@@ -265,7 +266,7 @@
     </div>
 </div>
 
-<div id="divServiceExchange" style="position:absolute; left:calc(50% - 300px); top:150px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divServiceExchange" style="position:fixed; left:calc(50% - 300px); top:120px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
     <div class="divTitle">알회수</div>
     <div class="divInfoBox" style="height:190px; line-height:34px; font-size:14px;">
 
@@ -591,4 +592,4 @@ window.ADMIN_I18N.btn_block = <?= json_encode(lang('Admin.btn_block'), JSON_UNES
 window.ADMIN_I18N.btn_delete = <?= json_encode(lang('Admin.btn_delete'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.status_online = <?= json_encode(lang('Admin.status_online'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
-<script src="/assets/js/company.js?v=6"></script>
+<script src="/assets/js/company.js?v=7"></script>
