@@ -145,6 +145,35 @@ class Exchange_Model extends Model {
         
     }
 
+    /**
+     * Pending Default-type exchanges for emp_fid, keyed by exchange_mb_uid (latest per uid).
+     * @return array<string, object>
+     */
+    public function mapWaitDefaultByEmpFid($emp_fid)
+    {
+        $map = [];
+        try {
+            $where = " exchange_state_delete = '0' AND ";
+            $where .= " exchange_type = '".CHARGE_TYPE_DEFAULT."' AND";
+            $where .= " exchange_action_state = '".CHARGE_STATE_WAIT."' AND";
+            $where .= " exchange_emp_fid = '".intval($emp_fid)."' ";
+            $rows = $this->mBuilder->select($this->mTbColumn)
+                ->where($where)
+                ->orderBy('exchange_fid', 'DESC')
+                ->get()
+                ->getResult();
+            foreach ($rows as $row) {
+                $uid = (string)$row->exchange_mb_uid;
+                if ($uid !== '' && !isset($map[$uid])) {
+                    $map[$uid] = $row;
+                }
+            }
+        } catch (\Exception $e) {
+            return [];
+        }
+        return $map;
+    }
+
     public function deleteExchange($exchange_id){
 
         $this->mBuilder->set('exchange_client_delete', '1');

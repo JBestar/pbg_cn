@@ -144,6 +144,35 @@ class Charge_Model extends Model {
         
     }
 
+    /**
+     * Pending Default-type charges for emp_fid, keyed by charge_mb_uid (latest per uid).
+     * @return array<string, object>
+     */
+    public function mapWaitDefaultByEmpFid($emp_fid)
+    {
+        $map = [];
+        try {
+            $where = " charge_state_delete = '0' AND ";
+            $where .= " charge_type = '".CHARGE_TYPE_DEFAULT."' AND";
+            $where .= " charge_action_state = '".CHARGE_STATE_WAIT."' AND";
+            $where .= " charge_emp_fid = '".intval($emp_fid)."' ";
+            $rows = $this->mBuilder->select($this->mTbColumn)
+                ->where($where)
+                ->orderBy('charge_fid', 'DESC')
+                ->get()
+                ->getResult();
+            foreach ($rows as $row) {
+                $uid = (string)$row->charge_mb_uid;
+                if ($uid !== '' && !isset($map[$uid])) {
+                    $map[$uid] = $row;
+                }
+            }
+        } catch (\Exception $e) {
+            return [];
+        }
+        return $map;
+    }
+
     public function deleteCharge($charge_id){
 
         $this->mBuilder->set('charge_client_delete', '1');

@@ -27,6 +27,45 @@ function levelText(lv) {
     return (window.ADMIN_I18N && window.ADMIN_I18N.role_agency) ? window.ADMIN_I18N.role_agency : '총판';
 }
 
+function confirmLabel() {
+    return (window.ADMIN_I18N && window.ADMIN_I18N.btn_ok) ? window.ADMIN_I18N.btn_ok : '확인';
+}
+
+/** Stop TTS loop immediately and refresh wait counters. */
+function stopWaitAlertAndRefresh() {
+    try {
+        if (typeof window.speechSynthesis !== 'undefined') {
+            window.speechSynthesis.cancel();
+        }
+    } catch (e) { /* ignore */ }
+    if (typeof reqWaitTransfer === 'function') {
+        reqWaitTransfer();
+    }
+    if (typeof reqAssets === 'function') {
+        setTimeout(function() { reqAssets(); }, 400);
+    }
+}
+
+function pendingReqCell(fid, money, kind) {
+    fid = parseInt(fid, 10) || 0;
+    money = parseInt(money, 10) || 0;
+    var html = '<td class="tdMoney td-pending-req">';
+    if (fid > 0 && money > 0) {
+        html += fmtMoney(money) + '<br>';
+        if (kind === 'charge') {
+            html += '<button type="button" class="btn-ce-confirm" onclick="permitAgencyCharge('
+                + fid + ');">' + esc(confirmLabel()) + '</button>';
+        } else {
+            html += '<button type="button" class="btn-ce-confirm" onclick="permitAgencyExchange('
+                + fid + ');">' + esc(confirmLabel()) + '</button>';
+        }
+    } else {
+        html += '—';
+    }
+    html += '</td>';
+    return html;
+}
+
 function showPage(arrInfo) {
     var tHtml = '';
     var sumCharge = 0, sumEx = 0, sumPt = 0, sumDiff = 0;
@@ -36,6 +75,7 @@ function showPage(arrInfo) {
         ? window.ADMIN_I18N.th_total : '합계';
     var showGrade = !!window.CE_SHOW_GRADE;
     var showAgency = !!window.CE_SHOW_AGENCY;
+    var showPending = !!window.CE_SHOW_PENDING;
     var colSpanId = 2;
     if (showGrade) colSpanId += 1;
     if (showAgency) colSpanId += 1;
@@ -63,8 +103,15 @@ function showPage(arrInfo) {
             }
             tHtml += '<td class="tdDate">' + esc(r.mb_uid) + '</td>';
             tHtml += '<td class="tdDate">' + esc(r.mb_nickname) + '</td>';
-            tHtml += '<td class="tdMoney">' + fmtMoney(charge) + '</td>';
-            tHtml += '<td class="tdMoney">' + fmtMoney(exchange) + '</td>';
+            if (showPending) {
+                tHtml += pendingReqCell(r.pending_charge_fid, r.pending_charge_money, 'charge');
+                tHtml += '<td class="tdMoney">' + fmtMoney(charge) + '</td>';
+                tHtml += pendingReqCell(r.pending_exchange_fid, r.pending_exchange_money, 'exchange');
+                tHtml += '<td class="tdMoney">' + fmtMoney(exchange) + '</td>';
+            } else {
+                tHtml += '<td class="tdMoney">' + fmtMoney(charge) + '</td>';
+                tHtml += '<td class="tdMoney">' + fmtMoney(exchange) + '</td>';
+            }
             tHtml += '<td class="tdMoney">' + fmtPoint(point) + '</td>';
             tHtml += '<td class="tdMoney ' + diffCls + '">' + fmtPoint(diff) + '</td>';
             tHtml += '<td class="tdDate"><button type="button" class="btn-detail-view" onclick="openCeDetail(\''
@@ -76,8 +123,15 @@ function showPage(arrInfo) {
     var sumDiffCls = sumDiff >= 0 ? 'td-diff-pos' : 'td-diff-neg';
     tHtml += '<tr style="background:#f5f5f5;font-weight:bold;">';
     tHtml += '<td class="tdDate" colspan="' + colSpanId + '">' + esc(totalLabel) + '</td>';
-    tHtml += '<td class="tdMoney">' + fmtMoney(sumCharge) + '</td>';
-    tHtml += '<td class="tdMoney">' + fmtMoney(sumEx) + '</td>';
+    if (showPending) {
+        tHtml += '<td class="tdMoney">—</td>';
+        tHtml += '<td class="tdMoney">' + fmtMoney(sumCharge) + '</td>';
+        tHtml += '<td class="tdMoney">—</td>';
+        tHtml += '<td class="tdMoney">' + fmtMoney(sumEx) + '</td>';
+    } else {
+        tHtml += '<td class="tdMoney">' + fmtMoney(sumCharge) + '</td>';
+        tHtml += '<td class="tdMoney">' + fmtMoney(sumEx) + '</td>';
+    }
     tHtml += '<td class="tdMoney">' + fmtPoint(sumPt) + '</td>';
     tHtml += '<td class="tdMoney ' + sumDiffCls + '">' + fmtPoint(sumDiff) + '</td>';
     tHtml += '<td class="tdDate"></td>';
@@ -94,6 +148,47 @@ function openCeDetail(uid) {
         + '&start=' + encodeURIComponent(start)
         + '&end=' + encodeURIComponent(end);
     window.open(url, 'ceDetail_' + uid, 'width=1100,height=720,scrollbars=yes,resizable=yes');
+}
+
+function permitAgencyCharge(chargeId) {
+    if (!confirm('승인하시겠습니까?')) return;
+    $.ajax({
+        url: '/api/chargeproc_permit',
+        data: { json_: JSON.stringify({ charge_id: chargeId }) },
+        type: 'post',
+        dataType: 'json',
+        success: function(jResult) {
+            if (jResult.status === 'success') {
+                stopWaitAlertAndRefresh();
+                reqPage();
+            } else if (jResult.status === 'logout') {
+                location.reload();
+            } else if (jResult.status === 'fail') {
+                if (jResult.code == 9) showAlert('보유머니가 부족합니다.');
+                else showAlert('충전처리가 실패되었습니다.');
+            }
+        }
+    });
+}
+
+function permitAgencyExchange(exchangeId) {
+    if (!confirm('승인하시겠습니까?')) return;
+    $.ajax({
+        url: '/api/exchangeproc_permit',
+        data: { json_: JSON.stringify({ exchange_id: exchangeId }) },
+        type: 'post',
+        dataType: 'json',
+        success: function(jResult) {
+            if (jResult.status === 'success') {
+                stopWaitAlertAndRefresh();
+                reqPage();
+            } else if (jResult.status === 'logout') {
+                location.reload();
+            } else if (jResult.status === 'fail') {
+                showAlert('환전처리가 실패되었습니다.');
+            }
+        }
+    });
 }
 
 function reqPage() {

@@ -2050,14 +2050,33 @@ class Api extends BaseController
 		} else {
 			$uid = $this->session->uid;
 			$objMember = $this->member_model->getByUid($uid);
+			$hqCe = false;
 			if ($objMember->mb_level == LEVEL_AGENCY) {
 				$arrReqData['self_uid'] = $objMember->mb_uid;
 			} else if ($objMember->mb_level > LEVEL_AGENCY) {
-				// 본사: 알충전/회수/포인트전환(머니)만
+				// 본사: 알충전/회수/포인트전환(머니)만 + 대기 신청 첨부
 				$arrReqData['hq_ce'] = 1;
+				$hqCe = true;
 			}
 			$moneyhist_model = new MoneyHist_Model();
-			$result->data = $moneyhist_model->getCeSummary($arrReqData, 'agency');
+			$rows = $moneyhist_model->getCeSummary($arrReqData, 'agency');
+			if ($hqCe && is_array($rows)) {
+				$charge_model = new Charge_Model();
+				$exchange_model = new Exchange_Model();
+				// 총판→본사 신청은 emp_fid=0
+				$pendingCharge = $charge_model->mapWaitDefaultByEmpFid(0);
+				$pendingExchange = $exchange_model->mapWaitDefaultByEmpFid(0);
+				foreach ($rows as $row) {
+					$muid = isset($row->mb_uid) ? (string)$row->mb_uid : '';
+					$pc = ($muid !== '' && isset($pendingCharge[$muid])) ? $pendingCharge[$muid] : null;
+					$pe = ($muid !== '' && isset($pendingExchange[$muid])) ? $pendingExchange[$muid] : null;
+					$row->pending_charge_fid = $pc ? (int)$pc->charge_fid : 0;
+					$row->pending_charge_money = $pc ? (float)$pc->charge_money : 0;
+					$row->pending_exchange_fid = $pe ? (int)$pe->exchange_fid : 0;
+					$row->pending_exchange_money = $pe ? (float)$pe->exchange_money : 0;
+				}
+			}
+			$result->data = $rows;
 			$result->status = STATUS_SUCCESS;
 		}
 		echo json_encode($result);
