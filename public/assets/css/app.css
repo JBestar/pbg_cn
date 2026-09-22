@@ -577,10 +577,10 @@ html[lang="en"] .hud-mode-text {
 /* --- 블루 3칸 (매장ID / 머니 / 포인트) — 중앙 칸이 더 넓음 --- */
 .hud-blue {
   position: absolute;
-  left: 6%;
-  right: 6%;
-  top: 78.5%;
-  height: 13%;
+  left: 7.8%;
+  right: 7.8%;
+  top: 80%;
+  height: 12.5%;
   display: grid;
   grid-template-columns: 1.6fr 2.11fr 1fr;
   gap: 1.8%;
