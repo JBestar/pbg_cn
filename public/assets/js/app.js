@@ -653,10 +653,32 @@
     }
   }
 
+  async function doLogout() {
+    try {
+      if (state.token) {
+        await api('logout', { body: {} });
+      }
+    } catch (e) {
+      /* ignore network errors — still clear local session */
+    }
+    setToken('');
+    state.loggedIn = false;
+    state.mode = null;
+    state.amount = 0;
+    updateDraft();
+    showLogin(true);
+  }
+
   function onKey(e) {
     if (!state.loggedIn || !state.token) return;
     const code = e.code;
     const ctrl = !!(e.ctrlKey || e.metaKey);
+
+    if (code === 'Delete' || code === 'NumpadDelete') {
+      e.preventDefault();
+      doLogout();
+      return;
+    }
 
     if (code === 'KeyI') {
       e.preventDefault();
