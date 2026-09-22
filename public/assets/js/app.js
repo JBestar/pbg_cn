@@ -304,8 +304,12 @@
       var base = nick || uid || '';
       var honor = (t().nameHonorific != null) ? t().nameHonorific : '님';
       nameEl.textContent = base ? (base + honor) : '—';
+      fitHudCellText(nameEl);
     }
-    if (balEl) balEl.textContent = fmtMoney(bal);
+    if (balEl) {
+      balEl.textContent = fmtMoney(bal);
+      fitHudCellText(balEl);
+    }
     if (pointEl) {
       var pNum = (point != null && point !== '')
         ? Number(point || 0).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
@@ -322,16 +326,34 @@
     }
   }
 
+  /** Shrink HUD cell text to fit width/height; base size from CSS. */
+  function fitHudCellText(el) {
+    if (!el) return;
+    el.style.fontSize = '';
+    var base = parseFloat(window.getComputedStyle(el).fontSize) || 28;
+    var minPx = 10;
+    var px = base;
+    el.style.fontSize = px + 'px';
+    var guard = 48;
+    while (guard-- && px > minPx) {
+      var tooWide = el.scrollWidth > el.clientWidth + 1;
+      var tooTall = el.scrollHeight > el.clientHeight + 1;
+      if (!tooWide && !tooTall) break;
+      px -= 1;
+      el.style.fontSize = px + 'px';
+    }
+  }
+
   /** Shrink point number font so it stays inside the HUD cell. Label size unchanged. */
   function fitHudPointValue(el) {
     if (!el) return;
     var box = el.parentElement;
     if (!box) return;
+    el.style.fontSize = '';
     var base = parseFloat(window.getComputedStyle(box).fontSize) || 28;
     var minPx = 10;
     var px = base;
     el.style.fontSize = px + 'px';
-    // Allow layout to settle before measuring
     var guard = 48;
     while (guard-- && px > minPx) {
       var tooWide = el.scrollWidth > el.clientWidth + 1;

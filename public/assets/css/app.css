@@ -604,6 +604,8 @@ html[lang="en"] .hud-blue .hud-text {
 .hud-blue .hud-store {
   color: #e8fbff;
   font-size: 25px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 html[lang="zh-CN"] .hud-blue .hud-store,
 html[lang="en"] .hud-blue .hud-store {
@@ -611,6 +613,8 @@ html[lang="en"] .hud-blue .hud-store {
 }
 .hud-money {
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .hud-point {
   flex-direction: column;
