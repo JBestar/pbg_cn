@@ -4,7 +4,7 @@
             <i class="fas fa-bars"></i>
         </button>
         <div class="admin-topbar-info">
-            <span class="admin-topbar-item"><i class="far fa-circle"></i> <span id="spanUserName"></span></span>
+            <span class="admin-topbar-item"><i class="fas fa-user"></i> <span id="spanUserName"></span></span>
     <?php if ($mb_level > LEVEL_AGENCY) {
         $isMaintainHdr = (new \App\Models\ConfSite_Model())->IsMaintain();
     ?>
@@ -15,13 +15,13 @@
                 <?= $isMaintainHdr ? lang('Admin.opt_site_lock') : lang('Admin.label_site_maintain') ?>
             </span>
     <?php } ?>
-            <span class="admin-topbar-item"><i class="far fa-circle"></i> <?= lang('Admin.money_hold') ?> : <span id="spanUserMoney" style="color:#ff0000;">0 원</span></span>
-            <span class="admin-topbar-item"><i class="far fa-circle"></i> <?= lang('Admin.point_hold') ?> : <span id="spanUserPoint" style="color:#ff0000;">0 원</span></span>
+            <span class="admin-topbar-item"><i class="fas fa-wallet"></i> <?= lang('Admin.money_hold') ?> : <span id="spanUserMoney" style="color:#ff0000;">0 원</span></span>
+            <span class="admin-topbar-item"><i class="fas fa-star"></i> <?= lang('Admin.point_hold') ?> : <span id="spanUserPoint" style="color:#ff0000;">0 원</span></span>
     <?php if($mb_level == LEVEL_AGENCY) { ?>
             <span class="admin-topbar-item" style="cursor:pointer;" onclick="pointToMoney();">[<?= lang('Admin.point_convert') ?>]</span>
-            <span class="admin-topbar-item"><i class="far fa-circle"></i> <?= lang('Admin.fee') ?> : <span id="spanGameRate" style="color:#ff0000;">0 %</span></span>
+            <span class="admin-topbar-item"><i class="fas fa-percent"></i> <?= lang('Admin.fee') ?> : <span id="spanGameRate" style="color:#ff0000;">0 %</span></span>
     <?php } ?>
-            <span class="admin-topbar-item admin-topbar-ip"><i class="far fa-circle"></i> IP : <span id="spanUserIp"></span></span>
+            <span class="admin-topbar-item admin-topbar-ip"><i class="fas fa-globe"></i> IP : <span id="spanUserIp"></span></span>
         </div>
         <div class="admin-topbar-actions">
     <?php if($mb_level == LEVEL_AGENCY) { ?>
