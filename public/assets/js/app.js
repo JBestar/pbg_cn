@@ -310,7 +310,35 @@
       var pNum = (point != null && point !== '')
         ? Number(point || 0).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
         : '0';
-      pointEl.textContent = 'p: ' + pNum;
+      var labelEl = pointEl.querySelector('.hud-point-label');
+      var valueEl = pointEl.querySelector('.hud-point-value') || $('headerPointValue');
+      if (labelEl) labelEl.textContent = 'P:';
+      if (valueEl) {
+        valueEl.textContent = pNum;
+        fitHudPointValue(valueEl);
+      } else {
+        pointEl.textContent = 'P:\n' + pNum;
+      }
+    }
+  }
+
+  /** Shrink point number font so it stays inside the HUD cell. Label size unchanged. */
+  function fitHudPointValue(el) {
+    if (!el) return;
+    var box = el.parentElement;
+    if (!box) return;
+    var base = parseFloat(window.getComputedStyle(box).fontSize) || 28;
+    var minPx = 10;
+    var px = base;
+    el.style.fontSize = px + 'px';
+    // Allow layout to settle before measuring
+    var guard = 48;
+    while (guard-- && px > minPx) {
+      var tooWide = el.scrollWidth > el.clientWidth + 1;
+      var tooTall = box.scrollHeight > box.clientHeight + 1;
+      if (!tooWide && !tooTall) break;
+      px -= 1;
+      el.style.fontSize = px + 'px';
     }
   }
 

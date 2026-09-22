@@ -613,7 +613,30 @@ html[lang="en"] .hud-blue .hud-store {
   font-variant-numeric: tabular-nums;
 }
 .hud-point {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.hud-point-label {
+  font-size: inherit;
+  flex-shrink: 0;
+  line-height: 1.1;
+}
+.hud-point-value {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
 }
 
 .draft-amount-num.is-pop {
