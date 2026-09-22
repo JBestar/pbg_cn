@@ -308,7 +308,7 @@
     if (balEl) balEl.textContent = fmtMoney(bal);
     if (pointEl) {
       var pNum = (point != null && point !== '')
-        ? Number(point || 0).toLocaleString('zh-CN', { maximumFractionDigits: 0 })
+        ? Number(point || 0).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
         : '0';
       pointEl.textContent = 'p: ' + pNum;
     }

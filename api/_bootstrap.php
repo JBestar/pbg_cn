@@ -506,6 +506,135 @@ function pbg_money_log($machineId, $betId, $type, $amount, $before, $after, $mem
     }
 }
 
+/** Admin POINTCHANGE_BET / POINTCHANGE_CANCEL */
+if (!defined('PBG_POINTCHANGE_BET')) {
+    define('PBG_POINTCHANGE_BET', 8);
+}
+if (!defined('PBG_POINTCHANGE_CANCEL')) {
+    define('PBG_POINTCHANGE_CANCEL', 9);
+}
+
+/**
+ * Ensure per-bet commission columns exist (idempotent).
+ */
+function pbg_ensure_bet_point_columns()
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    $db = pbg_db();
+    $chk = @$db->query("SHOW COLUMNS FROM `bets` LIKE 'empl_point'");
+    if ($chk && $chk->num_rows === 0) {
+        @$db->query("ALTER TABLE `bets` ADD COLUMN `empl_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `after_money`");
+        @$db->query("ALTER TABLE `bets` ADD COLUMN `agen_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `empl_point`");
+    }
+}
+
+/**
+ * lion getEmployeePbRatio — store + agency commission on bet amount.
+ * Uses 0.01 precision (not integer round).
+ *
+ * @return array{agen_fid:int,agen_point:float,store_fid:int,store_point:float,agen_uid:string,agen_emp_fid:int}
+ */
+function pbg_employee_pb_points(array $storeMember, $amount)
+{
+    $out = [
+        'agen_fid' => 0,
+        'agen_point' => 0.0,
+        'agen_uid' => '',
+        'agen_emp_fid' => 0,
+        'store_fid' => 0,
+        'store_point' => 0.0,
+    ];
+    $amount = (float)$amount;
+    if ($amount <= 0) {
+        return $out;
+    }
+    if ((int)$storeMember['mb_level'] !== 7) {
+        return $out;
+    }
+    $storeRate = (float)$storeMember['mb_game_pb_ratio'];
+    if ($storeRate >= 100) {
+        return $out;
+    }
+    $empFid = (int)$storeMember['mb_emp_fid'];
+    if ($empFid <= 0) {
+        return $out;
+    }
+    $agency = pbg_get_member_by_fid($empFid);
+    if (!$agency || (int)$agency['mb_level'] !== 8) {
+        return $out;
+    }
+    $agenRate = (float)$agency['mb_game_pb_ratio'];
+    if ($agenRate < $storeRate) {
+        return $out;
+    }
+
+    $storePoint = round(($storeRate * $amount) / 100.0, 2);
+    $agenPoint = round((($agenRate - $storeRate) * $amount) / 100.0, 2);
+    if ($storePoint < 0) {
+        $storePoint = 0.0;
+    }
+    if ($agenPoint < 0) {
+        $agenPoint = 0.0;
+    }
+
+    $out['store_fid'] = (int)$storeMember['mb_fid'];
+    $out['store_point'] = $storePoint;
+    $out['agen_fid'] = (int)$agency['mb_fid'];
+    $out['agen_point'] = $agenPoint;
+    $out['agen_uid'] = (string)$agency['mb_uid'];
+    $out['agen_emp_fid'] = (int)$agency['mb_emp_fid'];
+    return $out;
+}
+
+/**
+ * Add/subtract member points inside an open transaction. UNSIGNED-safe on subtract.
+ * Writes money_history with point before/after (types 8/9).
+ */
+function pbg_adjust_point(mysqli $db, $mbFid, $delta, $mbUid, $empFid, $changeType)
+{
+    $mbFid = (int)$mbFid;
+    $delta = round((float)$delta, 2);
+    if ($mbFid <= 0 || abs($delta) < 0.005) {
+        return 0.0;
+    }
+    $stmt = pbg_prepare($db, 'SELECT mb_point FROM member WHERE mb_fid=? FOR UPDATE');
+    $stmt->bind_param('i', $mbFid);
+    $stmt->execute();
+    $row = pbg_stmt_fetch_one($stmt);
+    $stmt->close();
+    if (!$row) {
+        throw new RuntimeException('point member lock failed: ' . $mbFid);
+    }
+    $before = (float)$row['mb_point'];
+    $after = round($before + $delta, 2);
+    if ($after < 0) {
+        $after = 0.0;
+        $delta = round($after - $before, 2);
+    }
+    if (abs($delta) < 0.005) {
+        return 0.0;
+    }
+    $upd = $db->prepare('UPDATE member SET mb_point=? WHERE mb_fid=?');
+    $upd->bind_param('di', $after, $mbFid);
+    $upd->execute();
+    $upd->close();
+
+    $mbUid = (string)$mbUid;
+    $empFid = (int)$empFid;
+    $type = (int)$changeType;
+    $h = $db->prepare(
+        'INSERT INTO money_history (money_mb_fid, money_mb_uid, money_mb_emp_fid, money_amount, money_before, money_after, money_change_type, money_update_time) VALUES (?,?,?,?,?,?,?,NOW())'
+    );
+    $h->bind_param('isidddi', $mbFid, $mbUid, $empFid, $delta, $before, $after, $type);
+    $h->execute();
+    $h->close();
+    return $delta;
+}
+
 /**
  * lion reground 타이밍과 유사: 5분 정각 직후(초 0~50) 또는 카운트다운 ≤5초
  */

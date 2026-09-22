@@ -513,10 +513,11 @@ function api_bet()
     }
 
     $db = pbg_db();
+    pbg_ensure_bet_point_columns();
     $db->begin_transaction();
     try {
         $fid = (int)$member['mb_fid'];
-        $stmt = pbg_prepare($db, 'SELECT mb_money, mb_emp_fid, mb_uid FROM member WHERE mb_fid=? FOR UPDATE');
+        $stmt = pbg_prepare($db, 'SELECT mb_money, mb_point, mb_emp_fid, mb_uid, mb_level, mb_game_pb_ratio FROM member WHERE mb_fid=? FOR UPDATE');
         $stmt->bind_param('i', $fid);
         $stmt->execute();
         $row = pbg_stmt_fetch_one($stmt);
@@ -539,6 +540,25 @@ function api_bet()
         $upd->execute();
         $upd->close();
 
+        // Commission (수수료→포인트): only when rates > 0; otherwise identical to prior behavior
+        $storeForPb = array_merge($member, $row);
+        $pb = pbg_employee_pb_points($storeForPb, $amount);
+        $emplPoint = (float)$pb['store_point'];
+        $agenPoint = (float)$pb['agen_point'];
+        if ($emplPoint > 0) {
+            pbg_adjust_point($db, $fid, $emplPoint, $mbUid, $empFid, PBG_POINTCHANGE_BET);
+        }
+        if ($agenPoint > 0 && (int)$pb['agen_fid'] > 0) {
+            pbg_adjust_point(
+                $db,
+                (int)$pb['agen_fid'],
+                $agenPoint,
+                (string)$pb['agen_uid'],
+                (int)$pb['agen_emp_fid'],
+                PBG_POINTCHANGE_BET
+            );
+        }
+
         $round = (int)$roundInfo['round'];
         $target = $meta['target'];
         $ratio = (float)$meta['ratio'];
@@ -547,9 +567,9 @@ function api_bet()
         $emptyResult = '';
         $mcode = $machineCode !== '' ? $machineCode : $mbUid;
 
-        $ins = $db->prepare('INSERT INTO bets (mb_fid, mb_uid, emp_fid, machine_id, machine_code, round, mode, target, ratio, amount, win_amount, state, result, before_money, after_money) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+        $ins = $db->prepare('INSERT INTO bets (mb_fid, mb_uid, emp_fid, machine_id, machine_code, round, mode, target, ratio, amount, win_amount, state, result, before_money, after_money, empl_point, agen_point) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
         $ins->bind_param(
-            'isiisiisdddisdd',
+            'isiisiisdddisdddd',
             $fid,
             $mbUid,
             $empFid,
@@ -564,7 +584,9 @@ function api_bet()
             $stateWait,
             $emptyResult,
             $bal,
-            $after
+            $after,
+            $emplPoint,
+            $agenPoint
         );
         if (!$ins->execute()) {
             throw new RuntimeException($ins->error);
@@ -583,6 +605,7 @@ function api_bet()
             'data' => [
                 'bet_id' => $betId,
                 'balance' => (float)$fresh['mb_money'],
+                'point' => (float)$fresh['mb_point'],
                 'round' => $round,
                 'label' => pbg_mode_label_cn($mode),
             ],
@@ -604,11 +627,13 @@ function api_cancel()
     pbg_settle_pending();
 
     $db = pbg_db();
+    pbg_ensure_bet_point_columns();
     $drawDb = pbg_db('draw_db');
     $db->begin_transaction();
     try {
         $fid = (int)$member['mb_fid'];
         $mbUid = $member['mb_uid'];
+        $empFid = (int)$member['mb_emp_fid'];
         $stmt = pbg_prepare($db, 'SELECT * FROM bets WHERE mb_fid=? AND state=1 ORDER BY id DESC');
         $stmt->bind_param('i', $fid);
         $stmt->execute();
@@ -646,12 +671,24 @@ function api_cancel()
         $bal = (float)$lockRow['mb_money'];
 
         $refunded = 0;
+        $reclaimStore = 0.0;
+        $reclaimAgenByFid = [];
         foreach ($bets as $bet) {
             $amt = (float)$bet['amount'];
             $before = $bal;
             $bal += $amt;
             $bid = (int)$bet['id'];
-            $updBet = $db->prepare('UPDATE bets SET state=4, settled_at=NOW() WHERE id=? AND state=1');
+            $emplPt = isset($bet['empl_point']) ? (float)$bet['empl_point'] : 0.0;
+            $agenPt = isset($bet['agen_point']) ? (float)$bet['agen_point'] : 0.0;
+            $reclaimStore += $emplPt;
+            $agenFid = (int)$bet['emp_fid'];
+            if ($agenPt > 0 && $agenFid > 0) {
+                if (!isset($reclaimAgenByFid[$agenFid])) {
+                    $reclaimAgenByFid[$agenFid] = 0.0;
+                }
+                $reclaimAgenByFid[$agenFid] += $agenPt;
+            }
+            $updBet = $db->prepare('UPDATE bets SET state=4, empl_point=0, agen_point=0, settled_at=NOW() WHERE id=? AND state=1');
             $updBet->bind_param('i', $bid);
             $updBet->execute();
             $updBet->close();
@@ -663,14 +700,38 @@ function api_cancel()
         $upd->bind_param('di', $bal, $fid);
         $upd->execute();
         $upd->close();
+
+        if ($reclaimStore > 0) {
+            pbg_adjust_point($db, $fid, 0 - $reclaimStore, $mbUid, $empFid, PBG_POINTCHANGE_CANCEL);
+        }
+        foreach ($reclaimAgenByFid as $agenFid => $agenPts) {
+            if ($agenPts <= 0) {
+                continue;
+            }
+            $agen = pbg_get_member_by_fid((int)$agenFid);
+            if (!$agen) {
+                continue;
+            }
+            pbg_adjust_point(
+                $db,
+                (int)$agenFid,
+                0 - $agenPts,
+                (string)$agen['mb_uid'],
+                (int)$agen['mb_emp_fid'],
+                PBG_POINTCHANGE_CANCEL
+            );
+        }
+
         $db->commit();
 
+        $fresh = pbg_get_member_by_fid($fid);
         pbg_json([
             'status' => 'success',
             'data' => [
                 'cancelled' => count($bets),
                 'refunded' => $refunded,
                 'balance' => $bal,
+                'point' => $fresh ? (float)$fresh['mb_point'] : 0.0,
             ],
         ]);
     } catch (Throwable $e) {

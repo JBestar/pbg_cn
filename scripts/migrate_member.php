@@ -203,6 +203,12 @@ if (!col_exists($db, 'bets', 'mb_uid')) {
 if (!col_exists($db, 'bets', 'emp_fid')) {
     run_sql($db, "ALTER TABLE `bets` ADD COLUMN `emp_fid` INT NOT NULL DEFAULT 0 AFTER `mb_uid`");
 }
+if (!col_exists($db, 'bets', 'empl_point')) {
+    run_sql($db, "ALTER TABLE `bets` ADD COLUMN `empl_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `after_money`");
+}
+if (!col_exists($db, 'bets', 'agen_point')) {
+    run_sql($db, "ALTER TABLE `bets` ADD COLUMN `agen_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `empl_point`");
+}
 if (!col_exists($db, 'money_log', 'mb_fid')) {
     run_sql($db, "ALTER TABLE `money_log` ADD COLUMN `mb_fid` INT NOT NULL DEFAULT 0 AFTER `id`");
 }
