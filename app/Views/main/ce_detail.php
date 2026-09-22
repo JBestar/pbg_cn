@@ -5,7 +5,7 @@
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title><?= lang('Admin.'.$title_key) ?></title>
     <link rel="stylesheet" href="/assets/css/lib/jquery-ui.css">
-    <link rel="stylesheet" href="/assets/css/main.css?v=2">
+    <link rel="stylesheet" href="/assets/css/main.css?v=5">
     <link rel="stylesheet" href="/assets/css/button1.css">
     <script src="/assets/js/lib/jquery-1.12.4.min.js"></script>
     <script src="/assets/js/lib/jquery-ui-1.12.1.min.js"></script>
@@ -18,7 +18,7 @@
         .default_table { width: 100%; border-collapse: collapse; }
         .default_table th, .default_table td { border: 1px solid #999; padding: 6px 8px; text-align: center; font-size: 13px; }
         .default_table th { background: #eee; }
-        .default_table td.tdMoney { text-align: right; }
+        .default_table td.tdMoney { text-align: center; }
         .btn-close-detail {
             display: inline-block; padding: 8px 28px; background: #1a73e8; color: #fff;
             border: none; border-radius: 4px; cursor: pointer; font-size: 14px;
