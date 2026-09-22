@@ -287,12 +287,23 @@ a:active {
     height: 32px;
     margin: 0;
     padding: 0;
-    border: 1px solid rgba(255,255,255,0.35);
+    border: 1px solid #1a222c;
     border-radius: 4px;
-    background: #39435c;
+    background: linear-gradient(180deg, #4a5568 0%, #39435c 55%, #2d3548 100%);
     color: #fff;
     cursor: pointer;
     flex-shrink: 0;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.28) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.22) inset,
+        0 2px 3px rgba(0, 0, 0, 0.28);
+}
+.admin-menu-btn:hover {
+    filter: brightness(1.08);
+}
+.admin-menu-btn:active {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35) inset;
+    transform: translateY(1px);
 }
 .admin-topbar-info {
     display: flex;
@@ -316,38 +327,127 @@ a:active {
     display: inline-block;
     min-width: 94px;
     height: 31px;
-    line-height: 31px;
+    line-height: 29px;
     padding: 0 10px;
-    border: none;
-    border-radius: 3px;
+    border: 1px solid transparent;
+    border-radius: 4px;
     color: #fefefe;
     font-size: 16px; /* 12px * 1.3 */
     font-weight: bold;
     cursor: pointer;
     text-align: center;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.32) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.22) inset,
+        0 2px 4px rgba(0, 0, 0, 0.28);
+    transition: filter 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
 }
-.admin-action-green { background-color: #1b6b2c; }
-.admin-action-blue { background-color: #0070bd; }
-.admin-action-red { background-color: #cb251d; }
+.admin-action-btn:hover {
+    filter: brightness(1.08);
+}
+.admin-action-btn:active {
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.4) inset,
+        0 1px 0 rgba(255, 255, 255, 0.1) inset;
+    transform: translateY(1px);
+    filter: brightness(0.96);
+}
+.admin-action-green {
+    background: linear-gradient(180deg, #2f9e48 0%, #1b6b2c 52%, #134f20 100%);
+    border-color: #0e3a17;
+}
+.admin-action-blue {
+    background: linear-gradient(180deg, #2b9adf 0%, #0070bd 52%, #00548f 100%);
+    border-color: #003f6b;
+}
+.admin-action-red {
+    background: linear-gradient(180deg, #e84a42 0%, #cb251d 52%, #9e1a14 100%);
+    border-color: #7a140f;
+}
 .admin-lang-select {
     height: 31px;
     font-size: 16px; /* 12px * 1.3 */
+    border: 1px solid #1a222c;
+    border-radius: 4px;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.2) inset,
+        0 2px 3px rgba(0, 0, 0, 0.25);
 }
 .admin-maintain-btn {
     display: inline-block;
     margin-left: 4px;
     padding: 0 12px;
     height: 29px;
-    line-height: 29px;
+    line-height: 27px;
     vertical-align: middle;
-    background-color: #e67e22;
+    background: linear-gradient(180deg, #f0a04a 0%, #e67e22 52%, #c96a18 100%);
     color: #ffffff;
     font-size: 16px; /* 12px * 1.3 */
     font-weight: bold;
-    border-radius: 3px;
+    border: 1px solid #a35512;
+    border-radius: 4px;
     cursor: pointer;
     text-align: center;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.35) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.2) inset,
+        0 2px 4px rgba(0, 0, 0, 0.28);
 }
+.admin-maintain-btn:hover {
+    filter: brightness(1.08);
+}
+.admin-maintain-btn:active {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4) inset;
+    transform: translateY(1px);
+}
+
+/* Shared list/action buttons — raised look */
+.btn-detail-view,
+.btn-ce-confirm,
+.btn-store-action {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.3) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.2) inset,
+        0 2px 3px rgba(0, 0, 0, 0.22);
+    transition: filter 0.12s ease, transform 0.08s ease;
+}
+.btn-detail-view:hover,
+.btn-ce-confirm:hover,
+.btn-store-action:hover {
+    filter: brightness(1.08);
+}
+.btn-detail-view:active,
+.btn-ce-confirm:active,
+.btn-store-action:active {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35) inset;
+    transform: translateY(1px);
+}
+.btn-detail-view {
+    background: linear-gradient(180deg, #3b8ef0 0%, #1a73e8 55%, #1557b0 100%);
+    border: 1px solid #0d47a1;
+}
+.btn-ce-confirm {
+    background: linear-gradient(180deg, #43a047 0%, #2e7d32 55%, #1b5e20 100%);
+    border: 1px solid #145214;
+}
+.btn-store-blue {
+    background: linear-gradient(180deg, #3b8ef0 0%, #1a73e8 55%, #1557b0 100%);
+    border: 1px solid #0d47a1;
+}
+.btn-store-red {
+    background: linear-gradient(180deg, #ef5350 0%, #e53935 55%, #c62828 100%);
+    border: 1px solid #b71c1c;
+}
+
 .admin-nav-overlay {
     display: none;
 }
@@ -570,26 +670,46 @@ a:active {
 
 .spanRed {
     padding: 3px 15px 3px 15px;
-    background-color: #cb251d;
+    background: linear-gradient(180deg, #e84a42 0%, #cb251d 100%);
     color: #fefefe;
+    border-radius: 3px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.25) inset,
+        0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .spanBlue {
     padding: 3px 15px 3px 15px;
-    background-color: #0070bd;
+    background: linear-gradient(180deg, #2b9adf 0%, #0070bd 100%);
     color: #fefefe;
+    border-radius: 3px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.25) inset,
+        0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .spanGreen {
     padding: 3px 15px 3px 15px;
-    background-color: #1b6b2c;
+    background: linear-gradient(180deg, #2f9e48 0%, #1b6b2c 100%);
     color: #fefefe;
+    border-radius: 3px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.25) inset,
+        0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .spanGray {
     padding: 3px 10px 3px 10px;
-    background-color: #777777;
+    background: linear-gradient(180deg, #8f8f8f 0%, #777777 100%);
     color: #fefefe;
+    border-radius: 3px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.25) inset,
+        0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .spanUnOverRed {

@@ -40,33 +40,17 @@
 
 <style>
 .btn-detail-view {
-    display: inline-block;
     padding: 6px 14px;
-    border-radius: 8px;
-    background: #1a73e8;
-    color: #fff !important;
     font-size: 13px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
     line-height: 1.3;
 }
-.btn-detail-view:hover { background: #1557b0; color: #fff !important; }
 .btn-ce-confirm {
-    display: inline-block;
     margin-left: 6px;
     padding: 4px 12px;
-    border-radius: 6px;
-    background: #2e7d32;
-    color: #fff !important;
     font-size: 13px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
     line-height: 1.3;
     vertical-align: middle;
 }
-.btn-ce-confirm:hover { background: #1b5e20; color: #fff !important; }
 .td-pending-req { line-height: 1.4; vertical-align: middle; white-space: nowrap; }
 .ce-req-amt { vertical-align: middle; }
 .td-diff-pos { color: #0000fe; }

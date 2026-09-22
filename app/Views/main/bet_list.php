@@ -32,19 +32,11 @@
 
 <style>
 .btn-detail-view {
-    display: inline-block;
     padding: 6px 14px;
-    border-radius: 8px;
-    background: #1a73e8;
-    color: #fff !important;
     font-size: 13px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
     line-height: 1.3;
+    text-decoration: none;
 }
-.btn-detail-view:hover { background: #1557b0; color: #fff !important; }
 </style>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>

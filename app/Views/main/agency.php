@@ -38,13 +38,10 @@
 
 <style>
 .btn-store-action {
-    display: inline-block; padding: 5px 12px; border-radius: 6px; border: none;
-    color: #fff !important; font-size: 12px; font-weight: 600; cursor: pointer; margin: 1px;
+    padding: 5px 12px;
+    font-size: 12px;
+    margin: 1px;
 }
-.btn-store-blue { background: #1a73e8; }
-.btn-store-red { background: #e53935; }
-.btn-store-blue:hover { background: #1557b0; }
-.btn-store-red:hover { background: #c62828; }
 </style>
 
 <script>
