@@ -373,31 +373,106 @@ a:active {
 }
 .admin-account-wrap .default_table {
     min-width: 960px;
+    font-size: 15px; /* 13px * 1.15 */
 }
 
 .default_table {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     width: calc(100% - 10px);
-    margin: 5px 5px 5px 5px;
-    font-size: 12px;
-    font-weight: normal;
+    margin: 8px 5px;
+    font-size: 14px; /* 13px * 1.1 */
+    font-weight: 400;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 14px rgba(15, 23, 42, 0.04);
 }
 
 .default_table table {
-    border: 1px solid #a3a3a3;
+    border: none;
     border-collapse: collapse;
 }
 
 .default_table th,
-td {
-    border: 1px solid #a3a3a3;
-    height: 26px;
+.default_table td {
+    border: none;
+    border-bottom: 1px solid #eef2f7;
+    height: auto;
+    min-height: 36px;
+    padding: 10px 12px;
+    vertical-align: middle;
+    color: #334155;
+}
+
+.default_table thead th {
+    background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+    color: #f0f9ff;
+    font-size: 14px; /* 13px * 1.05 */
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-align: center;
+    white-space: nowrap;
+    border-bottom: 1px solid #0369a1;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset;
+}
+
+/* Summary strip at top of main menu — distinct from list-table headers */
+.admin-account-wrap .default_table thead th {
+    background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+    color: #f0f9ff;
+    font-size: 14px; /* 12px * 1.15 */
+    border-bottom: 1px solid #075985;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset;
+}
+
+.default_table thead th:first-child {
+    border-top-left-radius: 9px;
+}
+.default_table thead th:last-child {
+    border-top-right-radius: 9px;
+}
+.default_table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 9px;
+}
+.default_table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 9px;
+}
+
+.default_table tbody tr {
+    background: #ffffff;
+    transition: background-color 0.15s ease;
+}
+
+.default_table tbody tr:nth-child(even) {
+    background: #e8eef5;
+}
+
+.default_table tbody tr:hover {
+    background: #eef6ff;
+}
+
+.default_table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Footer / total rows only (ce_list / term_list use #f5f5f5) — do not override mb_color / bet_chg rows */
+.default_table tbody tr[style*="#f5f5f5"] {
+    background: #e2e8f0 !important;
+    font-weight: 700 !important;
+}
+.default_table tbody tr[style*="#f5f5f5"]:hover {
+    background: #dbe3ee !important;
 }
 
 .tdMoney {
     text-align: center;
-    padding-left: 3px;
-    padding-right: 3px;
+    padding-left: 12px;
+    padding-right: 12px;
+    font-variant-numeric: tabular-nums;
 }
 
 .tdDate {
@@ -405,36 +480,40 @@ td {
 }
 
 .tdSum {
-    font-weight: bold;
-    background-color: #d8d8d8;
+    font-weight: 700;
+    background-color: #e2e8f0 !important;
+    color: #0f172a;
 }
 
 .divTitle {
     position: relative;
     width: calc(100% - 5px);
-    line-height: 30px;
+    line-height: 1.4;
     font-size: 20px;
-    font-weight: bold;
-    color: #010101;
-    padding-left: 5px;
+    font-weight: 700;
+    color: #0f172a;
+    padding: 8px 8px 6px 12px;
+    letter-spacing: -0.02em;
 }
 
 .divInfoBox {
     position: relative;
     width: calc(100% - 38px);
-    margin: 5px 5px 5px 5px;
-    padding: 5px 10px 5px 10px;
-    border: 3px solid #014e02;
+    margin: 8px 5px;
+    padding: 10px 14px;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    background: #f0fdf4;
 }
 
 .divSearch {
     position: relative;
     width: calc(100% - 5px);
     line-height: 30px;
-    font-size: 14px;
-    font-weight: normal;
-    color: #010101;
-    padding-left: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    padding: 6px 8px 8px 12px;
     box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;
@@ -452,11 +531,29 @@ td {
     position: relative;
     width: calc(100% - 18px);
     max-width: 100%;
-    margin: 5px 5px 5px 5px;
-    border: 3px solid #014e02;
+    margin: 8px 5px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
+}
+
+.divList .default_table {
+    width: 100%;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.divList .default_table thead th:first-child,
+.divList .default_table thead th:last-child,
+.divList .default_table tbody tr:last-child td:first-child,
+.divList .default_table tbody tr:last-child td:last-child {
+    border-radius: 0;
 }
 
 .divPaging {
@@ -560,7 +657,7 @@ body.lang-en .bw-lms { min-width: 3.2em; }
         width: 200px;
     }
     .default_table {
-        font-size: 11px;
+        font-size: 12px; /* 11px * 1.1 */
     }
     .divTitle {
         font-size: 18px;

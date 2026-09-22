@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title><?= lang('Admin.title_egg_charge') ?></title>
-<link rel="stylesheet" href="/assets/css/main.css?v=2">
+<link rel="stylesheet" href="/assets/css/main.css?v=6">
 <script src="/assets/js/lib/jquery-1.12.4.min.js"></script>
 <script src="/assets/js/lib/sweetalert2.all.min.js"></script>
 <style>

@@ -98,7 +98,8 @@ function changeAdminLang(lang) {
 
         <div class="admin-account-wrap">
         <table class="default_table">
-            <tbody><tr>
+            <thead>
+            <tr>
                 <th><?= lang('Admin.th_today_bet') ?></th>
                 <th><?= lang('Admin.th_today_win') ?></th>
                 <th><?= lang('Admin.th_today_point') ?></th>
@@ -112,6 +113,7 @@ function changeAdminLang(lang) {
                 <th><?= lang('Admin.th_month_exchange') ?></th>
                 <th><?= lang('Admin.th_month_ce_pl') ?></th>
             </tr>
+            </thead>
             <tbody id="tbAccount">
                 <tr>
                     <td class="tdMoney">0</td>

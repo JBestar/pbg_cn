@@ -5,7 +5,7 @@
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title><?= lang('Admin.'.$title_key) ?></title>
     <link rel="stylesheet" href="/assets/css/lib/jquery-ui.css">
-    <link rel="stylesheet" href="/assets/css/main.css?v=5">
+    <link rel="stylesheet" href="/assets/css/main.css?v=6">
     <link rel="stylesheet" href="/assets/css/button1.css">
     <script src="/assets/js/lib/jquery-1.12.4.min.js"></script>
     <script src="/assets/js/lib/jquery-ui-1.12.1.min.js"></script>
