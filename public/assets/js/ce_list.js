@@ -50,14 +50,17 @@ function pendingReqCell(fid, money, kind) {
     fid = parseInt(fid, 10) || 0;
     money = parseInt(money, 10) || 0;
     var html = '<td class="tdMoney td-pending-req">';
-    if (fid > 0 && money > 0) {
-        html += fmtMoney(money) + '<br>';
-        if (kind === 'charge') {
-            html += '<button type="button" class="btn-ce-confirm" onclick="permitAgencyCharge('
-                + fid + ');">' + esc(confirmLabel()) + '</button>';
-        } else {
-            html += '<button type="button" class="btn-ce-confirm" onclick="permitAgencyExchange('
-                + fid + ');">' + esc(confirmLabel()) + '</button>';
+    if (money > 0) {
+        html += '<span class="ce-req-amt">' + fmtMoney(money) + '</span>';
+        if (fid > 0) {
+            html += ' ';
+            if (kind === 'charge') {
+                html += '<button type="button" class="btn-ce-confirm" onclick="permitAgencyCharge('
+                    + fid + ');">' + esc(confirmLabel()) + '</button>';
+            } else {
+                html += '<button type="button" class="btn-ce-confirm" onclick="permitAgencyExchange('
+                    + fid + ');">' + esc(confirmLabel()) + '</button>';
+            }
         }
     } else {
         html += '—';
@@ -69,6 +72,7 @@ function pendingReqCell(fid, money, kind) {
 function showPage(arrInfo) {
     var tHtml = '';
     var sumCharge = 0, sumEx = 0, sumPt = 0, sumDiff = 0;
+    var sumChargeReq = 0, sumExchangeReq = 0;
     var detailLabel = (window.ADMIN_I18N && window.ADMIN_I18N.th_detail_view)
         ? window.ADMIN_I18N.th_detail_view : '상세보기';
     var totalLabel = (window.ADMIN_I18N && window.ADMIN_I18N.th_total)
@@ -88,10 +92,16 @@ function showPage(arrInfo) {
             var point = parseFloat(r.point_sum) || 0;
             var diff = parseFloat(r.diff_sum);
             if (isNaN(diff)) diff = charge - exchange - point;
+            var chargeReq = parseInt(r.charge_req_money, 10);
+            if (isNaN(chargeReq)) chargeReq = parseInt(r.pending_charge_money, 10) || 0;
+            var exchangeReq = parseInt(r.exchange_req_money, 10);
+            if (isNaN(exchangeReq)) exchangeReq = parseInt(r.pending_exchange_money, 10) || 0;
             sumCharge += charge;
             sumEx += exchange;
             sumPt += point;
             sumDiff += diff;
+            sumChargeReq += chargeReq;
+            sumExchangeReq += exchangeReq;
 
             var diffCls = diff >= 0 ? 'td-diff-pos' : 'td-diff-neg';
             tHtml += '<tr>';
@@ -104,9 +114,9 @@ function showPage(arrInfo) {
             tHtml += '<td class="tdDate">' + esc(r.mb_uid) + '</td>';
             tHtml += '<td class="tdDate">' + esc(r.mb_nickname) + '</td>';
             if (showPending) {
-                tHtml += pendingReqCell(r.pending_charge_fid, r.pending_charge_money, 'charge');
+                tHtml += pendingReqCell(r.pending_charge_fid, chargeReq, 'charge');
                 tHtml += '<td class="tdMoney">' + fmtMoney(charge) + '</td>';
-                tHtml += pendingReqCell(r.pending_exchange_fid, r.pending_exchange_money, 'exchange');
+                tHtml += pendingReqCell(r.pending_exchange_fid, exchangeReq, 'exchange');
                 tHtml += '<td class="tdMoney">' + fmtMoney(exchange) + '</td>';
             } else {
                 tHtml += '<td class="tdMoney">' + fmtMoney(charge) + '</td>';
@@ -124,9 +134,9 @@ function showPage(arrInfo) {
     tHtml += '<tr style="background:#f5f5f5;font-weight:bold;">';
     tHtml += '<td class="tdDate" colspan="' + colSpanId + '">' + esc(totalLabel) + '</td>';
     if (showPending) {
-        tHtml += '<td class="tdMoney">—</td>';
+        tHtml += '<td class="tdMoney">' + fmtMoney(sumChargeReq) + '</td>';
         tHtml += '<td class="tdMoney">' + fmtMoney(sumCharge) + '</td>';
-        tHtml += '<td class="tdMoney">—</td>';
+        tHtml += '<td class="tdMoney">' + fmtMoney(sumExchangeReq) + '</td>';
         tHtml += '<td class="tdMoney">' + fmtMoney(sumEx) + '</td>';
     } else {
         tHtml += '<td class="tdMoney">' + fmtMoney(sumCharge) + '</td>';

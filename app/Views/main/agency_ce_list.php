@@ -54,7 +54,7 @@
 .btn-detail-view:hover { background: #1557b0; color: #fff !important; }
 .btn-ce-confirm {
     display: inline-block;
-    margin-top: 4px;
+    margin-left: 6px;
     padding: 4px 12px;
     border-radius: 6px;
     background: #2e7d32;
@@ -64,9 +64,11 @@
     border: none;
     cursor: pointer;
     line-height: 1.3;
+    vertical-align: middle;
 }
 .btn-ce-confirm:hover { background: #1b5e20; color: #fff !important; }
-.td-pending-req { line-height: 1.4; vertical-align: middle; }
+.td-pending-req { line-height: 1.4; vertical-align: middle; white-space: nowrap; }
+.ce-req-amt { vertical-align: middle; }
 .td-diff-pos { color: #0000fe; }
 .td-diff-neg { color: #fe0000; }
 </style>
@@ -84,7 +86,7 @@ window.CE_SHOW_GRADE = <?= !empty($show_grade) ? 'true' : 'false' ?>;
 window.CE_SHOW_PENDING = <?= !empty($show_grade) ? 'true' : 'false' ?>;
 </script>
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/ce_list.js?v=4"></script>
+    <script src="/assets/js/ce_list.js?v=5"></script>
 <?php else :?>
     <script src="/assets/js/ce_list.js?v=<?=time();?>"></script>
 <?php endif ?>

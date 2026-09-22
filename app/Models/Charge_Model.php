@@ -173,6 +173,41 @@ class Charge_Model extends Model {
         return $map;
     }
 
+    /**
+     * Sum Default-type charge amounts (WAIT+PERMIT) per mb_uid for emp_fid.
+     * Date filter uses charge_time_require when start/end provided.
+     * @return array<string, float>
+     */
+    public function sumDefaultByEmpFid($emp_fid, $start = '', $end = '')
+    {
+        $map = [];
+        try {
+            $where = " charge_state_delete = '0' AND ";
+            $where .= " charge_type = '".CHARGE_TYPE_DEFAULT."' AND";
+            $where .= " charge_action_state IN ('".CHARGE_STATE_WAIT."','".CHARGE_STATE_PERMIT."') AND";
+            $where .= " charge_emp_fid = '".intval($emp_fid)."' ";
+            if (is_string($start) && strlen($start) > 0) {
+                $where .= " AND charge_time_require >= ".$this->mDb->escape($start)." ";
+            }
+            if (is_string($end) && strlen($end) > 0) {
+                $where .= " AND charge_time_require <= ".$this->mDb->escape($end.' 23:59:59')." ";
+            }
+            $sql = "SELECT charge_mb_uid, COALESCE(SUM(charge_money), 0) AS money_sum
+                    FROM ".$this->mTbName."
+                    WHERE ".$where."
+                    GROUP BY charge_mb_uid";
+            foreach ($this->mDb->query($sql)->getResult() as $row) {
+                $uid = (string)$row->charge_mb_uid;
+                if ($uid !== '') {
+                    $map[$uid] = (float)$row->money_sum;
+                }
+            }
+        } catch (\Exception $e) {
+            return [];
+        }
+        return $map;
+    }
+
     public function deleteCharge($charge_id){
 
         $this->mBuilder->set('charge_client_delete', '1');

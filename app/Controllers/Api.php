@@ -2063,16 +2063,26 @@ class Api extends BaseController
 			if ($hqCe && is_array($rows)) {
 				$charge_model = new Charge_Model();
 				$exchange_model = new Exchange_Model();
+				$start = isset($arrReqData['start']) ? (string)$arrReqData['start'] : '';
+				$end = isset($arrReqData['end']) ? (string)$arrReqData['end'] : '';
 				// 총판→본사 신청은 emp_fid=0
 				$pendingCharge = $charge_model->mapWaitDefaultByEmpFid(0);
 				$pendingExchange = $exchange_model->mapWaitDefaultByEmpFid(0);
+				$sumChargeReq = $charge_model->sumDefaultByEmpFid(0, $start, $end);
+				$sumExchangeReq = $exchange_model->sumDefaultByEmpFid(0, $start, $end);
 				foreach ($rows as $row) {
 					$muid = isset($row->mb_uid) ? (string)$row->mb_uid : '';
 					$pc = ($muid !== '' && isset($pendingCharge[$muid])) ? $pendingCharge[$muid] : null;
 					$pe = ($muid !== '' && isset($pendingExchange[$muid])) ? $pendingExchange[$muid] : null;
 					$row->pending_charge_fid = $pc ? (int)$pc->charge_fid : 0;
-					$row->pending_charge_money = $pc ? (float)$pc->charge_money : 0;
 					$row->pending_exchange_fid = $pe ? (int)$pe->exchange_fid : 0;
+					// 기간 내 신청 합계(대기+완료) — 확인 후에도 금액·합계 유지
+					$row->charge_req_money = ($muid !== '' && isset($sumChargeReq[$muid]))
+						? (float)$sumChargeReq[$muid] : 0;
+					$row->exchange_req_money = ($muid !== '' && isset($sumExchangeReq[$muid]))
+						? (float)$sumExchangeReq[$muid] : 0;
+					// 대기 단건 금액(버튼용 보조; 표시는 charge_req_money 우선)
+					$row->pending_charge_money = $pc ? (float)$pc->charge_money : 0;
 					$row->pending_exchange_money = $pe ? (float)$pe->exchange_money : 0;
 				}
 			}

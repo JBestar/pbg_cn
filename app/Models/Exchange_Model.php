@@ -174,6 +174,40 @@ class Exchange_Model extends Model {
         return $map;
     }
 
+    /**
+     * Sum Default-type exchange amounts (WAIT+PERMIT) per mb_uid for emp_fid.
+     * @return array<string, float>
+     */
+    public function sumDefaultByEmpFid($emp_fid, $start = '', $end = '')
+    {
+        $map = [];
+        try {
+            $where = " exchange_state_delete = '0' AND ";
+            $where .= " exchange_type = '".CHARGE_TYPE_DEFAULT."' AND";
+            $where .= " exchange_action_state IN ('".CHARGE_STATE_WAIT."','".CHARGE_STATE_PERMIT."') AND";
+            $where .= " exchange_emp_fid = '".intval($emp_fid)."' ";
+            if (is_string($start) && strlen($start) > 0) {
+                $where .= " AND exchange_time_require >= ".$this->mDb->escape($start)." ";
+            }
+            if (is_string($end) && strlen($end) > 0) {
+                $where .= " AND exchange_time_require <= ".$this->mDb->escape($end.' 23:59:59')." ";
+            }
+            $sql = "SELECT exchange_mb_uid, COALESCE(SUM(exchange_money), 0) AS money_sum
+                    FROM ".$this->mTbName."
+                    WHERE ".$where."
+                    GROUP BY exchange_mb_uid";
+            foreach ($this->mDb->query($sql)->getResult() as $row) {
+                $uid = (string)$row->exchange_mb_uid;
+                if ($uid !== '') {
+                    $map[$uid] = (float)$row->money_sum;
+                }
+            }
+        } catch (\Exception $e) {
+            return [];
+        }
+        return $map;
+    }
+
     public function deleteExchange($exchange_id){
 
         $this->mBuilder->set('exchange_client_delete', '1');
