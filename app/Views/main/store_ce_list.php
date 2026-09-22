@@ -6,7 +6,7 @@
         <input type="date" id="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
         &nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> :
         <input type="text" id="inputUserID" class="inputDate" value="">
-        &nbsp;&nbsp;<input type="submit" onclick="reqSearch();" class="btn_search" value="<?= lang('Admin.btn_search') ?>">
+        &nbsp;&nbsp;<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
         <button class="btn_red" onclick="location.reload();"><?= lang('Admin.btn_refresh') ?></button>
 	</div>
 

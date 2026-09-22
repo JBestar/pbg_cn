@@ -8,7 +8,7 @@
         <input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
         <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
 			&nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> : <input type="text" id="inputSubId" class="inputSubId" value="">
-			<input type="submit" class="btn_search" onclick="reqSearch();" value="<?= lang('Admin.btn_search') ?>">&nbsp;
+			<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>&nbsp;
             <button class="btn_red" onclick="window.location.reload();"><?= lang('Admin.btn_refresh') ?></button>
 		
 	</div>
@@ -76,4 +76,4 @@
 <!-- <div class="divContent"> -->    
 </div>
 
-<script src="/assets/js/exchange_list.js"></script>
+<script src="/assets/js/exchange_list.js?v=2"></script>

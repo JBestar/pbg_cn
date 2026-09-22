@@ -29,8 +29,8 @@ function showPage(arrInfo) {
 
             tHtml += "<td class=\"tdDate\">";
             if (parseInt(arrInfo[idx].charge_action_state) > 0) {
-                tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"deleteChargeProc(";
-                tHtml += arrInfo[idx].charge_fid + ");\">삭제</button>";
+                tHtml += "<button type=\"button\" class=\"btn_red btn_icon\" title=\"삭제\" aria-label=\"삭제\" onclick=\"deleteChargeProc(";
+                tHtml += arrInfo[idx].charge_fid + ");\"><i class=\"fas fa-trash-alt\"></i></button>";
             } else {
                 tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"permitChargeProc(";
                 tHtml += arrInfo[idx].charge_fid + ");\">확인</button> ";

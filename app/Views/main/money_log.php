@@ -28,7 +28,7 @@
 			</select>
 			<input type="text" id="inputSearchVal" name="inputSearchVal" class="inputDate" value="">
             -->
-			<input type="submit" class="btn_search" onclick="reqSearch();" value="<?= lang('Admin.btn_search') ?>" >
+			<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
 			<button class="btn_red" onclick="window.location.reload();"><?= lang('Admin.btn_refresh') ?></button>
 		</form>
 	</div>

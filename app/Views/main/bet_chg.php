@@ -6,7 +6,7 @@
                     <option value="<?= GAME_POWER_BALL ?>" selected><?= lang('Admin.game_powerball') ?></option>
     </select>
 			&nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> : <input type="text" id="inputUserID" name="inputUserID" class="inputDate" value="">
-			&nbsp;&nbsp;<input type="submit" onclick="reqSearch();" class="btn_search" value="<?= lang('Admin.btn_search') ?>">
+			&nbsp;&nbsp;<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
 	</div>
     <link rel="stylesheet" href="/assets/css/button.css">
     <link rel="stylesheet" href="/assets/css/button.new.css">

@@ -13,7 +13,7 @@
         <link rel="stylesheet" href="/assets/css/lib/jquery-ui.css">
         <link rel="stylesheet" href="/assets/css/lib/all.css">
 
-        <link rel="stylesheet" href="/assets/css/main.css?v=15">
+        <link rel="stylesheet" href="/assets/css/main.css?v=18">
         <link rel="stylesheet" href="/assets/css/button1.css">
         <link rel="stylesheet" href="/assets/css/button2.css">
         <link rel="stylesheet" href="/assets/css/simplePagination.css">        

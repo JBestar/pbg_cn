@@ -4,11 +4,10 @@
 			<input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
             <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
 			&nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> : <input type="text" id="inputSubId" name="inputSubId" class="inputDate" value="" autocomplete="off">
-			<input type="submit" class="btn_search" onclick="reqSearch();" value="<?= lang('Admin.btn_search') ?>">&nbsp;
-            <button type="button" class="btn_blue" style="float:right; margin-right:10px; padding:5px 14px; border-radius:6px;" onclick="openStoreReg();"><?= lang('Admin.title_agency_reg') ?></button>
+			<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>&nbsp;
+            <button type="button" class="btn_reg" style="float:right; margin-right:10px;" onclick="openStoreReg();"><?= lang('Admin.title_agency_reg') ?></button>
 	</div>
     <div class="divList">
-		<div class="divSearch" id="divSearchResult">Total 0</div>
 		<table class="default_table">
 			<thead>
                 <tr>
@@ -38,8 +37,6 @@
 
 <style>
 .btn-store-action {
-    padding: 5px 12px;
-    font-size: 12px;
     margin: 1px;
 }
 </style>
@@ -55,7 +52,7 @@ window.ADMIN_I18N.level_store = <?= json_encode(lang('Admin.menu_agency'), JSON_
 </script>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/agency.js?v=4"></script>
+    <script src="/assets/js/agency.js?v=7"></script>
 <?php else :?>
     <script src="/assets/js/agency.js?v=<?=time();?>"></script>
 <?php endif ?>

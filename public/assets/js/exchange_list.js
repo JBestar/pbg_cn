@@ -33,8 +33,8 @@ function showPage(arrInfo) {
             tHtml += "<td class=\"tdDate\">" + getChargeStateText(arrInfo[idx].exchange_action_state) + "</td>";
             tHtml += "<td class=\"tdDate\">";
             if (parseInt(arrInfo[idx].exchange_action_state) > 0) {
-                tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"deleteExchangeProc(";
-                tHtml += arrInfo[idx].exchange_fid + ");\">삭제</button>";
+                tHtml += "<button type=\"button\" class=\"btn_red btn_icon\" title=\"삭제\" aria-label=\"삭제\" onclick=\"deleteExchangeProc(";
+                tHtml += arrInfo[idx].exchange_fid + ");\"><i class=\"fas fa-trash-alt\"></i></button>";
             } else {
                 tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"permitExchangeProc(";
                 tHtml += arrInfo[idx].exchange_fid + ");\">확인</button> ";

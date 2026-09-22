@@ -21,8 +21,8 @@ function showPage(arrInfo) {
             tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn_blue\" ";
             tHtml += "onclick=\"showAnswerQna(" + idx + ");\"> ";
             tHtml += "답변</button></td>";
-            tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn_red\" ";
-            tHtml += "onclick=\"deleteQna(" + arrInfo[idx].notice_fid + ");\">삭제</button></td>";
+            tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn_red btn_icon\" title=\"삭제\" aria-label=\"삭제\" ";
+            tHtml += "onclick=\"deleteQna(" + arrInfo[idx].notice_fid + ");\"><i class=\"fas fa-trash-alt\"></i></button></td>";
             tHtml += "</tr>";
 
         }

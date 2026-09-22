@@ -10,7 +10,7 @@
 			<input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
             <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
 			&nbsp;&nbsp;&nbsp;<?= lang('Admin.label_receiver') ?> : <input type="text" id="inputUserID" name="inputUserID" class="inputDate" value="">
-			&nbsp;&nbsp;<input type="submit" onclick="reqSearch();" class="btn_search" value="<?= lang('Admin.btn_search') ?>">
+			&nbsp;&nbsp;<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
             <button class="btn_blue" style="float:right; margin-right:10px; padding:5px 14px; white-space:nowrap;" onclick="showEditMemo();"><?= lang('Admin.btn_send_memo') ?></button>
 	</div>
     <div class="divList">
@@ -130,4 +130,4 @@
     
 </div>
 
-<script src="/assets/js/memo_list.js"></script>
+<script src="/assets/js/memo_list.js?v=2"></script>

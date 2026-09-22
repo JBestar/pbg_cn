@@ -93,9 +93,10 @@ a:active {
 
 .spanLeftMenu {
     position: relative;
-    border: 0px solid #ff0000;
-    padding: 8px 0px 8px 20px;
-    left: 0px;
+    border: 0 solid transparent;
+    border-left: 3px solid transparent;
+    padding: 8px 12px 8px 17px;
+    left: 0;
     width: 200px;
     height: auto;
     min-height: 32px;
@@ -105,17 +106,44 @@ a:active {
     font-size: 17px; /* match .admin-topbar */
     font-weight: bold;
     cursor: pointer;
+    color: #e8eef5;
+    transform-origin: left center;
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        color 0.2s ease,
+        padding-left 0.2s ease;
+}
+
+.spanLeftMenu i {
+    display: inline-block;
+    transition: transform 0.2s ease;
 }
 
 .spanLeftMenu:hover {
-    background-color: #425164;
+    background: linear-gradient(90deg, #4a5d78 0%, #425164 60%, #39435c 100%);
+    border-left-color: #38bdf8;
+    color: #ffffff;
+    transform: scale(1.07) translateX(4px);
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    z-index: 2;
+}
+
+.spanLeftMenu:hover i {
+    transform: scale(1.15);
+    color: #7dd3fc;
 }
 
 .spanLeftSubMenu {
     position: relative;
-    border: 0px solid #ff0000;
-    padding: 8px 0px 8px 50px;
-    left: 0px;
+    border: 0 solid transparent;
+    border-left: 3px solid transparent;
+    padding: 8px 12px 8px 47px;
+    left: 0;
     width: 170px;
     height: auto;
     min-height: 32px;
@@ -125,15 +153,60 @@ a:active {
     font-size: 17px; /* match .admin-topbar */
     font-weight: bold;
     cursor: pointer;
+    color: #d7dee8;
+    transform-origin: left center;
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        color 0.2s ease;
+}
+
+.spanLeftSubMenu i {
+    display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .spanLeftSubMenu:hover {
-    background-color: #425164;
+    background: linear-gradient(90deg, #45566f 0%, #3f4d63 70%, #39435c 100%);
+    border-left-color: #7dd3fc;
+    color: #ffffff;
+    transform: scale(1.06) translateX(6px);
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    z-index: 2;
+}
+
+.spanLeftSubMenu:hover i {
+    transform: translateX(3px) scale(1.1);
+    color: #bae6fd;
 }
 
 .spanActiveMenu {
-    color: rgb(255, 255, 0);
-    background-color: rgb(66, 81, 100);
+    color: #fde047;
+    background: linear-gradient(90deg, #4a5a72 0%, #425164 100%);
+    border-left-color: #facc15;
+    box-shadow: inset 0 0 0 1px rgba(250, 204, 21, 0.15);
+}
+
+.spanActiveMenu:hover {
+    color: #fef08a;
+    border-left-color: #fde047;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spanLeftMenu,
+    .spanLeftSubMenu,
+    .spanLeftMenu i,
+    .spanLeftSubMenu i {
+        transition: none;
+    }
+    .spanLeftMenu:hover,
+    .spanLeftSubMenu:hover {
+        transform: none;
+    }
 }
 
 .badge {
@@ -408,17 +481,22 @@ a:active {
 .btn-ce-confirm,
 .btn-store-action {
     display: inline-block;
-    padding: 4px 12px;
+    height: 30px;
+    line-height: 28px;
+    padding: 0 12px;
     border-radius: 4px;
+    box-sizing: border-box;
     font-weight: 600;
+    font-size: 13px;
+    vertical-align: middle;
     cursor: pointer;
     color: #fff !important;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
     box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.3) inset,
-        0 -1px 0 rgba(0, 0, 0, 0.2) inset,
-        0 2px 3px rgba(0, 0, 0, 0.22);
-    transition: filter 0.12s ease, transform 0.08s ease;
+        0 1px 0 rgba(255, 255, 255, 0.35) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.22) inset,
+        0 2px 4px rgba(0, 0, 0, 0.28);
+    transition: filter 0.12s ease, transform 0.08s ease, box-shadow 0.12s ease;
 }
 .btn-detail-view:hover,
 .btn-ce-confirm:hover,
@@ -462,15 +540,17 @@ a:active {
     flex-shrink: 0;
     background-color: #39435c;
     color: #ffffff;
+    overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
+    padding: 6px 0 12px;
 }
 .admin-sidebar .spanLeftMenu,
 .admin-sidebar .spanLeftSubMenu {
     box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
+    width: calc(100% - 6px);
+    max-width: none;
 }
 .admin-account-wrap {
     width: 100%;
@@ -625,6 +705,88 @@ a:active {
     flex-wrap: wrap;
     align-items: center;
     gap: 4px 8px;
+}
+
+/* Icon-only action buttons (search / edit / delete) */
+button.btn_search.btn_icon,
+.btn_icon {
+    min-width: 34px;
+    width: 34px;
+    height: 30px;
+    line-height: 28px;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.35) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.22) inset,
+        0 2px 4px rgba(0, 0, 0, 0.28) !important;
+}
+button.btn_search.btn_icon {
+    font-size: 15px;
+}
+.btn_icon i {
+    pointer-events: none;
+}
+.btn_icon:active {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4) inset !important;
+    transform: translateY(1px);
+}
+.btn-store-action.btn_icon {
+    min-width: 34px;
+    width: 34px;
+    padding: 0;
+    line-height: 28px;
+}
+
+/* Text chips: 충전/회수/승인 — same height & rounded square as icons */
+.btn_chip,
+.btn_reg {
+    display: inline-block;
+    height: 30px;
+    line-height: 28px;
+    padding: 0 12px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    vertical-align: middle;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+    border: 1px solid transparent;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.35) inset,
+        0 -1px 0 rgba(0, 0, 0, 0.22) inset,
+        0 2px 4px rgba(0, 0, 0, 0.28);
+    transition: filter 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+}
+.btn_chip:hover,
+.btn_reg:hover {
+    filter: brightness(1.08);
+}
+.btn_chip:active,
+.btn_reg:active {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4) inset;
+    transform: translateY(1px);
+    filter: brightness(0.96);
+}
+.btn_blue.btn_chip {
+    background: linear-gradient(180deg, #2b9adf 0%, #0070bd 52%, #00548f 100%) !important;
+    border-color: #003f6b !important;
+}
+.btn_red.btn_chip {
+    background: linear-gradient(180deg, #e84a42 0%, #cb251d 52%, #9e1a14 100%) !important;
+    border-color: #7a140f !important;
+}
+.btn_reg {
+    background: linear-gradient(180deg, #2b9adf 0%, #0070bd 52%, #00548f 100%);
+    border-color: #003f6b;
+    white-space: nowrap;
 }
 
 .inputDate {

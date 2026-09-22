@@ -70,4 +70,4 @@
 
 
 
-<script src="/assets/js/qna_list.js"></script>
+<script src="/assets/js/qna_list.js?v=2"></script>

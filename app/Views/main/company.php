@@ -9,12 +9,11 @@
 			<input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
             <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
 			&nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> : <input type="text" id="inputSubId" name="inputSubId" class="inputDate" value="" autocomplete="off">
-			<input type="submit" class="btn_search" onclick="reqSearch();" value="<?= lang('Admin.btn_search') ?>">&nbsp;
-            <button class="submit" style="float:right; margin-right:10px; padding:5px 10px;" onclick="showRegMember();"><?= lang('Admin.title_company_reg') ?></button>
+			<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>&nbsp;
+            <button type="button" class="btn_reg" style="float:right; margin-right:10px;" onclick="showRegMember();"><?= lang('Admin.title_company_reg') ?></button>
 		
 	</div>
     <div class="divList">
-		<div class="divSearch" id="divSearchResult">Total 0</div>
 		<table class="default_table">
 			<thead>
                 <tr>
@@ -130,7 +129,6 @@
     <div class="divInfoBox" style="line-height:30px; font-size:14px;">
         
         
-        <div class="divSearch" id="divSubSearchResult">Total 0</div>
         <table class="default_table">
             <thead>
                 <tr>
@@ -593,4 +591,4 @@ window.ADMIN_I18N.btn_block = <?= json_encode(lang('Admin.btn_block'), JSON_UNES
 window.ADMIN_I18N.btn_delete = <?= json_encode(lang('Admin.btn_delete'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.status_online = <?= json_encode(lang('Admin.status_online'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
-<script src="/assets/js/company.js?v=3"></script>
+<script src="/assets/js/company.js?v=6"></script>

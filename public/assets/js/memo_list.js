@@ -25,11 +25,11 @@ function showPage(arrInfo) {
             tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn_blue\" ";
             tHtml += "onclick=\"showViewMemo(" + idx + ");\"> ";
             tHtml += "내용보기</button></td>";
-            tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn_blue\" ";
-            tHtml += "onclick=\"showModeMemo(" + idx + ");\" style=\"margin-right:5px;\"> ";
-            tHtml += "수정</button>";
-            tHtml += "<button type=\"button\" class=\"btn_red\" ";
-            tHtml += "onclick=\"deleteMemo(" + arrInfo[idx].notice_fid + ");\">삭제</button></td>";
+            tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn_blue btn_icon\" title=\"수정\" aria-label=\"수정\" ";
+            tHtml += "onclick=\"showModeMemo(" + idx + ");\" style=\"margin-right:5px;\">";
+            tHtml += "<i class=\"fas fa-pencil-alt\"></i></button>";
+            tHtml += "<button type=\"button\" class=\"btn_red btn_icon\" title=\"삭제\" aria-label=\"삭제\" ";
+            tHtml += "onclick=\"deleteMemo(" + arrInfo[idx].notice_fid + ");\"><i class=\"fas fa-trash-alt\"></i></button></td>";
             tHtml += "</tr>";
 
         }

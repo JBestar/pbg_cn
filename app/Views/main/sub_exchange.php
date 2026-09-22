@@ -58,4 +58,4 @@
     </div>
 
 
-    <script src="/assets/js/sub_exchange.js"></script>
+    <script src="/assets/js/sub_exchange.js?v=2"></script>

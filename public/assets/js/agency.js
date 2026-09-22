@@ -62,8 +62,8 @@ function showPage(arrInfo) {
             tHtml += '<button type="button" class="btn-store-action btn-store-red" onclick="openStoreRecover(\''
                 + escAttr(r.mb_uid) + '\')">' + t('btn_egg_recover', '회수') + '</button>';
             tHtml += '</td><td class="tdDate">';
-            tHtml += '<button type="button" class="btn-store-action btn-store-blue" onclick="openStoreEdit('
-                + r.mb_fid + ')">' + t('btn_edit', '수정') + '</button> ';
+            tHtml += '<button type="button" class="btn-store-action btn-store-blue btn_icon" title="' + t('btn_edit', '수정') + '" aria-label="' + t('btn_edit', '수정') + '" onclick="openStoreEdit('
+                + r.mb_fid + ')"><i class="fas fa-pencil-alt"></i></button> ';
             if (parseInt(r.mb_state_active, 10) == 1) {
                 tHtml += '<button type="button" class="btn-store-action btn-store-blue" onclick="reqPermitMember('
                     + r.mb_fid + ', 0);">' + t('btn_approve', '승인') + '</button>';
@@ -76,7 +76,6 @@ function showPage(arrInfo) {
             tHtml += '</tr>';
         }
     }
-    $('#divSearchResult').html('Total ' + totalMember);
     $('#tbodyList').html(tHtml);
 }
 

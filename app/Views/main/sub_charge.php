@@ -73,4 +73,4 @@
     </div>
 
 
-    <script src="/assets/js/sub_charge.js"></script>
+    <script src="/assets/js/sub_charge.js?v=2"></script>

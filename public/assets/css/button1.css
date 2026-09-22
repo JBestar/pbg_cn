@@ -18,6 +18,10 @@
     font-weight:normal;
     padding:2px 12px;
     text-decoration:none;
+    vertical-align: middle;
+}
+button.btn_search {
+    font-family: inherit;
 }
 .btn_search:hover {
     background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #68a54b), color-stop(1, #74ad5a));

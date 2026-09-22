@@ -31,7 +31,7 @@
         <input type="date" id="inputDateS" value="<?= esc($start) ?>" class="inputDate">
         &nbsp;~&nbsp;
         <input type="date" id="inputDateE" value="<?= esc($end) ?>" class="inputDate">
-        <input type="button" class="btn_search" onclick="reqDetailSearch();" value="<?= lang('Admin.btn_search') ?>">
+        <button type="button" class="btn_search btn_icon" onclick="reqDetailSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
     </div>
     <table class="default_table">
         <thead>

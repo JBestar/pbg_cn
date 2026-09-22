@@ -19,7 +19,7 @@
             ?>
             <input type="date" id="inputDateS" value="<?= $dateS ?>" name="inputDateS" class="inputDate hasDatepicker">&nbsp;~&nbsp;
             <input type="date" id="inputDateE" value="<?= $dateE ?>" name="inputDateE" class="inputDate hasDatepicker">
-            <input type="submit" class="btn_search" onclick="reqSearch();" value="<?= lang('Admin.btn_search') ?>">
+            <button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
     </div>
 
 

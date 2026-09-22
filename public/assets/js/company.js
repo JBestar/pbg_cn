@@ -50,29 +50,29 @@ function showPage(arrInfo) {
             tHtml += "</button></td>";
 
             tHtml += "<td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"showServiceCharge('";
+            tHtml += "<button type=\"button\" class=\"btn_blue btn_chip\" onclick=\"showServiceCharge('";
             tHtml += r.mb_uid + "', '" + r.mb_nickname + "', '" + r.mb_money + "');\">"
                 + t('btn_egg_charge', '충전') + "</button> ";
-            tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"showServiceExchange('";
+            tHtml += "<button type=\"button\" class=\"btn_red btn_chip\" onclick=\"showServiceExchange('";
             tHtml += r.mb_uid + "', '" + r.mb_nickname + "', '" + r.mb_money + "');\">"
                 + t('btn_egg_recover', '회수') + "</button>";
             tHtml += "</td>";
 
             tHtml += "<td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchEditMember(" + r.mb_fid + ");\">"
-                + t('btn_edit', '수정') + "</button> ";
+            tHtml += "<button type=\"button\" class=\"btn_blue btn_icon\" title=\"" + t('btn_edit', '수정') + "\" aria-label=\"" + t('btn_edit', '수정') + "\" onclick=\"fetchEditMember(" + r.mb_fid + ");\">"
+                + "<i class=\"fas fa-pencil-alt\"></i></button> ";
             if (parseInt(r.mb_state_active, 10) == 1) {
-                tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"reqPermitMember(" + r.mb_fid + ", 0);\">"
+                tHtml += "<button type=\"button\" class=\"btn_blue btn_chip\" onclick=\"reqPermitMember(" + r.mb_fid + ", 0);\">"
                     + t('btn_approve', '승인') + "</button>";
             } else {
-                tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqPermitMember(" + r.mb_fid + ", 1);\">"
+                tHtml += "<button type=\"button\" class=\"btn_red btn_chip\" onclick=\"reqPermitMember(" + r.mb_fid + ", 1);\">"
                     + t('btn_block', '차단') + "</button>";
             }
             tHtml += "</td>";
 
             tHtml += "<td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"reqDeleteMember(" + r.mb_fid + ");\">"
-                + t('btn_delete', '삭제') + "</button>";
+            tHtml += "<button type=\"button\" class=\"btn_red btn_icon\" title=\"" + t('btn_delete', '삭제') + "\" aria-label=\"" + t('btn_delete', '삭제') + "\" onclick=\"reqDeleteMember(" + r.mb_fid + ");\">"
+                + "<i class=\"fas fa-trash-alt\"></i></button>";
             tHtml += "</td>";
 
             tHtml += "<td class=\"tdDate\">";
@@ -85,7 +85,6 @@ function showPage(arrInfo) {
         }
     }
 
-    $('#divSearchResult').text('Total ' + totalMember);
     $('#tbodyList').html(tHtml);
 }
 
@@ -633,11 +632,11 @@ function showSubMember(arrInfo, objEmp) {
             tHtml += "<td class=\"tdMoney\" >" + fmtPoint(arrInfo[idx].mb_point) + "</td>";
 
             tHtml += "<td class=\"tdDate\">";
-            tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"showServiceCharge('";
+            tHtml += "<button type=\"button\" class=\"btn_blue btn_chip\" onclick=\"showServiceCharge('";
             tHtml += arrInfo[idx].mb_uid + "', '" + arrInfo[idx].mb_nickname + "', '" + arrInfo[idx].mb_money;
             tHtml += "', '" + objEmp.mb_fid + "');\">" + t('btn_egg_charge', '충전') + "</button> ";
 
-            tHtml += "<button type=\"button\" class=\"btn_red\" onclick=\"showServiceExchange('";
+            tHtml += "<button type=\"button\" class=\"btn_red btn_chip\" onclick=\"showServiceExchange('";
             tHtml += arrInfo[idx].mb_uid + "', '" + arrInfo[idx].mb_nickname + "', '" + arrInfo[idx].mb_money
             tHtml += "', '" + objEmp.mb_fid + "');\">" + t('btn_egg_recover', '회수') + "</button>";
             tHtml += "</td></tr>";
@@ -648,7 +647,6 @@ function showSubMember(arrInfo, objEmp) {
         $('#subTitleId').text(objEmp.mb_nickname + " 하부매장");
     }
 
-    $('#divSubSearchResult').text('Total ' + totalMember);
     $('#tSubbodyList').html(tHtml);
 
 
