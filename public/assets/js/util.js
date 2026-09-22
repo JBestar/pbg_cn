@@ -9,6 +9,14 @@ function showAlert(msg) {
 
 }
 
+/** Point / commission display — always 2 decimal places (display only). */
+function fmtPoint(n) {
+    return Number(n || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
 
 function closeAlert() {
     $('#layui-layer-shade').hide();

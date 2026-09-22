@@ -26,21 +26,22 @@ function showPage(arrInfo, gameId) {
             tHtml += "<td class=\"tdDate\">" + arrInfo[idx].bet_count + "</td>";
             tHtml += "<td class=\"tdMoney\">" + parseInt(arrInfo[idx].bet_sum).toLocaleString() + "</td>";
             tHtml += "<td class=\"tdMoney\">" + parseInt(arrInfo[idx].win_sum).toLocaleString() + "</td>";
-            tHtml += "<td class=\"tdMoney\">" + parseInt(arrInfo[idx].point_sum).toLocaleString() + "</td>";
-            profit = parseInt(arrInfo[idx].bet_sum) - parseInt(arrInfo[idx].win_sum) - parseInt(arrInfo[idx].point_sum);
+            var pointSum = parseFloat(arrInfo[idx].point_sum) || 0;
+            tHtml += "<td class=\"tdMoney\">" + fmtPoint(pointSum) + "</td>";
+            profit = (parseInt(arrInfo[idx].bet_sum, 10) || 0) - (parseInt(arrInfo[idx].win_sum, 10) || 0) - pointSum;
             tHtml += "<td class=\"tdMoney\">";
             if (profit >= 0) {
                 tHtml += "<font color=\"#0000fe\">";
             } else {
                 tHtml += "<font color=\"#fe0000\">";
             }
-            tHtml += profit.toLocaleString() + "</font></td>";
+            tHtml += fmtPoint(profit) + "</font></td>";
 
             tHtml += "</tr>";
             totalCnt += parseInt(arrInfo[idx].bet_count);
             totalBet += parseInt(arrInfo[idx].bet_sum);
             totalWin += parseInt(arrInfo[idx].win_sum);
-            totalPoint += parseInt(arrInfo[idx].point_sum);
+            totalPoint += pointSum;
             totalProfit += profit;
         }
 
@@ -48,12 +49,12 @@ function showPage(arrInfo, gameId) {
     $("#thBetCount").html(totalCnt.toLocaleString());
     $("#thBetSum").html(totalBet.toLocaleString());
     $("#thWinSum").html(totalWin.toLocaleString());
-    $("#thPointSum").html(totalPoint.toLocaleString());
+    $("#thPointSum").html(fmtPoint(totalPoint));
 
     if (totalProfit >= 0)
         $("#thProfitSum").css("color", "#0000fe");
     else $("#thProfitSum").css("color", "#fe0000");
-    $("#thProfitSum").html(totalProfit.toLocaleString());
+    $("#thProfitSum").html(fmtPoint(totalProfit));
 
     $('#tbodyList').html(tHtml);
 }

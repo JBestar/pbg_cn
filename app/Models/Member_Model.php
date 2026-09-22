@@ -535,7 +535,7 @@ class Member_Model extends Model {
                 $strSql.= " ) AS emp_tb ON emp_tb.emp_fid = member.mb_emp_fid ";
 
             $strSql.= " LEFT JOIN ( SELECT mb_uid AS bet_mb_uid, SUM(amount) AS bet_sum, SUM(win_amount) AS bet_win_sum, ";
-                $strSql.= " 0 AS bet_empl_sum, 0 AS bet_agen_sum FROM bets ";
+                $strSql.= " COALESCE(SUM(empl_point), 0) AS bet_empl_sum, COALESCE(SUM(agen_point), 0) AS bet_agen_sum FROM bets ";
                 $strSql.= " WHERE state IN (2, 3) ";
                 if( array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0 ){
                     $strSql.= " AND created_at >= '".$this->mDb->escapeString($arrRqData['start'])."' ";
@@ -551,7 +551,7 @@ class Member_Model extends Model {
 
 
             $strSql.= " LEFT JOIN ( SELECT emp_fid AS bet_emp_fid, SUM(amount) AS bet_sum, SUM(win_amount) AS bet_win_sum, ";
-                $strSql.= " 0 AS bet_empl_sum, 0 AS bet_agen_sum FROM bets ";
+                $strSql.= " COALESCE(SUM(empl_point), 0) AS bet_empl_sum, COALESCE(SUM(agen_point), 0) AS bet_agen_sum FROM bets ";
                 $strSql.= " WHERE state IN (2, 3) ";
                 if( array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0 ){
                     $strSql.= " AND created_at >= '".$this->mDb->escapeString($arrRqData['start'])."' ";

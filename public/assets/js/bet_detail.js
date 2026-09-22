@@ -43,7 +43,7 @@ function showDetail(arrInfo) {
             tHtml += '<td>' + (parseInt(r.bet_money, 10) || 0).toLocaleString() + '</td>';
             tHtml += '<td>' + afterMoney.toLocaleString() + '</td>';
             tHtml += '<td>' + (parseInt(r.bet_win_money, 10) || 0).toLocaleString() + '</td>';
-            tHtml += '<td>' + (parseInt(r.mb_point, 10) || 0).toLocaleString() + '</td>';
+            tHtml += '<td>' + fmtPoint(r.mb_point) + '</td>';
             tHtml += '<td>' + esc(r.bet_time) + '</td>';
             tHtml += '</tr>';
         }

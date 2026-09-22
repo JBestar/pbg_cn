@@ -23,17 +23,17 @@ function showPage(arrInfo) {
             } else {
                 tHtml += '<td class="tdDate">' + (row.round_time || '') + '</td>';
             }
-            var betSum = parseInt(row.bet_sum, 10) || 0;
-            var winSum = parseInt(row.win_sum, 10) || 0;
-            var pointSum = (parseInt(row.empl_sum, 10) || 0) + (parseInt(row.agen_sum, 10) || 0);
+            var betSum = parseFloat(row.bet_sum) || 0;
+            var winSum = parseFloat(row.win_sum) || 0;
+            var pointSum = (parseFloat(row.empl_sum) || 0) + (parseFloat(row.agen_sum) || 0);
             tHtml += '<td class="tdDate">' + (parseInt(row.bet_count, 10) || 0) + '</td>';
-            tHtml += '<td class="tdMoney">' + betSum.toLocaleString() + '</td>';
-            tHtml += '<td class="tdMoney">' + winSum.toLocaleString() + '</td>';
-            tHtml += '<td class="tdMoney">' + pointSum.toLocaleString() + '</td>';
+            tHtml += '<td class="tdMoney">' + betSum.toLocaleString(undefined, { maximumFractionDigits: 2 }) + '</td>';
+            tHtml += '<td class="tdMoney">' + winSum.toLocaleString(undefined, { maximumFractionDigits: 2 }) + '</td>';
+            tHtml += '<td class="tdMoney">' + fmtPoint(pointSum) + '</td>';
             var profit = betSum - winSum - pointSum;
             tHtml += '<td class="tdMoney">';
             tHtml += profit >= 0 ? '<font color="#0000fe">' : '<font color="#fe0000">';
-            tHtml += profit.toLocaleString() + '</font></td>';
+            tHtml += fmtPoint(profit) + '</font></td>';
             tHtml += '</tr>';
         }
     }

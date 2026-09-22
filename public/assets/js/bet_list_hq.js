@@ -85,8 +85,8 @@ function showPage(arrInfo, roleLabel) {
             tHtml += diff >= 0 ? '<font color="#0000fe">' : '<font color="#fe0000">';
             tHtml += diff.toLocaleString() + '</font></td>';
             tHtml += '<td class="tdDate">' + (parseInt(r.win_rounds, 10) || 0) + '</td>';
-            tHtml += '<td class="tdMoney">' + Math.round(point).toLocaleString() + '</td>';
-            tHtml += '<td class="tdMoney">' + Math.round(agenPoint).toLocaleString() + '</td>';
+            tHtml += '<td class="tdMoney">' + fmtPoint(point) + '</td>';
+            tHtml += '<td class="tdMoney">' + fmtPoint(agenPoint) + '</td>';
             if (hqMode === 'agency') {
                 tHtml += '<td class="tdDate"><button type="button" class="btn-detail-view" onclick="openAgencyStores(\''
                     + escAttr(r.mb_uid) + '\');">' + esc(detailLabel) + '</button></td>';

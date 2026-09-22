@@ -320,7 +320,7 @@ class PbBet_Model extends Model {
                     COUNT(b.id) AS bet_count,
                     SUM(b.amount) AS bet_sum,
                     SUM(b.win_amount) AS win_sum,
-                    0 AS point_sum
+                    COALESCE(SUM(b.empl_point + b.agen_point), 0) AS point_sum
                     FROM bets b
                     WHERE {$where}
                     GROUP BY CAST(b.created_at AS DATE), b.round

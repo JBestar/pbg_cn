@@ -26,6 +26,16 @@ function moneyCell(n, colorize) {
     return html;
 }
 
+/** Bet profit cell (may include fractional points) — display only. */
+function pointProfitCell(n) {
+    var v = Number(n) || 0;
+    var html = '<td class="tdMoney">';
+    if (v >= 0) html += '<font color="#0000fe">';
+    else html += '<font color="#fe0000">';
+    html += fmtPoint(v) + '</font></td>';
+    return html;
+}
+
 function showPage(arrInfo) {
     var tHtml = '';
     var hq = isHq();
@@ -50,8 +60,8 @@ function showPage(arrInfo) {
             tHtml += '<td class="tdDate">' + (row.date || '') + '</td>';
             tHtml += '<td class="tdMoney">' + bet.toLocaleString() + '</td>';
             tHtml += '<td class="tdMoney">' + win.toLocaleString() + '</td>';
-            tHtml += '<td class="tdMoney">' + point.toLocaleString() + '</td>';
-            tHtml += moneyCell(bet_profit, true);
+            tHtml += '<td class="tdMoney">' + fmtPoint(point) + '</td>';
+            tHtml += pointProfitCell(bet_profit);
             tHtml += '<td class="tdMoney">' + give.toLocaleString() + '</td>';
             tHtml += '<td class="tdMoney">' + recovery.toLocaleString() + '</td>';
             if (hq) {
@@ -76,8 +86,8 @@ function showPage(arrInfo) {
         tHtml += '<td class="tdDate">' + totalLabel() + '</td>';
         tHtml += '<td class="tdMoney">' + bet_sum.toLocaleString() + '</td>';
         tHtml += '<td class="tdMoney">' + win_sum.toLocaleString() + '</td>';
-        tHtml += '<td class="tdMoney">' + point_sum.toLocaleString() + '</td>';
-        tHtml += moneyCell(bet_profit_sum, true);
+        tHtml += '<td class="tdMoney">' + fmtPoint(point_sum) + '</td>';
+        tHtml += pointProfitCell(bet_profit_sum);
         tHtml += '<td class="tdMoney">' + give_sum.toLocaleString() + '</td>';
         tHtml += '<td class="tdMoney">' + recovery_sum.toLocaleString() + '</td>';
         if (hq) {

@@ -32,8 +32,8 @@ function showPage(arrInfo) {
             // skip deleted-looking rows only if needed
             var bet = parseInt(r.bet_sum, 10) || 0;
             var win = parseInt(r.bet_win_sum, 10) || 0;
-            var empl = parseInt(r.bet_empl_sum, 10) || 0;
-            var agen = parseInt(r.bet_agen_sum, 10) || 0;
+            var empl = parseFloat(r.bet_empl_sum) || 0;
+            var agen = parseFloat(r.bet_agen_sum) || 0;
             var profit = bet - win - empl - agen;
             var eggIn = parseInt(r.charge_present_sum, 10) || 0;
             var eggOut = parseInt(r.exchange_present_sum, 10) || 0;
@@ -45,12 +45,12 @@ function showPage(arrInfo) {
             tHtml += '<td class="tdDate">' + r.mb_nickname + '</td>';
             tHtml += '<td class="tdDate">' + displayPwd(r.mb_pwd) + '</td>';
             tHtml += '<td class="tdMoney">' + (parseInt(r.mb_money, 10) || 0).toLocaleString() + '</td>';
-            tHtml += '<td class="tdMoney">' + (parseInt(r.mb_point, 10) || 0).toLocaleString() + '</td>';
+            tHtml += '<td class="tdMoney">' + fmtPoint(r.mb_point) + '</td>';
             tHtml += '<td class="tdMoney">' + bet.toLocaleString() + '</td>';
             tHtml += '<td class="tdMoney">';
             if (profit >= 0) tHtml += '<font color="#0000fe">';
             else tHtml += '<font color="#fe0000">';
-            tHtml += profit.toLocaleString() + '</font></td>';
+            tHtml += fmtPoint(profit) + '</font></td>';
             tHtml += '<td class="tdMoney">' + (parseInt(r.mb_limit_round, 10) || 0).toLocaleString() + '</td>';
             tHtml += '<td class="tdMoney">' + (parseInt(r.mb_limit_single, 10) || 0).toLocaleString() + '</td>';
             tHtml += '<td class="tdMoney">' + (parseInt(r.mb_limit_mix, 10) || 0).toLocaleString() + '</td>';

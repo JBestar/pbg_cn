@@ -54,8 +54,8 @@ class PbRound_Model extends Model {
                    COUNT(id) AS bet_count,
                    SUM(amount) AS bet_sum,
                    SUM(win_amount) AS win_sum,
-                   0 AS empl_sum,
-                   0 AS agen_sum
+                   COALESCE(SUM(empl_point), 0) AS empl_sum,
+                   COALESCE(SUM(agen_point), 0) AS agen_sum
             FROM bets
             WHERE {$bw}
             GROUP BY round

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/assets/css/button1.css">
     <script src="/assets/js/lib/jquery-1.12.4.min.js"></script>
     <script src="/assets/js/lib/jquery-ui-1.12.1.min.js"></script>
-    <script src="/assets/js/util.js?v=5"></script>
+    <script src="/assets/js/util.js?v=6"></script>
     <script>
     window.ADMIN_I18N = {
         mark_odd: <?= json_encode(lang('Admin.mark_odd'), JSON_UNESCAPED_UNICODE) ?>,

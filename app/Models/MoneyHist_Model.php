@@ -482,7 +482,8 @@ class MoneyHist_Model extends Model {
         }
 
         try {
-            $strSql = " SELECT CAST(created_at AS DATE) AS bet_date, SUM(amount) AS bet_sum , SUM(win_amount) AS win_sum ";
+            $strSql = " SELECT CAST(created_at AS DATE) AS bet_date, SUM(amount) AS bet_sum , SUM(win_amount) AS win_sum,
+                    COALESCE(SUM(empl_point), 0) AS empl_sum, COALESCE(SUM(agen_point), 0) AS agen_sum ";
             $strSql.= " FROM bets ";
             $strSql.= " WHERE ".$where;
             $strSql.= " GROUP BY CAST(created_at AS DATE)";
@@ -494,9 +495,8 @@ class MoneyHist_Model extends Model {
                     continue;
                 $arrAcc[$objResult->bet_date]->money_bet += $objResult->bet_sum;
                 $arrAcc[$objResult->bet_date]->money_win += $objResult->win_sum;
-                // 일자별 포인트는 member.mb_point(보유)로 집계하지 않음 — 배팅내역에서 표시
-                $arrAcc[$objResult->bet_date]->point_empl += 0;
-                $arrAcc[$objResult->bet_date]->point_agen += 0;
+                $arrAcc[$objResult->bet_date]->point_empl += (float)$objResult->empl_sum;
+                $arrAcc[$objResult->bet_date]->point_agen += (float)$objResult->agen_sum;
             }
         } catch (\Exception $e) {
             // bets 집계 실패 시 날짜 뼈대만 유지
@@ -696,7 +696,7 @@ class MoneyHist_Model extends Model {
         foreach ($rows as $row) {
             $charge = intval($row->charge_sum);
             $exchange = intval($row->exchange_sum);
-            $point = intval($row->point_sum);
+            $point = round((float)$row->point_sum, 2);
             $obj = new \StdClass;
             $obj->mb_uid = $row->mb_uid;
             $obj->mb_nickname = $row->mb_nickname;
@@ -707,7 +707,7 @@ class MoneyHist_Model extends Model {
             $obj->charge_sum = $charge;
             $obj->exchange_sum = $exchange;
             $obj->point_sum = $point;
-            $obj->diff_sum = $charge - $exchange - $point;
+            $obj->diff_sum = round($charge - $exchange - $point, 2);
             $out[] = $obj;
         }
         return $out;

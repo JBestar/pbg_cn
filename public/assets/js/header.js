@@ -69,7 +69,7 @@ function showUserInfo(objUser) {
     mUser = objUser;
     $('#spanUserName').text(mUser.mb_nickname);
     $('#spanUserMoney').text(parseInt(mUser.mb_money).toLocaleString() + " 원");
-    $('#spanUserPoint').text(parseInt(mUser.mb_point).toLocaleString() + " 원");
+    $('#spanUserPoint').text(fmtPoint(mUser.mb_point) + " 원");
     $('#spanUserIp').text(mUser.mb_ip_last);
     if (mUser.mb_level == 8) {
         $('#spanGameRate').text(mUser.mb_game_pb_ratio + " %");
@@ -93,9 +93,9 @@ function showAccountInfo(arrInfo) {
     tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_bet || 0).toLocaleString() + "</td>";
     tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_win || 0).toLocaleString() + "</td>";
     if (mbLevel == 8)
-        tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].point_agen || 0).toLocaleString() + "</td>";
+        tHtml += "<td class=\"tdMoney\">" + fmtPoint(Math.abs(arrInfo[0].point_agen || 0)) + "</td>";
     else
-        tHtml += "<td class=\"tdMoney\">" + (Math.abs(arrInfo[0].point_agen || 0) + Math.abs(arrInfo[0].point_empl || 0)).toLocaleString() + "</td>";
+        tHtml += "<td class=\"tdMoney\">" + fmtPoint(Math.abs(arrInfo[0].point_agen || 0) + Math.abs(arrInfo[0].point_empl || 0)) + "</td>";
     bet_profit = Math.abs(arrInfo[0].money_bet || 0) - Math.abs(arrInfo[0].money_win || 0) - Math.abs(arrInfo[0].point_agen || 0) - Math.abs(arrInfo[0].point_empl || 0);
     tHtml += "<td class=\"tdMoney\">";
     if (bet_profit >= 0) {
@@ -103,7 +103,7 @@ function showAccountInfo(arrInfo) {
     } else {
         tHtml += "<font color=\"#fe0000\">";
     }
-    tHtml += bet_profit.toLocaleString() + "</font></td>";
+    tHtml += fmtPoint(bet_profit) + "</font></td>";
     tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_charge || 0).toLocaleString() + "</td>";
     tHtml += "<td class=\"tdMoney\">" + Math.abs(arrInfo[0].money_exchange || 0).toLocaleString() + "</td>";
     charge_profit = Math.abs(arrInfo[0].money_charge || 0) - Math.abs(arrInfo[0].money_exchange || 0);

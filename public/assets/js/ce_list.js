@@ -45,8 +45,8 @@ function showPage(arrInfo) {
             var r = arrInfo[idx];
             var charge = parseInt(r.charge_sum, 10) || 0;
             var exchange = parseInt(r.exchange_sum, 10) || 0;
-            var point = parseInt(r.point_sum, 10) || 0;
-            var diff = parseInt(r.diff_sum, 10);
+            var point = parseFloat(r.point_sum) || 0;
+            var diff = parseFloat(r.diff_sum);
             if (isNaN(diff)) diff = charge - exchange - point;
             sumCharge += charge;
             sumEx += exchange;
@@ -65,8 +65,8 @@ function showPage(arrInfo) {
             tHtml += '<td class="tdDate">' + esc(r.mb_nickname) + '</td>';
             tHtml += '<td class="tdMoney">' + fmtMoney(charge) + '</td>';
             tHtml += '<td class="tdMoney">' + fmtMoney(exchange) + '</td>';
-            tHtml += '<td class="tdMoney">' + fmtMoney(point) + '</td>';
-            tHtml += '<td class="tdMoney ' + diffCls + '">' + fmtMoney(diff) + '</td>';
+            tHtml += '<td class="tdMoney">' + fmtPoint(point) + '</td>';
+            tHtml += '<td class="tdMoney ' + diffCls + '">' + fmtPoint(diff) + '</td>';
             tHtml += '<td class="tdDate"><button type="button" class="btn-detail-view" onclick="openCeDetail(\''
                 + escAttr(r.mb_uid) + '\');">' + esc(detailLabel) + '</button></td>';
             tHtml += '</tr>';
@@ -78,8 +78,8 @@ function showPage(arrInfo) {
     tHtml += '<td class="tdDate" colspan="' + colSpanId + '">' + esc(totalLabel) + '</td>';
     tHtml += '<td class="tdMoney">' + fmtMoney(sumCharge) + '</td>';
     tHtml += '<td class="tdMoney">' + fmtMoney(sumEx) + '</td>';
-    tHtml += '<td class="tdMoney">' + fmtMoney(sumPt) + '</td>';
-    tHtml += '<td class="tdMoney ' + sumDiffCls + '">' + fmtMoney(sumDiff) + '</td>';
+    tHtml += '<td class="tdMoney">' + fmtPoint(sumPt) + '</td>';
+    tHtml += '<td class="tdMoney ' + sumDiffCls + '">' + fmtPoint(sumDiff) + '</td>';
     tHtml += '<td class="tdDate"></td>';
     tHtml += '</tr>';
 

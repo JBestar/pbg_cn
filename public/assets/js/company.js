@@ -42,7 +42,7 @@ function showPage(arrInfo) {
             tHtml += "<td class=\"tdDate\">" + r.mb_nickname + "</td>";
             tHtml += "<td class=\"tdDate\">" + displayPwd(r.mb_pwd) + "</td>";
             tHtml += "<td class=\"tdMoney\">" + (parseInt(r.mb_money, 10) || 0).toLocaleString() + "</td>";
-            tHtml += "<td class=\"tdMoney\">" + (parseInt(r.mb_point, 10) || 0).toLocaleString() + "</td>";
+            tHtml += "<td class=\"tdMoney\">" + fmtPoint(r.mb_point) + "</td>";
             tHtml += "<td class=\"tdDate\">" + (r.mb_game_pb_ratio || 0) + " %</td>";
             tHtml += "<td class=\"tdDate\">";
             tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"fetchSubMember('" + r.mb_fid + "');\">";
@@ -630,7 +630,7 @@ function showSubMember(arrInfo, objEmp) {
             tHtml += "<td class=\"tdDate\" >" + arrInfo[idx].mb_uid + "</td>";
             tHtml += "<td class=\"tdDate\" >" + arrInfo[idx].mb_nickname + "</td>";
             tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].mb_money).toLocaleString() + "</td>";
-            tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].mb_point).toLocaleString() + "</td>";
+            tHtml += "<td class=\"tdMoney\" >" + fmtPoint(arrInfo[idx].mb_point) + "</td>";
 
             tHtml += "<td class=\"tdDate\">";
             tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"showServiceCharge('";
