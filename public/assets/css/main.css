@@ -1,3 +1,6 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
 @font-face {
     font-family: 'NanumSquare';
     src: url('/fonts/nanumsquarer.eot');
@@ -6,29 +9,48 @@
     font-style: normal;
 }
 
-@font-face {
-    font-family: 'BareunDotum';
-    font-style: normal;
-    font-weight: 300;
-    /* Hangul only — prevents empty CJK glyphs from blocking Chinese fallback fonts */
-    unicode-range: U+AC00-D7A3, U+1100-11FF, U+3130-318F, U+A960-A97F, U+D7B0-D7FF;
-    src: url('//cdn.jsdelivr.net/korean-webfonts/1/orgs/othrs/kpa/BareunDotum/BareunDotumOTFPro1.woff2') format('woff2'), url('//cdn.jsdelivr.net/korean-webfonts/1/orgs/othrs/kpa/BareunDotum/BareunDotumOTFPro1.woff') format('woff');
+:root {
+    --admin-font-ko: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+    --admin-font-zh: 'Microsoft YaHei', 'Noto Sans SC', 'SimSun', 'Malgun Gothic', sans-serif;
 }
 
 * {
-    font-family: 'Microsoft YaHei', 'Malgun Gothic', 'BareunDotum', 'Segoe UI', sans-serif;
+    font-family: var(--admin-font-ko);
 }
 
 body {
-    font-family: 'Microsoft YaHei', 'Malgun Gothic', 'BareunDotum', 'Segoe UI', sans-serif;
-    font-size: 12px;
+    font-family: var(--admin-font-ko);
+    font-size: 13px;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+}
+
+/* Keep Font Awesome glyph font */
+.fa,
+.fas,
+.far,
+.fab,
+.fal,
+.fad,
+[class^="fa-"],
+[class*=" fa-"] {
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands", "FontAwesome" !important;
+}
+.fas,
+.fa {
+    font-weight: 900 !important;
+}
+.far {
+    font-weight: 400 !important;
 }
 
 body.lang-zh {
-    font-family: 'Microsoft YaHei', 'SimSun', 'Noto Sans SC', 'Malgun Gothic', sans-serif;
+    font-family: var(--admin-font-zh);
 }
 body.lang-zh *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad) {
-    font-family: 'Microsoft YaHei', 'SimSun', 'Noto Sans SC', 'Malgun Gothic', sans-serif;
+    font-family: var(--admin-font-zh);
 }
 /* Keep Font Awesome glyph font — lang-zh must not override icon fonts */
 body.lang-zh .fa,
@@ -512,7 +534,7 @@ body.lang-en .bw-lms { min-width: 3.2em; }
     background-color: #f7f4ac;
 }
 
-/* Lang select: BareunDotum lacks Han glyphs — force CJK-capable stack; option text dark on white when open */
+/* Lang select: keep CJK-capable stack for mixed labels */
 #adminLangSelect {
     width: auto;
     min-width: 88px;
@@ -522,13 +544,13 @@ body.lang-en .bw-lms { min-width: 3.2em; }
     background: #1a3a5c;
     color: #fff;
     cursor: pointer;
-    font-family: 'Microsoft YaHei', 'SimSun', 'Malgun Gothic', 'BareunDotum', sans-serif !important;
+    font-family: 'Microsoft YaHei', 'Noto Sans SC', 'Malgun Gothic', 'Pretendard', sans-serif !important;
     font-size: 13px;
 }
 #adminLangSelect option {
     color: #111;
     background: #fff;
-    font-family: 'Microsoft YaHei', 'SimSun', 'Malgun Gothic', 'BareunDotum', sans-serif !important;
+    font-family: 'Microsoft YaHei', 'Noto Sans SC', 'Malgun Gothic', 'Pretendard', sans-serif !important;
 }
 
 /* Tablet */

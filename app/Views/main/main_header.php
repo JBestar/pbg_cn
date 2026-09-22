@@ -8,10 +8,12 @@
 		<title><?=$site_name?> <?= lang('Admin.admin_suffix') ?></title>
 
 		<link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
+        <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" />
         <link rel="stylesheet" href="/assets/css/lib/jquery-ui.css">
         <link rel="stylesheet" href="/assets/css/lib/all.css">
 
-        <link rel="stylesheet" href="/assets/css/main.css?v=3">
+        <link rel="stylesheet" href="/assets/css/main.css?v=4">
         <link rel="stylesheet" href="/assets/css/button1.css">
         <link rel="stylesheet" href="/assets/css/button2.css">
         <link rel="stylesheet" href="/assets/css/simplePagination.css">        
