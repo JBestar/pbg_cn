@@ -99,7 +99,7 @@ return [
     'th_sub_money_sum' => '하위머니합',
     'th_bet' => '배팅',
     'th_win' => '당첨',
-    'th_fee_pct' => '수수료(%)',
+    'th_fee_pct' => '수수료',
     'th_store_cnt' => '매장수',
     'th_charge_recall' => '충전/회수',
     'th_edit' => '수정',

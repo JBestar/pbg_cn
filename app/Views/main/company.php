@@ -20,7 +20,7 @@
 		
 	</div>
     <div class="divList">
-		<table class="default_table">
+		<table class="default_table nowrap_table">
 			<thead>
                 <tr>
                     <th><?= lang('Admin.th_no') ?></th>
@@ -146,7 +146,7 @@
     <div class="divInfoBox admin-modal-body" style="line-height:30px; font-size:14px;">
         
         
-        <table class="default_table">
+        <table class="default_table nowrap_table">
             <thead>
                 <tr>
                     <th><?= lang('Admin.th_no') ?></th>

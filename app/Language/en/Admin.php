@@ -99,7 +99,7 @@ return [
     'th_sub_money_sum' => 'Sub total',
     'th_bet' => 'Bet',
     'th_win' => 'Win',
-    'th_fee_pct' => 'Fee(%)',
+    'th_fee_pct' => 'Fee',
     'th_store_cnt' => 'Stores',
     'th_charge_recall' => 'Charge/Recall',
     'th_edit' => 'Edit',

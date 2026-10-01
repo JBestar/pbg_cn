@@ -8,7 +8,7 @@
             <button type="button" class="btn_reg" style="float:right; margin-right:10px;" onclick="openStoreReg();"><?= lang('Admin.title_agency_reg') ?></button>
 	</div>
     <div class="divList">
-		<table class="default_table">
+		<table class="default_table nowrap_table">
 			<thead>
                 <tr>
                     <th><?= lang('Admin.th_no') ?></th>

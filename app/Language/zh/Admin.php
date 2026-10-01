@@ -99,7 +99,7 @@ return [
     'th_sub_money_sum' => '下级金额合计',
     'th_bet' => '投注',
     'th_win' => '中奖',
-    'th_fee_pct' => '手续费(%)',
+    'th_fee_pct' => '手续费',
     'th_store_cnt' => '门店数',
     'th_charge_recall' => '充值/回收',
     'th_edit' => '修改',

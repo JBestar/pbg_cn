@@ -16,7 +16,7 @@
 	</div>
 
     <div class="divList">
-		<table class="default_table">
+		<table class="default_table nowrap_table">
 			<thead>
                 <tr>
                     <th><?= lang('Admin.th_role') ?></th>

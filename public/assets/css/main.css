@@ -665,6 +665,11 @@ a:active {
     text-align: center;
 }
 
+/* Keep each row on one line regardless of locale font width; long-text tables (memo/qna) must not use this */
+.default_table.nowrap_table td {
+    white-space: nowrap;
+}
+
 .tdSum {
     font-weight: 700;
     background-color: #e2e8f0 !important;
