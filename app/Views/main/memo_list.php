@@ -55,7 +55,7 @@
 </div>
 
 
-<div id="divEditMemo" style="position:absolute; left:calc(50% - 500px); top:100px; width:970px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divEditMemo" style="position:absolute; left:calc(50% - 500px); top:100px; width:970px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
 
     <div class="divTitle">쪽지발송</div>
     <div class="divList" style="height: 320px;">
@@ -77,7 +77,7 @@
 
 </div>
 
-<div id="divModMemo" style="position:absolute; left:calc(50% - 500px); top:100px; width:970px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divModMemo" style="position:absolute; left:calc(50% - 500px); top:100px; width:970px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
 
     <div class="divTitle">쪽지수정</div>
     <div class="divList" style="height: 320px;">
@@ -101,7 +101,7 @@
 </div>
 
 
-<div id="divViewMemo" style="position:absolute; left:calc(50% - 500px); top:100px; width:1000px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divViewMemo" style="position:absolute; left:calc(50% - 500px); top:100px; width:1000px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
 
     <div class="divTitle">쪽지보기</div>
 

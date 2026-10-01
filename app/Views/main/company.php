@@ -62,7 +62,7 @@
 }
 </style>
 
-    <div id="divRegSub" style="position:absolute; left:calc(50% - 300px); top:100px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none;">
+    <div id="divRegSub" style="position:absolute; left:calc(50% - 300px); top:100px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
 		<div class="divTitle">총판등록</div>
         <div class="divInfoBox" style="line-height:34px; font-size:14px;">
             <table style="width:100%; border:0px;">
@@ -180,7 +180,7 @@
 </div>
 
 
-<div id="divEditSub" style="position:absolute; left:calc(50% - 300px); top:100px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divEditSub" style="position:absolute; left:calc(50% - 300px); top:100px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
     <div class="divTitle">총판정보변경</div>
     <div class="divInfoBox" style="line-height:34px; font-size:14px;">
         <input id="editSubNo" type="hidden">
@@ -326,7 +326,7 @@
 
 
 
-<div id="divEditSubRate" style="position:absolute; left:calc(50% - 300px); top:30px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divEditSubRate" style="position:absolute; left:calc(50% - 300px); top:30px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
 	<div class="divTitle" id="divEditSubRateTitle">배당변경</div>
     <div class="divInfoBox" style="line-height:34px; font-size:14px;">
         <input id="editSubRateNo" type="hidden">

@@ -46,7 +46,7 @@
 </div>
 
 
-<div id="divAnswerQna" style="position:absolute; left:calc(50% - 500px); top:100px; width:970px; border:1px solid #010101; background-color:#fefefe; display:none;">
+<div id="divAnswerQna" style="position:absolute; left:calc(50% - 500px); top:100px; width:970px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
 
     <div class="divTitle">문의답변</div>
     <div class="divList" style="height: 510px;">

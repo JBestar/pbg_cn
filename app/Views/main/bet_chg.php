@@ -39,7 +39,7 @@
 
 	</div>
 
-    <div id="divEditBet" style="position:absolute; left:calc(50% - 340px); top:30px; width:680px; border:1px solid #010101; background-color:#fefefe; display:none;">
+    <div id="divEditBet" style="position:absolute; left:calc(50% - 340px); top:30px; width:680px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
         <div class="divTitle" id="divEditBetTitle">배팅수정
             <button class="btn_red" style="position:absolute; right:5px; top:5px; font-size:18px;" onclick="closeEditBet();">&times;</button>
         </div>
