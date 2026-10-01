@@ -304,8 +304,13 @@ class Charge_Model extends Model {
             }     
                     
 
-            $this->mBuilder ->where($where)            
-                            ->getCompiledSelect(false);
+            $this->mBuilder ->where($where);
+            $channelSql = trim(preg_replace('/^\s*AND\s+/i', '', channel_filter_sql($arrRqData, 'charge_mb_uid')));
+            if ($channelSql !== '') {
+                // 서브쿼리가 쿼리빌더 식별자 보호에 깨지지 않도록 escape=false 로 별도 추가
+                $this->mBuilder->where($channelSql, null, false);
+            }
+            $this->mBuilder->getCompiledSelect(false);
 
             return $this->mBuilder->countAllResults();
             
@@ -351,8 +356,12 @@ class Charge_Model extends Model {
             $joinTbName = 'member';
             $this->mBuilder ->select($this->mTbColumn)   
                             ->join($joinTbName, $joinTbName.'.mb_uid = '.$this->mTbName.'.charge_mb_uid')  
-                            ->where($where)
-                            ->orderBy('charge_fid', 'DESC')
+                            ->where($where);
+            $channelSql = trim(preg_replace('/^\s*AND\s+/i', '', channel_filter_sql($arrRqData, '', $joinTbName)));
+            if ($channelSql !== '') {
+                $this->mBuilder->where($channelSql, null, false);
+            }
+            $this->mBuilder ->orderBy('charge_fid', 'DESC')
                             ->getCompiledSelect(false);
 
             $query = $this->mBuilder->get($cntPer, $cntPer*($page-1));

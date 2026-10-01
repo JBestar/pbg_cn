@@ -48,7 +48,8 @@ function buildFilter() {
         start: $('#inputDateS').val(),
         end: $('#inputDateE').val(),
         round_id: $('#inputGameNo').val(),
-        mb_uid: $('#selectLevel').val() || ''
+        mb_uid: $('#selectLevel').val() || '',
+        channel: getChannelFilter()
     };
 }
 

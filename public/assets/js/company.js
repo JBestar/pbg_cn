@@ -37,7 +37,7 @@ function showPage(arrInfo) {
                 tHtml += "<tr>";
             }
             tHtml += "<td class=\"tdDate\">" + (parseInt(idx, 10) + 1) + "</td>";
-            tHtml += "<td class=\"tdDate\">" + getMemberLevelText(r.mb_level) + "</td>";
+            tHtml += "<td class=\"tdDate\">" + getMemberLevelText(r.mb_level) + " / " + getMemberChannelText(r.mb_channel) + "</td>";
             tHtml += "<td class=\"tdDate\">" + r.mb_uid + "</td>";
             tHtml += "<td class=\"tdDate\">" + r.mb_nickname + "</td>";
             tHtml += "<td class=\"tdDate\">" + displayPwd(r.mb_pwd) + "</td>";
@@ -190,7 +190,8 @@ function reqPage() {
     var objData = {
         "start": $('#inputDateS').val(),
         "end": $('#inputDateE').val(),
-        "mb_uid": $('#inputSubId').val()
+        "mb_uid": $('#inputSubId').val(),
+        "channel": $('#selChannel').length ? $('#selChannel').val() : ""
     };
 
     var jsonData = JSON.stringify(objData);
@@ -241,6 +242,7 @@ function initRegMember() {
     $('#regSubBankNum').val('');
     $('#regSubBankOwner').val('');
     $('#regSubSingleDealRate').val('');
+    $('#regSubChannel').val('0');
 
 }
 
@@ -256,6 +258,7 @@ function reqRegMember() {
         "bank_num": $('#regSubBankNum').val(),
         "bank_owner": $('#regSubBankOwner').val(),
         "game_ratio": $('#regSubSingleDealRate').val(),
+        "channel": $('#regSubChannel').val(),
 
     };
 
@@ -268,7 +271,7 @@ function reqRegMember() {
 
     var jsonData = JSON.stringify(objData);
 
-    if (!confirm("등록하시겠습니까?"))
+    if (!confirm("등록하시겠습니까? [" + getMemberChannelText(objData.channel) + "]"))
         return;
 
     $.ajax({
@@ -308,6 +311,7 @@ function showEditMember(objInfo) {
     if (objInfo != null) {
         $('#editSubId').text(objInfo.mb_uid);
         $('#editSubName').text(objInfo.mb_nickname);
+        $('#editSubChannel').text(getMemberChannelText(objInfo.mb_channel));
         $('#editSubPwd').val(objInfo.mb_pwd);
         $('#editSubExcPwd').val(objInfo.mb_bank_pwd);
         $('#editSubPhone').val(objInfo.mb_phone);

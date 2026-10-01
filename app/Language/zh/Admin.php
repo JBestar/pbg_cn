@@ -268,4 +268,9 @@ return [
     'room4' => '第四号',
     'hint_sum_range' => '[小 : 15~72 / 大 : 73~130 / 大号 : 81~130 / 中号 : 65~80 / 小号 : 15~64]',
     'lang_saved' => '语言已保存',
+    'label_channel' => '类型',
+    'channel_all' => '全部',
+    'channel_cabinet' => '游戏机',
+    'channel_mobile' => '手机',
+    'hint_channel_fixed' => '* 注册后不可更改',
 ];

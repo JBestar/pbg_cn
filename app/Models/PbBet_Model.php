@@ -55,6 +55,7 @@ class PbBet_Model extends Model {
         if (array_key_exists('mb_emp_fid', $arrRqData)) {
             $where .= " AND b.emp_fid = '" . intval($arrRqData['mb_emp_fid']) . "' ";
         }
+        $where .= channel_filter_sql($arrRqData, 'b.mb_uid');
         return $where;
     }
 
@@ -268,6 +269,7 @@ class PbBet_Model extends Model {
         if (array_key_exists('mb_emp_fid', $arrRqData)) {
             $where .= " AND b.emp_fid = '" . intval($arrRqData['mb_emp_fid']) . "' ";
         }
+        $where .= channel_filter_sql($arrRqData, 'b.mb_uid');
         return $where;
     }
 
@@ -339,6 +341,7 @@ class PbBet_Model extends Model {
             if (array_key_exists('mb_emp_fid', $arrRqData)) {
                 $where .= " AND b.emp_fid = '" . intval($arrRqData['mb_emp_fid']) . "' ";
             }
+            $where .= channel_filter_sql($arrRqData, '', 'm');
             $sql = "SELECT m.mb_fid, b.mb_uid AS bet_mb_uid
                     FROM bets b
                     JOIN member m ON m.mb_uid = b.mb_uid
@@ -364,6 +367,7 @@ class PbBet_Model extends Model {
             if (!empty($arrRqData['mb_uid'])) {
                 $whereMember .= " AND m.mb_uid = '" . $this->mDb->escapeString($arrRqData['mb_uid']) . "' ";
             }
+            $whereMember .= channel_filter_sql($arrRqData, '', 'm');
 
             $whereBet = " b.state IN (2, 3) ";
             if (!empty($arrRqData['start'])) {
@@ -376,7 +380,7 @@ class PbBet_Model extends Model {
                 $whereBet .= " AND b.round = '" . $this->mDb->escapeString($arrRqData['round_id']) . "' ";
             }
 
-            $sql = "SELECT m.mb_fid, m.mb_uid, m.mb_nickname, m.mb_money, m.mb_point,
+            $sql = "SELECT m.mb_fid, m.mb_uid, m.mb_nickname, m.mb_money, m.mb_point, m.mb_channel,
                     IFNULL(agen.mb_point, 0) AS agen_point,
                     IFNULL(bt.bet_sum, 0) AS bet_sum,
                     IFNULL(bt.win_sum, 0) AS win_sum,
@@ -410,6 +414,7 @@ class PbBet_Model extends Model {
             if (!empty($arrRqData['mb_uid'])) {
                 $whereMember .= " AND m.mb_uid = '" . $this->mDb->escapeString($arrRqData['mb_uid']) . "' ";
             }
+            $whereMember .= channel_filter_sql($arrRqData, '', 'm');
 
             $whereBet = " b.state IN (2, 3) ";
             if (!empty($arrRqData['start'])) {
@@ -422,7 +427,7 @@ class PbBet_Model extends Model {
                 $whereBet .= " AND b.round = '" . $this->mDb->escapeString($arrRqData['round_id']) . "' ";
             }
 
-            $sql = "SELECT m.mb_fid, m.mb_uid, m.mb_nickname, m.mb_money, m.mb_point,
+            $sql = "SELECT m.mb_fid, m.mb_uid, m.mb_nickname, m.mb_money, m.mb_point, m.mb_channel,
                     m.mb_point AS agen_point,
                     IFNULL(bt.bet_sum, 0) AS bet_sum,
                     IFNULL(bt.win_sum, 0) AS win_sum,

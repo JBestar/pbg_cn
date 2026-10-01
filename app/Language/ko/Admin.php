@@ -269,4 +269,9 @@ return [
     'room4' => '제4번',
     'hint_sum_range' => '[언더 : 15~72 / 오버 : 73~130 / 대 : 81~130 / 중 : 65~80 / 소 : 15~64]',
     'lang_saved' => '언어가 저장되었습니다',
+    'label_channel' => '구분',
+    'channel_all' => '전체',
+    'channel_cabinet' => '게임기',
+    'channel_mobile' => '모바일',
+    'hint_channel_fixed' => '* 등록 후 변경 불가',
 ];

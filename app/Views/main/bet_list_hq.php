@@ -11,6 +11,7 @@
         <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
         &nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> :
         <input type="text" id="inputUserID" name="inputUserID" class="inputDate" value="">
+        <?= view('main/_channel_select') ?>
         &nbsp;&nbsp;<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
 	</div>
 
@@ -53,7 +54,7 @@ window.ADMIN_I18N.label_agency_bets = <?= json_encode(lang('Admin.label_agency_b
 window.ADMIN_I18N.label_store_bets = <?= json_encode(lang('Admin.label_store_bets'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/bet_list_hq.js?v=1"></script>
+    <script src="/assets/js/bet_list_hq.js?v=2"></script>
 <?php else :?>
     <script src="/assets/js/bet_list_hq.js?v=<?=time();?>"></script>
 <?php endif ?>

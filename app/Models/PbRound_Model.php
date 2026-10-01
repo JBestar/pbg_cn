@@ -49,6 +49,7 @@ class PbRound_Model extends Model {
         if (!empty($arrRqData['store_uid'])) {
             $bw .= " AND mb_uid = '" . $this->mDb->escapeString($arrRqData['store_uid']) . "' ";
         }
+        $bw .= channel_filter_sql($arrRqData, 'mb_uid');
         return " LEFT JOIN (
             SELECT round AS bet_round_fid,
                    COUNT(id) AS bet_count,

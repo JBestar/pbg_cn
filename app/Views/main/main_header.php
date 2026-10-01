@@ -28,7 +28,7 @@
         <script src="/assets/js/lib/sweetalert2.min.js"></script> -->
         <script src="/assets/js/lib/sweetalert2.all.min.js"></script>
 
-        <script src="/assets/js/util.js?v=6"></script>
+        <script src="/assets/js/util.js?v=8"></script>
         <script src="/assets/js/header.js?v=4"></script>
         <script src="/assets/js/window.js"></script>
         <script>
@@ -62,7 +62,9 @@
             bet_void: <?= json_encode(lang('Admin.bet_void'), JSON_UNESCAPED_UNICODE) ?>,
             th_detail_view: <?= json_encode(lang('Admin.th_detail_view'), JSON_UNESCAPED_UNICODE) ?>,
             btn_ok: <?= json_encode(lang('Admin.btn_ok'), JSON_UNESCAPED_UNICODE) ?>,
-            btn_cancel: <?= json_encode(lang('Admin.btn_cancel'), JSON_UNESCAPED_UNICODE) ?>
+            btn_cancel: <?= json_encode(lang('Admin.btn_cancel'), JSON_UNESCAPED_UNICODE) ?>,
+            channel_cabinet: <?= json_encode(lang('Admin.channel_cabinet'), JSON_UNESCAPED_UNICODE) ?>,
+            channel_mobile: <?= json_encode(lang('Admin.channel_mobile'), JSON_UNESCAPED_UNICODE) ?>
         };
         </script>
     </head>

@@ -75,7 +75,7 @@ function showPage(arrInfo, roleLabel) {
             var point = parseFloat(r.mb_point) || 0;
             var agenPoint = parseFloat(r.agen_point) || 0;
             tHtml += '<tr>';
-            tHtml += '<td class="tdDate">' + esc(roleLabel) + '</td>';
+            tHtml += '<td class="tdDate">' + esc(roleLabel) + ' / ' + esc(getMemberChannelText(r.mb_channel)) + '</td>';
             tHtml += '<td class="tdDate">' + esc(r.mb_uid) + '</td>';
             tHtml += '<td class="tdDate">' + esc(r.mb_nickname) + '</td>';
             tHtml += '<td class="tdMoney">' + (parseInt(r.mb_money, 10) || 0).toLocaleString() + '</td>';
@@ -104,7 +104,8 @@ function reqPage() {
     var objData = {
         start: $('#inputDateS').val(),
         end: $('#inputDateE').val(),
-        mb_uid: $('#inputUserID').val()
+        mb_uid: $('#inputUserID').val(),
+        channel: getChannelFilter()
     };
     var url, roleLabel;
     if (hqMode === 'agency') {

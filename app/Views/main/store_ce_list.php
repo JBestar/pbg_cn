@@ -6,6 +6,7 @@
         <input type="date" id="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
         &nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> :
         <input type="text" id="inputUserID" class="inputDate" value="">
+        <?php if (!empty($show_agency)) echo view('main/_channel_select'); ?>
         &nbsp;&nbsp;<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
         <button class="btn_red" onclick="location.reload();"><?= lang('Admin.btn_refresh') ?></button>
 	</div>
@@ -54,7 +55,7 @@ window.CE_SHOW_GRADE = false;
 window.CE_SHOW_AGENCY = <?= !empty($show_agency) ? 'true' : 'false' ?>;
 </script>
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/ce_list.js?v=3"></script>
+    <script src="/assets/js/ce_list.js?v=6"></script>
 <?php else :?>
     <script src="/assets/js/ce_list.js?v=<?=time();?>"></script>
 <?php endif ?>

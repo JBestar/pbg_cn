@@ -94,6 +94,10 @@ defined('LEVEL_AGENCY')        || define('LEVEL_AGENCY', 8);
 defined('LEVEL_EMPLOYEE')      || define('LEVEL_EMPLOYEE', 7);
 defined('LEVEL_USER')          || define('LEVEL_USER', 1);
 
+//member.mb_channel — 등록 후 변경 불가 (매장은 소속 총판 값을 상속)
+defined('CHANNEL_CABINET')     || define('CHANNEL_CABINET', 0);
+defined('CHANNEL_MOBILE')      || define('CHANNEL_MOBILE', 1);
+
 //permit state
 defined('PERMIT_OK')           || define('PERMIT_OK', 1);
 defined('PERMIT_CANCEL')       || define('PERMIT_CANCEL', 0);

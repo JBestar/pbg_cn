@@ -15,6 +15,7 @@ function reqPage() {
     var objData = {
         start: $('#inputDateS').val(),
         end: $('#inputDateE').val(),
+        channel: getChannelFilter(),
         page: 1,
         cntper: 500
     };

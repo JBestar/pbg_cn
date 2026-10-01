@@ -205,7 +205,8 @@ function reqPage() {
     var objData = {
         start: $('#inputDateS').val(),
         end: $('#inputDateE').val(),
-        mb_uid: $('#inputUserID').val()
+        mb_uid: $('#inputUserID').val(),
+        channel: getChannelFilter()
     };
     var api = window.CE_API || '/api/store_ce_summary';
     $.ajax({

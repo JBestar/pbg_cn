@@ -305,6 +305,7 @@ class Api extends BaseController
 						}
 					}
 				}
+				$this->applyChannelScope($arrReqData, $objMember);
 				$arrAcc = $moneyhist_model->getAccList($arrReqData);
 				
 				$result->data = $arrAcc;
@@ -340,6 +341,7 @@ class Api extends BaseController
 				} else {
 					$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
 				}
+				$this->applyChannelScope($arrReqData, $objMember);
 
 				$arrMember = $this->member_model->searchList($arrReqData, $level);
 				if ($level === LEVEL_AGENCY && is_array($arrMember)) {
@@ -820,6 +822,15 @@ class Api extends BaseController
 			}
 			unset($arrReqData['mb_uid']);
 		}
+		$this->applyChannelScope($arrReqData, $objMember);
+	}
+
+	/** 게임기/모바일 필터(channel)는 본사만 사용. 총판 이하는 요청값 제거 */
+	private function applyChannelScope(array &$arrReqData, $objMember)
+	{
+		if (is_null($objMember) || (int)$objMember->mb_level <= LEVEL_AGENCY) {
+			unset($arrReqData['channel']);
+		}
 	}
 
 	public function pbbetlist_count()
@@ -838,6 +849,7 @@ class Api extends BaseController
 			if($objMember->mb_level == LEVEL_AGENCY){
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid; 
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 
             $pbbet_model = new PbBet_Model();
 			$nCount = $pbbet_model->searchCount($arrReqData);
@@ -865,6 +877,7 @@ class Api extends BaseController
 			if($objMember->mb_level == LEVEL_AGENCY){
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid; 
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 			
             $pbbet_model = new PbBet_Model();
 			$arrBet = $pbbet_model->searchList($arrReqData, $arrReqData['page'], $arrReqData['cntper']);
@@ -927,6 +940,7 @@ class Api extends BaseController
 			if($objMember->mb_level == LEVEL_AGENCY){
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid; 
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 
 			$pbbet_model = new PbBet_Model();
 
@@ -976,6 +990,7 @@ class Api extends BaseController
 			} else if ($objMember->mb_level == LEVEL_EMPLOYEE) {
 				$arrReqData['mb_uid'] = $objMember->mb_uid;
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 			$pbbet_model = new PbBet_Model();
 			$result->data = $pbbet_model->getStoreBetSummary($arrReqData);
 			$result->status = STATUS_SUCCESS;
@@ -1027,6 +1042,7 @@ class Api extends BaseController
 			if ($objMember->mb_level == LEVEL_AGENCY) {
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 			$page = isset($arrReqData['page']) ? max(1, intval($arrReqData['page'])) : 1;
 			$cntper = isset($arrReqData['cntper']) ? max(1, intval($arrReqData['cntper'])) : 200;
 			$pbbet_model = new PbBet_Model();
@@ -1252,6 +1268,7 @@ class Api extends BaseController
 
 			$arrReqData['mb_emp_fid'] = $objMember->mb_level == LEVEL_AGENCY ? $objMember->mb_fid : 0;
 			$arrReqData['mb_emp_uid'] = $objMember->mb_level > LEVEL_AGENCY ? $objMember->mb_uid : "";
+			$this->applyChannelScope($arrReqData, $objMember);
 
 			$charge_model = new Charge_Model();
 			$count = $charge_model->searchProcCount($arrReqData);
@@ -1280,6 +1297,7 @@ class Api extends BaseController
 
 			$arrReqData['mb_emp_fid'] = $objMember->mb_level == LEVEL_AGENCY ? $objMember->mb_fid : 0;
 			$arrReqData['mb_emp_uid'] = $objMember->mb_level > LEVEL_AGENCY ? $objMember->mb_uid : "";
+			$this->applyChannelScope($arrReqData, $objMember);
 
 			$charge_model = new Charge_Model();
 			$arrCharge = $charge_model->searchProcList($arrReqData, $arrReqData['page'], $arrReqData['cntper']);
@@ -1606,6 +1624,7 @@ class Api extends BaseController
 
 			$arrReqData['mb_emp_fid'] = $objMember->mb_level == LEVEL_AGENCY ? $objMember->mb_fid : 0;
 			$arrReqData['mb_emp_uid'] = $objMember->mb_level > LEVEL_AGENCY ? $objMember->mb_uid : "";
+			$this->applyChannelScope($arrReqData, $objMember);
 			
 			$exchange_model = new Exchange_Model();
 			$count = $exchange_model->searchProcCount($arrReqData);
@@ -1634,6 +1653,7 @@ class Api extends BaseController
 
 			$arrReqData['mb_emp_fid'] = $objMember->mb_level == LEVEL_AGENCY ? $objMember->mb_fid : 0;
 			$arrReqData['mb_emp_uid'] = $objMember->mb_level > LEVEL_AGENCY ? $objMember->mb_uid : "";
+			$this->applyChannelScope($arrReqData, $objMember);
 			
 			$exchange_model = new Exchange_Model();
 			$arrExchange = $exchange_model->searchProcList($arrReqData, $arrReqData['page'], $arrReqData['cntper']);
@@ -2028,6 +2048,7 @@ class Api extends BaseController
 			if ($objMember->mb_level == LEVEL_AGENCY) {
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 			$moneyhist_model = new MoneyHist_Model();
 			$result->data = $moneyhist_model->getCeSummary($arrReqData, 'store');
 			$result->status = STATUS_SUCCESS;
@@ -2058,6 +2079,7 @@ class Api extends BaseController
 				$arrReqData['hq_ce'] = 1;
 				$hqCe = true;
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 			$moneyhist_model = new MoneyHist_Model();
 			$rows = $moneyhist_model->getCeSummary($arrReqData, 'agency');
 			if ($hqCe && is_array($rows)) {
@@ -2158,6 +2180,7 @@ class Api extends BaseController
 			if ($objMember->mb_level == LEVEL_AGENCY) {
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 			$moneyhist_model = new MoneyHist_Model();
 			$result->data = $moneyhist_model->searchPointConvertCount($arrReqData);
 			$result->status = STATUS_SUCCESS;
@@ -2183,6 +2206,7 @@ class Api extends BaseController
 			if ($objMember->mb_level == LEVEL_AGENCY) {
 				$arrReqData['mb_emp_fid'] = $objMember->mb_fid;
 			}
+			$this->applyChannelScope($arrReqData, $objMember);
 			$page = isset($arrReqData['page']) ? intval($arrReqData['page']) : 1;
 			$cntper = isset($arrReqData['cntper']) ? intval($arrReqData['cntper']) : 50;
 			$moneyhist_model = new MoneyHist_Model();

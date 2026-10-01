@@ -485,6 +485,20 @@ function getMemberLevelText(nLevel) {
     }
 }
 
+/** 본사 화면의 게임기/모바일 선택값. 선택상자가 없는 화면(총판)은 '' → 서버는 필터 미적용 */
+function getChannelFilter() {
+    var $sel = $('#selChannel');
+    return $sel.length ? ($sel.val() || '') : '';
+}
+
+function getMemberChannelText(nChannel) {
+    var i18n = window.ADMIN_I18N || {};
+    if (parseInt(nChannel, 10) === 1) {
+        return i18n.channel_mobile || "모바일";
+    }
+    return i18n.channel_cabinet || "게임기";
+}
+
 function getChargeTypeText(iState) {
     switch (parseInt(iState)) {
         case 0:

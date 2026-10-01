@@ -421,6 +421,7 @@ class MoneyHist_Model extends Model {
         if(array_key_exists('mb_emp_fid', $arrRqData)){
             $where .= " AND money_mb_emp_fid = '".$arrRqData['mb_emp_fid']."' ";    
         }
+        $where .= channel_filter_sql($arrRqData, 'money_mb_uid');
 
         //회차한도
         $strSql = " SELECT CAST(money_update_time AS DATE) AS money_update_date, money_change_type ";
@@ -480,6 +481,7 @@ class MoneyHist_Model extends Model {
         if(array_key_exists('mb_emp_fid', $arrRqData)){
             $where .= " AND emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";    
         }
+        $where .= channel_filter_sql($arrRqData, 'mb_uid');
 
         try {
             $strSql = " SELECT CAST(created_at AS DATE) AS bet_date, SUM(amount) AS bet_sum , SUM(win_amount) AS win_sum,
@@ -533,6 +535,7 @@ class MoneyHist_Model extends Model {
         if(array_key_exists('mb_emp_fid', $arrRqData)){
             $where .= " AND money_mb_emp_fid = '".$arrRqData['mb_emp_fid']."' ";    
         }
+        $where .= channel_filter_sql($arrRqData, 'money_mb_uid');
 
         $strSql = " SELECT money_change_type, ";
         $strSql.= " SUM(money_amount) AS money_sum FROM ".$this->mTbName;
@@ -587,6 +590,7 @@ class MoneyHist_Model extends Model {
             if (array_key_exists('mb_emp_fid', $arrRqData)) {
                 $whereBet .= " AND emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";
             }
+            $whereBet .= channel_filter_sql($arrRqData, 'mb_uid');
             $strSql = " SELECT COALESCE(SUM(amount),0) AS bet_sum, COALESCE(SUM(win_amount),0) AS win_sum FROM bets WHERE ".$whereBet;
             $row = $this->mDb->query($strSql)->getRow();
             if ($row) {
@@ -652,6 +656,7 @@ class MoneyHist_Model extends Model {
         if (array_key_exists('mb_uid', $arrRqData) && strlen(trim($arrRqData['mb_uid'])) > 0) {
             $whereMember .= " AND m.mb_uid LIKE ".$this->mDb->escape('%'.trim($arrRqData['mb_uid']).'%')." ";
         }
+        $whereMember .= channel_filter_sql($arrRqData, '', 'm');
 
         $whereHist = "1=1";
         if (array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0) {
@@ -786,6 +791,7 @@ class MoneyHist_Model extends Model {
             if (array_key_exists('mb_emp_fid', $arrRqData) && intval($arrRqData['mb_emp_fid']) > 0) {
                 $where .= " AND m.mb_emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";
             }
+            $where .= channel_filter_sql($arrRqData, '', 'm');
             $sql = "SELECT COUNT(*) AS cnt FROM ".$this->mTbName." h "
                 ." INNER JOIN member m ON m.mb_fid = h.money_mb_fid "
                 ." WHERE ".$where;
@@ -815,6 +821,7 @@ class MoneyHist_Model extends Model {
             if (array_key_exists('mb_emp_fid', $arrRqData) && intval($arrRqData['mb_emp_fid']) > 0) {
                 $where .= " AND m.mb_emp_fid = '".intval($arrRqData['mb_emp_fid'])."' ";
             }
+            $where .= channel_filter_sql($arrRqData, '', 'm');
             $offset = $cntPer * ($page - 1);
             $sql = "SELECT h.money_fid, h.money_mb_uid, m.mb_nickname, "
                 ." h.money_amount, h.money_before, h.money_after, h.money_update_time "

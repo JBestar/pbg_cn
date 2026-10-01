@@ -8,6 +8,7 @@
     &nbsp;&nbsp;&nbsp;<?= lang('Admin.label_period') ?> : <input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
             <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
 			&nbsp;&nbsp;&nbsp;<span id="spanGameRound"><?= lang('Admin.label_game_round') ?></span> : <input type="text" id="inputGameNo" name="inputGameNo" class="inputDate">
+			<?php if (!empty($is_hq)) echo view('main/_channel_select'); ?>
 			<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
 		
 	</div>
@@ -85,4 +86,4 @@
 <!-- <div class="divContent"> -->    
 </div>
 
-<script src="/assets/js/bet_sum.js"></script>
+<script src="/assets/js/bet_sum.js?v=2"></script>

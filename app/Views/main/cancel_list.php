@@ -4,6 +4,7 @@
         &nbsp;&nbsp;<?= lang('Admin.label_period') ?> :
         <input type="date" id="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
         <input type="date" id="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
+        <?php if (!empty($is_hq)) echo view('main/_channel_select'); ?>
         &nbsp;&nbsp;<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
 	</div>
 
@@ -27,7 +28,7 @@
 </div>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/cancel_list.js?v=1"></script>
+    <script src="/assets/js/cancel_list.js?v=2"></script>
 <?php else :?>
     <script src="/assets/js/cancel_list.js?v=<?=time();?>"></script>
 <?php endif ?>

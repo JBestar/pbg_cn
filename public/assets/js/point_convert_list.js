@@ -41,7 +41,8 @@ function reqCount() {
     var objData = {
         start: $('#inputDateS').val(),
         end: $('#inputDateE').val(),
-        mb_uid: $('#inputUserID').val()
+        mb_uid: $('#inputUserID').val(),
+        channel: getChannelFilter()
     };
     $.ajax({
         url: '/api/point_convert_count',
@@ -71,6 +72,7 @@ function reqPage() {
         start: $('#inputDateS').val(),
         end: $('#inputDateE').val(),
         mb_uid: $('#inputUserID').val(),
+        channel: getChannelFilter(),
         page: page,
         cntper: per
     };

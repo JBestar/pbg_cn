@@ -12,6 +12,7 @@
         <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
         &nbsp;&nbsp;&nbsp;<span id="spanGameRound"><?= lang('Admin.label_game_round') ?></span> :
         <input type="text" id="inputGameNo" name="inputGameNo" class="inputDate" value="">
+        <?= view('main/_channel_select') ?>
         <button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
 	</div>
     <div class="divList">
@@ -48,7 +49,7 @@
 </div>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/game_result_hq.js?v=1"></script>
+    <script src="/assets/js/game_result_hq.js?v=2"></script>
 <?php else :?>
     <script src="/assets/js/game_result_hq.js?v=<?=time();?>"></script>
 <?php endif ?>

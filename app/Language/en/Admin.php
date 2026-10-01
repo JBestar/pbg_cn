@@ -268,4 +268,9 @@ return [
     'room4' => 'Room4',
     'hint_sum_range' => '[Under: 15~72 / Over: 73~130 / Big: 81~130 / Mid: 65~80 / Small: 15~64]',
     'lang_saved' => 'Language saved',
+    'label_channel' => 'Type',
+    'channel_all' => 'All',
+    'channel_cabinet' => 'Cabinet',
+    'channel_mobile' => 'Mobile',
+    'hint_channel_fixed' => '* Cannot be changed after registration',
 ];

@@ -230,6 +230,31 @@
       return true;
     }
     
+/**
+ * 본사 화면의 게임기/모바일 필터 SQL 조각. channel 이 없거나 잘못된 값이면 '' (기존 SQL 그대로).
+ * $memberAlias 를 주면 "AND m.mb_channel = N", 아니면 회원아이디 컬럼으로 서브쿼리 필터.
+ */
+function channel_filter_sql($arrRqData, $uidColumn = '', $memberAlias = ''){
+  if (!is_array($arrRqData) || !array_key_exists('channel', $arrRqData)) {
+    return '';
+  }
+  $raw = $arrRqData['channel'];
+  if ($raw === '' || $raw === null || !is_numeric($raw)) {
+    return '';
+  }
+  $ch = (int)$raw;
+  if ($ch !== CHANNEL_CABINET && $ch !== CHANNEL_MOBILE) {
+    return '';
+  }
+  if ($memberAlias !== '') {
+    return " AND {$memberAlias}.mb_channel = {$ch} ";
+  }
+  if ($uidColumn === '') {
+    return '';
+  }
+  return " AND {$uidColumn} IN (SELECT mb_uid FROM member WHERE mb_channel = {$ch}) ";
+}
+
 function writeLog($contenet){ 
     
   $tmNow = time() ;

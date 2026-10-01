@@ -241,7 +241,7 @@ class Main extends BaseController
 
 			echo view('main/main_header', array("site_name"=>$siteName));
 			echo view('main/main_menu', $arrItem);		
-			echo view('main/bet_sum');		
+			echo view('main/bet_sum', ['is_hq' => ($objMember->mb_level > LEVEL_AGENCY)]);		
 			echo view('main/main_footer');
 		}	
 	}
@@ -351,7 +351,7 @@ class Main extends BaseController
 
 		echo view('main/main_header', array("site_name" => $siteName));
 		echo view('main/main_menu', $arrItem);
-		echo view('main/cancel_list');
+		echo view('main/cancel_list', ['is_hq' => ($objMember->mb_level > LEVEL_AGENCY)]);
 		echo view('main/main_footer');
 	}
 
@@ -415,7 +415,7 @@ class Main extends BaseController
 
 		echo view('main/main_header', array("site_name" => $siteName));
 		echo view('main/main_menu', $arrItem);
-		echo view('main/point_convert_list');
+		echo view('main/point_convert_list', ['is_hq' => ($objMember->mb_level > LEVEL_AGENCY)]);
 		echo view('main/main_footer');
 	}
 

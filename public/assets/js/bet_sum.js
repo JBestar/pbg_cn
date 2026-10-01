@@ -80,7 +80,8 @@ function reqPage() {
         "game": $('#selectGameType').val(),
         "start": $('#inputDateS').val(),
         "end": $('#inputDateE').val(),
-        "round_id": $('#inputGameNo').val()
+        "round_id": $('#inputGameNo').val(),
+        "channel": getChannelFilter()
     };
 
     var jsonData = JSON.stringify(objData);

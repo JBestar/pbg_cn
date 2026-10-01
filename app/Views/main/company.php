@@ -9,6 +9,12 @@
 			<input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
             <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
 			&nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> : <input type="text" id="inputSubId" name="inputSubId" class="inputDate" value="" autocomplete="off">
+			&nbsp;&nbsp;<?= lang('Admin.label_channel') ?> :
+			<select id="selChannel" class="inputDate">
+				<option value=""><?= lang('Admin.channel_all') ?></option>
+				<option value="0"><?= lang('Admin.channel_cabinet') ?></option>
+				<option value="1"><?= lang('Admin.channel_mobile') ?></option>
+			</select>
 			<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>&nbsp;
             <button type="button" class="btn_reg" style="float:right; margin-right:10px;" onclick="showRegMember();"><?= lang('Admin.title_company_reg') ?></button>
 		
@@ -97,6 +103,16 @@
                     </tr>
 
                     <tr>
+                        <td style="width:120px; border:0px;"><?= lang('Admin.label_channel') ?></td>
+                        <td style="width:150px; border:0px;">
+                            <select id="regSubChannel" style="width:126px;">
+                                <option value="0"><?= lang('Admin.channel_cabinet') ?></option>
+                                <option value="1"><?= lang('Admin.channel_mobile') ?></option>
+                            </select>
+                        </td>
+                        <td style="border:0px;"><?= lang('Admin.hint_channel_fixed') ?></td>
+                    </tr>
+                    <tr>
                         <td style="width:120px; border:0px;">수수료</td>
                         <td style="width:150px; border:0px;"><input type="text" id="regSubSingleDealRate" style="width:120px;"> %</td>
                         <td style="border:0px;"></td>
@@ -180,6 +196,11 @@
                     <td style="width:120px; border:0px;">이름</td>
                     <td style="width:150px; border:0px;"><span id="editSubName" style="font-weight:bold;"></span></td>
                     <td style="border:0px;"></td>
+                </tr>
+                <tr>
+                    <td style="width:120px; border:0px;"><?= lang('Admin.label_channel') ?></td>
+                    <td style="width:150px; border:0px;"><span id="editSubChannel" style="font-weight:bold;"></span></td>
+                    <td style="border:0px;"><?= lang('Admin.hint_channel_fixed') ?></td>
                 </tr>
                 <tr>
                     <td style="width:120px; border:0px;">비밀번호</td>
@@ -592,4 +613,4 @@ window.ADMIN_I18N.btn_block = <?= json_encode(lang('Admin.btn_block'), JSON_UNES
 window.ADMIN_I18N.btn_delete = <?= json_encode(lang('Admin.btn_delete'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.status_online = <?= json_encode(lang('Admin.status_online'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
-<script src="/assets/js/company.js?v=7"></script>
+<script src="/assets/js/company.js?v=8"></script>

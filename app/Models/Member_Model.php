@@ -16,7 +16,7 @@ class Member_Model extends Model {
         $this->mDb      = Database::connect();
         $this->mBuilder = $this->mDb->table($this->mTbName);
 
-        $this->mTbColumn = ['mb_fid', 'mb_uid', 'mb_level', 'mb_emp_fid', 'mb_nickname', 'mb_money', 'mb_point',
+        $this->mTbColumn = ['mb_fid', 'mb_uid', 'mb_level', 'mb_channel', 'mb_emp_fid', 'mb_nickname', 'mb_money', 'mb_point',
             'mb_lang', 'mb_time_join', 'mb_time_last', 'mb_ip_last', 'mb_game_pb_ratio', 'mb_state_active', 'mb_state_delete',
             'mb_limit_round', 'mb_limit_single', 'mb_limit_mix', 'mb_limit_three', 'mb_limit_digit' ];
     }
@@ -360,18 +360,25 @@ class Member_Model extends Model {
             $arrRqData['level'] = LEVEL_EMPLOYEE;
             
             $arrRqData['mb_emp_fid'] = $objAdmin->mb_fid;
+            // 매장 구분은 클라이언트 입력을 무시하고 소속 총판 값을 강제 상속
+            $arrRqData['channel'] = (int)$objAdmin->mb_channel;
 
             if(floatval($arrRqData['game_ratio']) > floatval($objAdmin->mb_game_pb_ratio) )
                 return RESULT_OVERRATIO;
         } else if($objAdmin->mb_level > LEVEL_AGENCY){
             $arrRqData['level'] = LEVEL_AGENCY;
             $arrRqData['mb_emp_fid'] = 0;
+            $channel = (array_key_exists('channel', $arrRqData) && is_numeric($arrRqData['channel'])) ? (int)$arrRqData['channel'] : -1;
+            if($channel !== CHANNEL_CABINET && $channel !== CHANNEL_MOBILE)
+                return RESULT_ERROR;
+            $arrRqData['channel'] = $channel;
         } else return RESULT_ERROR;
 
 
         $this->mBuilder->set('mb_uid', $arrRqData['uid']);
         $this->mBuilder->set('mb_pwd', self::storePassword($arrRqData['pwd'], $arrRqData['level']));
         $this->mBuilder->set('mb_level', $arrRqData['level']);
+        $this->mBuilder->set('mb_channel', $arrRqData['channel']);
         $this->mBuilder->set('mb_emp_fid', $arrRqData['mb_emp_fid']);
         $this->mBuilder->set('mb_nickname', $arrRqData['nickname']);
         $this->mBuilder->set('mb_time_join', 'NOW()', false);
@@ -388,7 +395,7 @@ class Member_Model extends Model {
         
         if($this->mBuilder->insert())
             return RESULT_OK;
-        else RESULT_ERROR;
+        return RESULT_ERROR;
     }
 
     public function modify($arrRqData, $objAdmin)
@@ -473,7 +480,7 @@ class Member_Model extends Model {
         } else return NULL;
         
         try { 
-            $tbColumn = ['mb_fid', 'mb_uid', 'mb_level', 'mb_emp_fid', 'mb_nickname', 'mb_money', 'mb_point' ];
+            $tbColumn = ['mb_fid', 'mb_uid', 'mb_level', 'mb_channel', 'mb_emp_fid', 'mb_nickname', 'mb_money', 'mb_point' ];
 
             $this->mBuilder ->select($tbColumn)
                             ->where($where)
@@ -504,6 +511,7 @@ class Member_Model extends Model {
         if($level == LEVEL_EMPLOYEE){
             $where_member .= " AND mb_emp_fid = '".$arrRqData['mb_emp_fid']."' ";    
         } 
+        $where_member .= channel_filter_sql($arrRqData, '', 'member');
 
         if( array_key_exists('start', $arrRqData) && strlen($arrRqData['start']) > 0 ){
             $where_bet .= " AND bet_time >= '".$arrRqData['start']."' ";
@@ -517,7 +525,7 @@ class Member_Model extends Model {
             $where_exchange .= " AND exchange_time_require <= '".$arrRqData['end']." 23:59:59' ";
         }            
             
-        $strSql = "SELECT mb_fid, mb_uid, mb_level, mb_emp_fid, mb_nickname, mb_money, mb_point, mb_pwd, mb_time_join, mb_time_last, ";
+        $strSql = "SELECT mb_fid, mb_uid, mb_level, mb_channel, mb_emp_fid, mb_nickname, mb_money, mb_point, mb_pwd, mb_time_join, mb_time_last, ";
         $strSql.= " mb_ip_last, mb_game_pb_ratio, mb_state_active, mb_limit_round, mb_limit_single, mb_limit_mix, mb_limit_three, mb_limit_digit, mb_color, mb_rest, ";
 
         if($level == LEVEL_EMPLOYEE){
