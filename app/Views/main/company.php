@@ -63,42 +63,42 @@
 </style>
 
     <div id="divRegSub" style="position:absolute; left:calc(50% - 300px); top:100px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
-		<div class="divTitle">총판등록</div>
+		<div class="divTitle"><?= lang('Admin.title_company_reg') ?></div>
         <div class="divInfoBox" style="line-height:34px; font-size:14px;">
             <table style="width:100%; border:0px;">
                 
                 <tbody>
                     <tr>
-                        <td style="width:120px; border:0px;">아이디</td>
+                        <td style="width:120px; border:0px;"><?= lang('Admin.label_id') ?></td>
                         <td style="width:150px; border:0px;"><input type="text" id="regSubId" style="width:120px;"></td>
-                        <td style="border:0px;">* 중복 아이디 불가</td>
+                        <td style="border:0px;"><?= lang('Admin.hint_dup_id') ?></td>
                     </tr>
                     <tr>
-                        <td style="width:120px; border:0px;">이름</td>
+                        <td style="width:120px; border:0px;"><?= lang('Admin.label_name') ?></td>
                         <td style="width:150px; border:0px;"><input type="text" id="regSubName" style="width:120px;"></td>
-                        <td style="border:0px;">* 중복 이름 불가</td>
+                        <td style="border:0px;"><?= lang('Admin.hint_dup_name') ?></td>
                     </tr>
                     <tr>
-                        <td style="width:120px; border:0px;">비밀번호</td>
+                        <td style="width:120px; border:0px;"><?= lang('Admin.label_password') ?></td>
                         <td style="width:150px; border:0px;"><input type="password" id="regSubPwd" style="width:120px;"></td>
                         <td style="border:0px;"></td>
                     </tr>
                     <tr>
-                        <td style="width:120px; border:0px;">출금 비밀번호</td>
+                        <td style="width:120px; border:0px;"><?= lang('Admin.label_bank_pwd') ?></td>
                         <td style="width:150px; border:0px;"><input type="password" id="regSubExcPwd" style="width:120px;"></td>
                         <td style="border:0px;"></td>
                     </tr>
                     <tr>
-                        <td style="width:120px; border:0px;">휴대전화</td>
+                        <td style="width:120px; border:0px;"><?= lang('Admin.label_phone') ?></td>
                         <td style="width:150px; border:0px;"><input type="text" id="regSubPhone" style="width:120px;"></td>
                         <td style="border:0px;"></td>
                     </tr>
                     <tr>
-                        <td style="width:120px; border:0px;">계좌정보</td>
+                        <td style="width:120px; border:0px;"><?= lang('Admin.label_bank_info') ?></td>
                         <td style="border:0px;" colspan="2">
-                            <input type="text" id="regSubBank" style="width:120px;" placeholder="은행명">
-                            <input type="text" id="regSubBankNum" style="width:160px;" placeholder="계좌번호">
-                            <input type="text" id="regSubBankOwner" style="width:120px;" placeholder="예금주">
+                            <input type="text" id="regSubBank" style="width:120px;" placeholder="<?= esc(lang('Admin.ph_bank_name'), 'attr') ?>">
+                            <input type="text" id="regSubBankNum" style="width:160px;" placeholder="<?= esc(lang('Admin.ph_bank_num'), 'attr') ?>">
+                            <input type="text" id="regSubBankOwner" style="width:120px;" placeholder="<?= esc(lang('Admin.ph_bank_owner'), 'attr') ?>">
                         </td>
                     </tr>
 
@@ -113,7 +113,7 @@
                         <td style="border:0px;"><?= lang('Admin.hint_channel_fixed') ?></td>
                     </tr>
                     <tr>
-                        <td style="width:120px; border:0px;">수수료</td>
+                        <td style="width:120px; border:0px;"><?= lang('Admin.label_fee') ?></td>
                         <td style="width:150px; border:0px;"><input type="text" id="regSubSingleDealRate" style="width:120px;"> %</td>
                         <td style="border:0px;"></td>
                     </tr>
@@ -127,8 +127,8 @@
                     -->
                     <tr>
                         <td style="border:0px; text-align:center;" colspan="3">
-                            <button class="btn_search" onclick="reqRegMember();">등록</button>&nbsp;
-                            <button class="btn_red" onclick="closeRegMember();">닫기</button>
+                            <button class="btn_search" onclick="reqRegMember();"><?= lang('Admin.btn_register') ?></button>&nbsp;
+                            <button class="btn_red" onclick="closeRegMember();"><?= lang('Admin.btn_close') ?></button>
                         </td>
                     </tr>
                 </tbody>
@@ -142,7 +142,7 @@
 
 <div id="divSubMemberOverlay" class="admin-modal-overlay" style="display:none;" onclick="closeSubMember();"></div>
 <div id="divSubMember" class="admin-modal-panel" style="display:none;">
-    <div class="divTitle" id="subTitleId">하위매장</div>
+    <div class="divTitle" id="subTitleId"><?= lang('Admin.title_sub_store') ?></div>
     <div class="divInfoBox admin-modal-body" style="line-height:30px; font-size:14px;">
         
         
@@ -171,7 +171,7 @@
                 
                 <tr>
                     <td style="border:0px; text-align:center;" colspan="3">
-                        <button type="button" class="btn_red btn_chip" onclick="closeSubMember();">닫기</button>
+                        <button type="button" class="btn_red btn_chip" onclick="closeSubMember();"><?= lang('Admin.btn_close') ?></button>
                     </td>
                 </tr>
             </tbody>
@@ -181,19 +181,19 @@
 
 
 <div id="divEditSub" style="position:absolute; left:calc(50% - 300px); top:100px; width:600px; border:1px solid #010101; background-color:#fefefe; display:none; z-index:2010;">
-    <div class="divTitle">총판정보변경</div>
+    <div class="divTitle"><?= lang('Admin.title_company_edit') ?></div>
     <div class="divInfoBox" style="line-height:34px; font-size:14px;">
         <input id="editSubNo" type="hidden">
         <table style="width:100%; border:0px;">
             
             <tbody>
                 <tr>
-                    <td style="width:120px; border:0px;">아이디</td>
+                    <td style="width:120px; border:0px;"><?= lang('Admin.label_id') ?></td>
                     <td style="width:150px; border:0px;"><span id="editSubId" style="font-weight:bold;"></span></td>
                     <td style="border:0px;"></td>
                 </tr>
                 <tr>
-                    <td style="width:120px; border:0px;">이름</td>
+                    <td style="width:120px; border:0px;"><?= lang('Admin.label_name') ?></td>
                     <td style="width:150px; border:0px;"><span id="editSubName" style="font-weight:bold;"></span></td>
                     <td style="border:0px;"></td>
                 </tr>
@@ -203,31 +203,31 @@
                     <td style="border:0px;"><?= lang('Admin.hint_channel_fixed') ?></td>
                 </tr>
                 <tr>
-                    <td style="width:120px; border:0px;">비밀번호</td>
+                    <td style="width:120px; border:0px;"><?= lang('Admin.label_password') ?></td>
                     <td style="width:150px; border:0px;"><input type="text" id="editSubPwd" style="width:120px;"></td>
                     <td style="border:0px;"></td>
                 </tr>
                 <tr>
-                    <td style="width:120px; border:0px;">출금 비밀번호</td>
+                    <td style="width:120px; border:0px;"><?= lang('Admin.label_bank_pwd') ?></td>
                     <td style="width:150px; border:0px;"><input type="text" id="editSubExcPwd" style="width:120px;"></td>
                     <td style="border:0px;"></td>
                 </tr>
                 <tr>
-                    <td style="width:120px; border:0px;">휴대전화</td>
+                    <td style="width:120px; border:0px;"><?= lang('Admin.label_phone') ?></td>
                     <td style="width:150px; border:0px;"><input type="text" id="editSubPhone" style="width:120px;"></td>
                     <td style="border:0px;"></td>
                 </tr>
                 <tr>
-                    <td style="width:120px; border:0px;">계좌정보</td>
+                    <td style="width:120px; border:0px;"><?= lang('Admin.label_bank_info') ?></td>
                     <td style="border:0px;" colspan="2">
-                        <input type="text" id="editSubBank" style="width:120px;" placeholder="은행명">
-                        <input type="text" id="editSubBankNum" style="width:160px;" placeholder="계좌번호">
-                        <input type="text" id="editSubBankOwner" style="width:120px;" placeholder="예금주">
+                        <input type="text" id="editSubBank" style="width:120px;" placeholder="<?= esc(lang('Admin.ph_bank_name'), 'attr') ?>">
+                        <input type="text" id="editSubBankNum" style="width:160px;" placeholder="<?= esc(lang('Admin.ph_bank_num'), 'attr') ?>">
+                        <input type="text" id="editSubBankOwner" style="width:120px;" placeholder="<?= esc(lang('Admin.ph_bank_owner'), 'attr') ?>">
                     </td>
                 </tr>
 
                 <tr>
-                    <td style="width:120px; border:0px;">수수료</td>
+                    <td style="width:120px; border:0px;"><?= lang('Admin.label_fee') ?></td>
                     <td style="width:150px; border:0px;"><input type="text" id="editSubSingleDealRate" style="width:120px;"> %</td>
                     <td style="border:0px;"></td>
                 </tr>
@@ -241,8 +241,8 @@
                 -->
                 <tr>
                     <td style="border:0px; text-align:center;" colspan="3">
-                        <button class="btn_search" onclick="reqEditMember();">변경</button>&nbsp;
-                        <button class="btn_red" onclick="closeEditMember();">닫기</button>
+                        <button class="btn_search" onclick="reqEditMember();"><?= lang('Admin.btn_change') ?></button>&nbsp;
+                        <button class="btn_red" onclick="closeEditMember();"><?= lang('Admin.btn_close') ?></button>
                     </td>
                 </tr>
             </tbody>
@@ -612,5 +612,6 @@ window.ADMIN_I18N.btn_approve = <?= json_encode(lang('Admin.btn_approve'), JSON_
 window.ADMIN_I18N.btn_block = <?= json_encode(lang('Admin.btn_block'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.btn_delete = <?= json_encode(lang('Admin.btn_delete'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.status_online = <?= json_encode(lang('Admin.status_online'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.title_sub_store_of = <?= json_encode(lang('Admin.title_sub_store_of'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
-<script src="/assets/js/company.js?v=8"></script>
+<script src="/assets/js/company.js?v=9"></script>

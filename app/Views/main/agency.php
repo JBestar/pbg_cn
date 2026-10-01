@@ -52,7 +52,7 @@ window.ADMIN_I18N.level_store = <?= json_encode(lang('Admin.menu_agency'), JSON_
 </script>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/agency.js?v=7"></script>
+    <script src="/assets/js/agency.js?v=8"></script>
 <?php else :?>
     <script src="/assets/js/agency.js?v=<?=time();?>"></script>
 <?php endif ?>

@@ -629,7 +629,7 @@ function showSubMember(arrInfo, objEmp) {
 
             tHtml += "<tr>";
             tHtml += "<td class=\"tdDate\" >" + (parseInt(idx) + 1) + "</td>";
-            tHtml += "<td class=\"tdDate\">" + getMemberLevelText(arrInfo[idx].mb_level) + "</td>";
+            tHtml += "<td class=\"tdDate\">" + getMemberLevelText(arrInfo[idx].mb_level) + " / " + getMemberChannelText(arrInfo[idx].mb_channel) + "</td>";
             tHtml += "<td class=\"tdDate\" >" + arrInfo[idx].mb_uid + "</td>";
             tHtml += "<td class=\"tdDate\" >" + arrInfo[idx].mb_nickname + "</td>";
             tHtml += "<td class=\"tdMoney\" >" + parseInt(arrInfo[idx].mb_money).toLocaleString() + "</td>";
@@ -648,7 +648,8 @@ function showSubMember(arrInfo, objEmp) {
     }
 
     if (objEmp != null) {
-        $('#subTitleId').text(objEmp.mb_nickname + " 하부매장");
+        var empName = objEmp.mb_nickname;
+        $('#subTitleId').text(t('title_sub_store_of', '{name} 하부매장').replace('{name}', function() { return empName; }));
     }
 
     $('#tSubbodyList').html(tHtml);

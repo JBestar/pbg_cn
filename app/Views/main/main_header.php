@@ -28,7 +28,7 @@
         <script src="/assets/js/lib/sweetalert2.min.js"></script> -->
         <script src="/assets/js/lib/sweetalert2.all.min.js"></script>
 
-        <script src="/assets/js/util.js?v=8"></script>
+        <script src="/assets/js/util.js?v=9"></script>
         <script src="/assets/js/header.js?v=4"></script>
         <script src="/assets/js/window.js"></script>
         <script>
@@ -64,7 +64,9 @@
             btn_ok: <?= json_encode(lang('Admin.btn_ok'), JSON_UNESCAPED_UNICODE) ?>,
             btn_cancel: <?= json_encode(lang('Admin.btn_cancel'), JSON_UNESCAPED_UNICODE) ?>,
             channel_cabinet: <?= json_encode(lang('Admin.channel_cabinet'), JSON_UNESCAPED_UNICODE) ?>,
-            channel_mobile: <?= json_encode(lang('Admin.channel_mobile'), JSON_UNESCAPED_UNICODE) ?>
+            channel_mobile: <?= json_encode(lang('Admin.channel_mobile'), JSON_UNESCAPED_UNICODE) ?>,
+            role_store: <?= json_encode(lang('Admin.role_store'), JSON_UNESCAPED_UNICODE) ?>,
+            role_agency: <?= json_encode(lang('Admin.role_agency'), JSON_UNESCAPED_UNICODE) ?>
         };
         </script>
     </head>

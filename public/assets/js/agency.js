@@ -40,7 +40,7 @@ function showPage(arrInfo) {
 
             tHtml += '<tr id="trFid-' + r.mb_fid + '">';
             tHtml += '<td class="tdDate">' + (parseInt(idx, 10) + 1) + '</td>';
-            tHtml += '<td class="tdDate">' + getMemberLevelText(r.mb_level) + '</td>';
+            tHtml += '<td class="tdDate">' + getMemberLevelText(r.mb_level) + ' / ' + getMemberChannelText(r.mb_channel) + '</td>';
             tHtml += '<td class="tdDate">' + r.mb_uid + '</td>';
             tHtml += '<td class="tdDate">' + r.mb_nickname + '</td>';
             tHtml += '<td class="tdDate">' + displayPwd(r.mb_pwd) + '</td>';

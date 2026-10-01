@@ -273,4 +273,7 @@ return [
     'channel_cabinet' => '游戏机',
     'channel_mobile' => '手机',
     'hint_channel_fixed' => '* 注册后不可更改',
+    'title_company_edit' => '总代信息更改',
+    'title_sub_store' => '下级门店',
+    'title_sub_store_of' => '{name} 下级门店',
 ];

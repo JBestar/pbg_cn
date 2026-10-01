@@ -273,4 +273,7 @@ return [
     'channel_cabinet' => 'Cabinet',
     'channel_mobile' => 'Mobile',
     'hint_channel_fixed' => '* Cannot be changed after registration',
+    'title_company_edit' => 'Edit agency',
+    'title_sub_store' => 'Sub stores',
+    'title_sub_store_of' => 'Sub stores of {name}',
 ];

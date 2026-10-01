@@ -474,12 +474,28 @@ function getMoneyChangeTypeText(iType) {
     }
 }
 
+/** ADMIN_I18N(서버 lang 파일) 우선. 값이 없을 때만 <html lang> 기준 사전 사용 — app/Language/{ko,zh,en}/Admin.php 와 동일하게 유지 */
+var ADMIN_I18N_FALLBACK = {
+    ko: { role_store: '매장', role_agency: '총판', channel_cabinet: '게임기', channel_mobile: '모바일' },
+    zh: { role_store: '门店', role_agency: '总代', channel_cabinet: '游戏机', channel_mobile: '手机' },
+    en: { role_store: 'Store', role_agency: 'Agency', channel_cabinet: 'Cabinet', channel_mobile: 'Mobile' }
+};
+
+function adminLocaleText(key) {
+    if (window.ADMIN_I18N && window.ADMIN_I18N[key]) {
+        return window.ADMIN_I18N[key];
+    }
+    var lang = String(document.documentElement.getAttribute('lang') || 'ko').toLowerCase().substr(0, 2);
+    var dict = ADMIN_I18N_FALLBACK[lang] || ADMIN_I18N_FALLBACK.ko;
+    return dict[key] || ADMIN_I18N_FALLBACK.ko[key] || '';
+}
+
 function getMemberLevelText(nLevel) {
     switch (parseInt(nLevel)) {
         case 7:
-            return "매장";
+            return adminLocaleText('role_store');
         case 8:
-            return "총판";
+            return adminLocaleText('role_agency');
         default:
             return '';
     }
@@ -492,11 +508,10 @@ function getChannelFilter() {
 }
 
 function getMemberChannelText(nChannel) {
-    var i18n = window.ADMIN_I18N || {};
     if (parseInt(nChannel, 10) === 1) {
-        return i18n.channel_mobile || "모바일";
+        return adminLocaleText('channel_mobile');
     }
-    return i18n.channel_cabinet || "게임기";
+    return adminLocaleText('channel_cabinet');
 }
 
 function getChargeTypeText(iState) {

@@ -274,4 +274,7 @@ return [
     'channel_cabinet' => '게임기',
     'channel_mobile' => '모바일',
     'hint_channel_fixed' => '* 등록 후 변경 불가',
+    'title_company_edit' => '총판정보변경',
+    'title_sub_store' => '하부매장',
+    'title_sub_store_of' => '{name} 하부매장',
 ];
