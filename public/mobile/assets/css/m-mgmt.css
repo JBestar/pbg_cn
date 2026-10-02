@@ -507,6 +507,48 @@
   color: #ff8a8a;
 }
 
+.m-point-have {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e8f4ff;
+}
+
+.m-point-have strong {
+  color: #ffe08a;
+  font-weight: 800;
+}
+
+.m-point-amount-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.m-point-amount-wrap .m-charge-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.m-point-full {
+  flex: 0 0 auto;
+  min-width: 64px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  color: #1a2a44;
+  cursor: pointer;
+  background: linear-gradient(180deg, #ffe08a 0%, #e0b040 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 3px 0 #8a6410;
+}
+
+.m-point-full:active {
+  transform: translateY(1px);
+}
+
 @media (max-width: 360px) {
   .m-mgmt-grid { gap: 10px 4px; padding: 12px 4px 6px; }
   .m-mgmt-ico { width: 48px; height: 48px; }

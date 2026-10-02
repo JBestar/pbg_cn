@@ -486,43 +486,152 @@
   }
 
   function openPointConvert() {
+    var mgmtPanel = $('mgmtPanel');
+    if (mgmtPanel) mgmtPanel.hidden = true;
+    showGrid(true);
     state.panel = 'point';
-    var pt = Number(state.member && state.member.point) || 0;
-    var html = ''
-      + '<div class="m-mgmt-convert">'
-      + '<p>' + esc(I18N().t('mgmtPointConvertHelp')) + '</p>'
-      + '<p>' + esc(I18N().t('mgmtPoint')) + ': <strong id="mgmtConvertPoint">' + esc(fmtPoint(pt)) + 'u</strong></p>'
-      + '<div class="m-mgmt-convert-actions">'
-      + '<button type="button" class="m-mgmt-btn m-mgmt-btn--ghost" id="mgmtConvertCancel">' + esc(I18N().t('mgmtCancel')) + '</button>'
-      + '<button type="button" class="m-mgmt-btn m-mgmt-btn--ok" id="mgmtConvertOk"' + (pt <= 0 ? ' disabled' : '') + '>'
-      + esc(I18N().t('mgmtConvertDo')) + '</button>'
-      + '</div></div>';
-    openPanel(I18N().t('mgmtPointConvert'), html);
-    var cancel = $('mgmtConvertCancel');
-    var ok = $('mgmtConvertOk');
-    if (cancel) cancel.addEventListener('click', closePanel);
-    if (ok) ok.addEventListener('click', doPointConvert);
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('point');
+
+    var body = $('pointPageBody');
+    if (!body) return;
+    body.innerHTML = renderPointForm([]);
+    bindPointUi();
+    var hist = $('mPointHistBody');
+    if (hist) {
+      hist.innerHTML = '<tr><td colspan="2" class="m-charge-empty">' + esc(I18N().t('mgmtLoading')) + '</td></tr>';
+    }
+
+    if (typeof hooks.api !== 'function') {
+      fillPointHistory([]);
+      return;
+    }
+    hooks.api('point_convert_list', { qs: '&limit=30' }).then(function (r) {
+      if (state.panel !== 'point') return;
+      var json = (r && r.json) || {};
+      var rows = (json.status === 'success' && Array.isArray(json.data)) ? json.data : [];
+      fillPointHistory(rows);
+    }, function () {
+      if (state.panel !== 'point') return;
+      fillPointHistory([]);
+    });
   }
 
-  function doPointConvert() {
-    if (state.busy) return;
+  function closePointPage() {
+    if (state.panel === 'point') state.panel = null;
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
+  }
+
+  function renderPointForm(rows) {
     var pt = Number(state.member && state.member.point) || 0;
-    if (pt <= 0) {
+    var html = ''
+      + '<div class="m-charge m-point-page-inner">'
+      + '<p class="m-point-have">' + esc(I18N().t('mgmtPointHave')) + ' <strong id="mPointHave">' + esc(fmtPoint(pt)) + '</strong></p>'
+      + '<div class="m-charge-row m-point-amount-row">'
+      + '<label>' + esc(I18N().t('mgmtPointAsk')) + '</label>'
+      + '<div class="m-point-amount-wrap">'
+      + '<input type="text" id="mPointAmount" class="m-charge-input" value="" inputmode="numeric" />'
+      + '<button type="button" class="m-point-full" id="mPointFull">' + esc(I18N().t('mgmtPointFull')) + '</button>'
+      + '</div></div>'
+      + '<div class="m-charge-actions">'
+      + '<button type="button" class="m-mgmt-btn m-mgmt-btn--ok" id="mPointSubmit">' + esc(I18N().t('mgmtPointSubmit')) + '</button>'
+      + '<button type="button" class="m-mgmt-btn m-mgmt-btn--danger" id="mPointCancel">' + esc(I18N().t('mgmtCancel')) + '</button>'
+      + '</div>'
+      + '<div class="m-charge-table-wrap"><table class="m-charge-table"><thead><tr>'
+      + '<th>' + esc(I18N().t('mgmtPointColAmt')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtPointColProc')) + '</th>'
+      + '</tr></thead><tbody id="mPointHistBody">';
+    if (!rows || !rows.length) {
+      html += '<tr><td colspan="2" class="m-charge-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</td></tr>';
+    } else {
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i] || {};
+        html += '<tr>'
+          + '<td>' + esc((Number(r.amount) || 0).toLocaleString()) + '</td>'
+          + '<td>' + esc(r.processed_at || '-') + '</td>'
+          + '</tr>';
+      }
+    }
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  function bindPointUi() {
+    var input = $('mPointAmount');
+    var full = $('mPointFull');
+    var cancel = $('mPointCancel');
+    var submit = $('mPointSubmit');
+    function havePt() {
+      return Math.floor(Number(state.member && state.member.point) || 0);
+    }
+    function setAmount(n) {
+      n = Math.max(0, Math.floor(Number(n) || 0));
+      if (input) input.value = n > 0 ? String(n) : '';
+    }
+    if (full) {
+      full.addEventListener('click', function () { setAmount(havePt()); });
+    }
+    if (cancel) {
+      cancel.addEventListener('click', function () { setAmount(0); });
+    }
+    if (submit) {
+      submit.addEventListener('click', function () {
+        var amt = parseInt((input && input.value) || '0', 10) || 0;
+        doPointConvert(amt);
+      });
+    }
+    if (input) {
+      input.addEventListener('input', function () {
+        var v = String(input.value || '').replace(/[^\d]/g, '');
+        input.value = v;
+      });
+    }
+  }
+
+  function fillPointHistory(rows) {
+    var tbody = $('mPointHistBody');
+    if (!tbody) return;
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="2" class="m-charge-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</td></tr>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i] || {};
+      html += '<tr>'
+        + '<td>' + esc((Number(r.amount) || 0).toLocaleString()) + '</td>'
+        + '<td>' + esc(r.processed_at || '-') + '</td>'
+        + '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function doPointConvert(amount) {
+    amount = parseInt(amount, 10) || 0;
+    if (amount < 1) {
+      toast(I18N().t('mgmtPointNeedAmount'));
+      return;
+    }
+    var have = Math.floor(Number(state.member && state.member.point) || 0);
+    if (have <= 0) {
       toast(I18N().msg('NO_POINT') || I18N().t('mgmtNoPoint'));
       return;
     }
+    if (amount > have) {
+      toast(I18N().msg('BALANCE') || I18N().t('mgmtConvertFail'));
+      return;
+    }
     if (!window.confirm(I18N().t('mgmtPointConvertConfirm'))) return;
-    if (typeof hooks.api !== 'function') return;
+    if (typeof hooks.api !== 'function' || state.busy) return;
     state.busy = true;
-    var ok = $('mgmtConvertOk');
-    if (ok) ok.disabled = true;
-    hooks.api('point_convert', { body: {} }).then(function (r) {
+    var btn = $('mPointSubmit');
+    if (btn) btn.disabled = true;
+    hooks.api('point_convert', { body: { amount: amount } }).then(function (r) {
       state.busy = false;
+      if (btn) btn.disabled = false;
       var json = (r && r.json) || {};
       if (json.status !== 'success') {
         var code = json.code || '';
         toast((code && I18N().msg(code)) || json.message || I18N().t('mgmtConvertFail'));
-        if (ok) ok.disabled = false;
         return;
       }
       var d = json.data || {};
@@ -534,10 +643,10 @@
         hooks.onBalance({ balance: state.member.balance, point: state.member.point });
       }
       toast(I18N().t('mgmtConvertOk'));
-      closePanel();
+      openPointConvert();
     }, function () {
       state.busy = false;
-      if (ok) ok.disabled = false;
+      if (btn) btn.disabled = false;
       toast(I18N().t('mgmtConvertFail'));
     });
   }
@@ -624,6 +733,10 @@
     var exchangeClose = $('exchangePageClose');
     if (exchangeBack) exchangeBack.addEventListener('click', closeExchangePage);
     if (exchangeClose) exchangeClose.addEventListener('click', closeExchangePage);
+    var pointBack = $('pointPageBack');
+    var pointClose = $('pointPageClose');
+    if (pointBack) pointBack.addEventListener('click', closePointPage);
+    if (pointClose) pointClose.addEventListener('click', closePointPage);
   }
 
   function sync(member) {
@@ -645,6 +758,8 @@
     if (chargeRoot) I18N().applyStatic(chargeRoot);
     var exchangeRoot = $('pageExchange');
     if (exchangeRoot) I18N().applyStatic(exchangeRoot);
+    var pointRoot = $('pagePoint');
+    if (pointRoot) I18N().applyStatic(pointRoot);
     renderProfile();
     if (state.panel === 'point') openPointConvert();
     else if (state.panel === 'charge') openCharge();
@@ -659,7 +774,7 @@
   }
 
   function show() {
-    if (state.panel !== 'charge' && state.panel !== 'exchange') closePanel();
+    if (state.panel !== 'charge' && state.panel !== 'exchange' && state.panel !== 'point') closePanel();
     renderProfile();
   }
 

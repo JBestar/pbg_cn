@@ -150,6 +150,8 @@
     if (pageCharge) pageCharge.hidden = name !== 'charge';
     var pageExchange = $('pageExchange');
     if (pageExchange) pageExchange.hidden = name !== 'exchange';
+    var pagePoint = $('pagePoint');
+    if (pagePoint) pagePoint.hidden = name !== 'point';
   }
 
   function renderError() {

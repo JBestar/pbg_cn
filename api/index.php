@@ -60,6 +60,9 @@ try {
         case 'point_convert':
             api_point_convert();
             break;
+        case 'point_convert_list':
+            api_point_convert_list();
+            break;
         case 'charge_request':
             api_charge_request();
             break;
@@ -766,7 +769,7 @@ function api_cancel()
     }
 }
 
-/** F1: 포인트 전액 → 게임머니 (money_history type 10) */
+/** F1: 포인트 → 게임머니 (money_history type 10). body.amount 있으면 일부, 없으면 전액. */
 function api_point_convert()
 {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -774,6 +777,9 @@ function api_point_convert()
     }
     $auth = pbg_auth_member(true);
     $member = $auth['member'];
+    $body = pbg_body();
+    $reqAmount = isset($body['amount']) ? (float)$body['amount'] : 0;
+
     $db = pbg_db();
     $db->begin_transaction();
     try {
@@ -786,16 +792,26 @@ function api_point_convert()
         if (!$row) {
             throw new RuntimeException('member lock failed');
         }
-        $point = (float)$row['mb_point'];
-        if ($point <= 0) {
+        $have = (float)$row['mb_point'];
+        if ($have <= 0) {
             $db->rollback();
-            pbg_json(['status' => 'fail', 'code' => 'NO_POINT', 'message' => '没有可转换的积分']);
+            pbg_json(['status' => 'fail', 'code' => 'NO_POINT', 'message' => '전환할 포인트가 없습니다']);
+        }
+        // amount omitted or <=0 → convert all (legacy)
+        $convert = ($reqAmount > 0) ? $reqAmount : $have;
+        if ($convert < 1) {
+            $db->rollback();
+            pbg_json(['status' => 'fail', 'code' => 'NO_AMOUNT', 'message' => '금액을 입력하세요']);
+        }
+        if ($convert > $have) {
+            $db->rollback();
+            pbg_json(['status' => 'fail', 'code' => 'BALANCE', 'message' => '포인트가 부족합니다']);
         }
         $bal = (float)$row['mb_money'];
-        $after = $bal + $point;
-        $zero = 0.0;
+        $afterMoney = $bal + $convert;
+        $afterPoint = $have - $convert;
         $upd = $db->prepare('UPDATE member SET mb_money=?, mb_point=? WHERE mb_fid=?');
-        $upd->bind_param('ddi', $after, $zero, $fid);
+        $upd->bind_param('ddi', $afterMoney, $afterPoint, $fid);
         $upd->execute();
         $upd->close();
 
@@ -805,7 +821,7 @@ function api_point_convert()
         $h = $db->prepare(
             'INSERT INTO money_history (money_mb_fid, money_mb_uid, money_mb_emp_fid, money_amount, money_before, money_after, money_change_type, money_update_time) VALUES (?,?,?,?,?,?,?,NOW())'
         );
-        $h->bind_param('isidddi', $fid, $mbUid, $empFid, $point, $bal, $after, $type);
+        $h->bind_param('isidddi', $fid, $mbUid, $empFid, $convert, $bal, $afterMoney, $type);
         $h->execute();
         $h->close();
 
@@ -813,15 +829,47 @@ function api_point_convert()
         pbg_json([
             'status' => 'success',
             'data' => [
-                'balance' => $after,
-                'point' => 0,
-                'converted' => $point,
+                'balance' => $afterMoney,
+                'point' => $afterPoint,
+                'converted' => $convert,
             ],
         ]);
     } catch (Throwable $e) {
         $db->rollback();
         throw $e;
     }
+}
+
+/** Point→money conversion history (money_change_type=10). */
+function api_point_convert_list()
+{
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 30;
+    $db = pbg_db();
+    $fid = (int)$member['mb_fid'];
+    $type = 10;
+    $stmt = pbg_prepare(
+        $db,
+        'SELECT money_fid, money_amount, money_update_time
+         FROM money_history
+         WHERE money_mb_fid=? AND money_change_type=?
+         ORDER BY money_fid DESC
+         LIMIT ' . $limit
+    );
+    $stmt->bind_param('ii', $fid, $type);
+    $stmt->execute();
+    $raw = pbg_stmt_fetch_all($stmt);
+    $stmt->close();
+    $rows = [];
+    foreach ($raw as $r) {
+        $rows[] = [
+            'id' => (int)$r['money_fid'],
+            'amount' => abs((float)$r['money_amount']),
+            'processed_at' => $r['money_update_time'],
+        ];
+    }
+    pbg_json(['status' => 'success', 'data' => $rows]);
 }
 
 /** Mobile store → parent agency charge request (member_charge wait). */
