@@ -247,8 +247,12 @@ function api_history()
     $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 30;
     $db = pbg_db();
     $fid = (int)$m['mb_fid'];
-    $stmt = pbg_prepare($db, 'SELECT * FROM bets WHERE mb_fid=? ORDER BY id DESC LIMIT ?');
-    $stmt->bind_param('ii', $fid, $limit);
+    // Inline LIMIT — some mysqli builds mishandle bound LIMIT params
+    $stmt = pbg_prepare(
+        $db,
+        'SELECT * FROM bets WHERE mb_fid=? ORDER BY id DESC LIMIT ' . $limit
+    );
+    $stmt->bind_param('i', $fid);
     $stmt->execute();
     $raw = pbg_stmt_fetch_all($stmt);
     $stmt->close();

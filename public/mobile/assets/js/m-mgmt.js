@@ -16,6 +16,7 @@
     member: { uid: '', name: '', balance: 0, point: 0 },
     busy: false,
     panel: null,
+    liveTimer: null,
   };
 
   function I18N() { return window.PBGM_I18N; }
@@ -670,8 +671,166 @@
       + '</li>';
   }
 
+  function betResultMeta(st) {
+    st = parseInt(st, 10) || 0;
+    if (st === 1) return { cls: 'is-wait', key: 'mgmtStateWait' };
+    if (st === 2) return { cls: 'is-lose', key: 'mgmtBetMiss' };
+    if (st === 3) return { cls: 'is-win', key: 'mgmtBetHit' };
+    if (st === 4) return { cls: 'is-cancel', key: 'mgmtStateCancel' };
+    return { cls: '', key: '' };
+  }
+
+  function betsLiveModeHtml(mode) {
+    var m = parseInt(mode, 10) || 0;
+    var t = function (k) { return I18N().t(k); };
+    var P = t('markP') || 'P';
+    var B = t('markB') || 'B';
+    var pSpan = '<span class="m-bets-mark m-bets-mark--p">' + esc(P) + '</span>';
+    var bSpan = '<span class="m-bets-mark m-bets-mark--b">' + esc(B) + '</span>';
+    var r1 = esc(t('room1Title'));
+    var r2 = esc(t('room2Title'));
+    var r3 = esc(t('room3Title'));
+    var r4 = esc(t('room4Title'));
+    // Combo: 제1번방P+제2번방P
+    var combo = {
+      5: r1 + pSpan + '+' + r2 + pSpan,
+      6: r1 + bSpan + '+' + r2 + pSpan,
+      7: r1 + pSpan + '+' + r2 + bSpan,
+      8: r1 + bSpan + '+' + r2 + bSpan,
+      13: r3 + pSpan + '+' + r4 + pSpan,
+      14: r3 + bSpan + '+' + r4 + pSpan,
+      15: r3 + pSpan + '+' + r4 + bSpan,
+      16: r3 + bSpan + '+' + r4 + bSpan,
+    };
+    if (combo[m]) return combo[m];
+    var single = {
+      1: r1 + pSpan,
+      2: r1 + bSpan,
+      3: r2 + pSpan,
+      4: r2 + bSpan,
+      9: r3 + pSpan,
+      10: r3 + bSpan,
+      11: r4 + pSpan,
+      12: r4 + bSpan,
+    };
+    if (single[m]) return single[m];
+    return esc(modeLabel(m));
+  }
+
+  /** HTML for 선택 column (number modes → yellow 3D ball). */
+  function betsLivePickHtml(row) {
+    var m = parseInt(row.mode, 10) || 0;
+    var ratio = Number(row.ratio);
+    var rTxt = ratio > 0 ? ' [' + (Math.round(ratio * 100) / 100).toString() + ']' : '';
+    if (m >= 30 && m <= 39) {
+      var n = m - 30;
+      return '<span class="m-bets-pick-inner">'
+        + '<span class="m-bets-pb-ball" aria-label="' + n + '">' + n + '</span>'
+        + '<span class="m-bets-pick-ratio">' + esc(rTxt) + '</span>'
+        + '</span>';
+    }
+    return '<span class="m-bets-pick-inner">'
+      + betsLiveModeHtml(m)
+      + (rTxt ? '<span class="m-bets-pick-ratio">' + esc(rTxt) + '</span>' : '')
+      + '</span>';
+  }
+
+  function stopBetsLivePoll() {
+    if (state.liveTimer) {
+      clearInterval(state.liveTimer);
+      state.liveTimer = null;
+    }
+  }
+
+  function renderBetsLiveTable(rows) {
+    var html = ''
+      + '<div class="m-bets-table-wrap"><table class="m-bets-table"><thead><tr>'
+      + '<th>' + esc(I18N().t('mgmtBetColRound')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtBetColPick')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtBetColAmount')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtBetColWin')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtBetColResult')) + '</th>'
+      + '</tr></thead><tbody>';
+    if (!rows || !rows.length) {
+      html += '<tr><td colspan="5" class="m-charge-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</td></tr>';
+    } else {
+      var prevRound = null;
+      var stripeDark = false;
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i] || {};
+        var round = parseInt(r.round, 10) || 0;
+        // Number only: 1625971(204) — no trailing "회차"
+        var roundTxt = I18N().formatRoundWithDay
+          ? I18N().formatRoundWithDay(round, false)
+          : String(round);
+        var st = betResultMeta(r.state);
+        var winAmt = parseInt(r.state, 10) === 3 ? (Number(r.win_amount) || 0) : 0;
+        if (prevRound != null && prevRound !== round) {
+          stripeDark = !stripeDark;
+        }
+        var trCls = stripeDark ? 'm-bets-row--dark' : 'm-bets-row--light';
+        if (prevRound != null && prevRound !== round) trCls += ' m-bets-sep';
+        html += '<tr class="' + trCls + '">'
+          + '<td class="m-bets-round" data-round="' + round + '">' + esc(roundTxt) + '</td>'
+          + '<td class="m-bets-pick">' + betsLivePickHtml(r) + '</td>'
+          + '<td class="m-bets-amt">' + esc(fmtMoney(r.amount)) + '</td>'
+          + '<td class="m-bets-win">' + esc(fmtMoney(winAmt)) + '</td>'
+          + '<td><span class="m-bets-badge ' + st.cls + '">' + esc(I18N().t(st.key) || '-') + '</span></td>'
+          + '</tr>';
+        prevRound = round;
+      }
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function loadBetsLive(silent) {
+    var body = $('betsLivePageBody');
+    if (!body) return;
+    if (!silent) {
+      body.innerHTML = '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>';
+    }
+    if (typeof hooks.api !== 'function') {
+      body.innerHTML = renderBetsLiveTable([]);
+      return;
+    }
+    hooks.api('history', { qs: '&limit=50' }).then(function (r) {
+      if (state.panel !== 'betsLive') return;
+      var json = (r && r.json) || {};
+      var rows = (json.status === 'success' && Array.isArray(json.data)) ? json.data : [];
+      body.innerHTML = renderBetsLiveTable(rows);
+    }, function () {
+      if (state.panel !== 'betsLive') return;
+      if (!silent) body.innerHTML = renderBetsLiveTable([]);
+    });
+  }
+
+  function openBetsLive() {
+    var mgmtPanel = $('mgmtPanel');
+    if (mgmtPanel) mgmtPanel.hidden = true;
+    showGrid(true);
+    state.panel = 'betsLive';
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('betsLive');
+    stopBetsLivePoll();
+    loadBetsLive(false);
+    state.liveTimer = setInterval(function () {
+      var page = $('pageBetsLive');
+      if (state.panel !== 'betsLive' || (page && page.hidden)) {
+        stopBetsLivePoll();
+        return;
+      }
+      loadBetsLive(true);
+    }, 5000);
+  }
+
+  function closeBetsLivePage() {
+    stopBetsLivePoll();
+    if (state.panel === 'betsLive') state.panel = null;
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
+  }
+
   function openHistory(kind) {
-    var titleKey = kind === 'live' ? 'mgmtBetsLive' : (kind === 'wins' ? 'mgmtWins' : 'mgmtBetsAll');
+    var titleKey = kind === 'wins' ? 'mgmtWins' : 'mgmtBetsAll';
     state.panel = 'hist:' + kind;
     openPanel(I18N().t(titleKey), '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>');
     if (typeof hooks.api !== 'function') return;
@@ -683,9 +842,7 @@
         return;
       }
       var rows = (json.data || []).slice();
-      if (kind === 'live') {
-        rows = rows.filter(function (x) { return parseInt(x.state, 10) === 1; });
-      } else if (kind === 'wins') {
+      if (kind === 'wins') {
         rows = rows.filter(function (x) { return parseInt(x.state, 10) === 3; });
       }
       if (!rows.length) {
@@ -706,7 +863,7 @@
     if (action === 'charge') return openCharge();
     if (action === 'exchange') return openExchange();
     if (action === 'point') return openPointConvert();
-    if (action === 'betsLive') return openHistory('live');
+    if (action === 'betsLive') return openBetsLive();
     if (action === 'betsAll') return openHistory('all');
     if (action === 'wins') return openHistory('wins');
     if (action === 'inquiry') return openSoon('mgmtInquiry');
@@ -737,6 +894,10 @@
     var pointClose = $('pointPageClose');
     if (pointBack) pointBack.addEventListener('click', closePointPage);
     if (pointClose) pointClose.addEventListener('click', closePointPage);
+    var betsLiveBack = $('betsLivePageBack');
+    var betsLiveClose = $('betsLivePageClose');
+    if (betsLiveBack) betsLiveBack.addEventListener('click', closeBetsLivePage);
+    if (betsLiveClose) betsLiveClose.addEventListener('click', closeBetsLivePage);
   }
 
   function sync(member) {
@@ -760,10 +921,13 @@
     if (exchangeRoot) I18N().applyStatic(exchangeRoot);
     var pointRoot = $('pagePoint');
     if (pointRoot) I18N().applyStatic(pointRoot);
+    var betsLiveRoot = $('pageBetsLive');
+    if (betsLiveRoot) I18N().applyStatic(betsLiveRoot);
     renderProfile();
     if (state.panel === 'point') openPointConvert();
     else if (state.panel === 'charge') openCharge();
     else if (state.panel === 'exchange') openExchange();
+    else if (state.panel === 'betsLive') openBetsLive();
     else if (state.panel === 'soon') {
       /* leave soon panel; title already set */
     } else if (state.panel && String(state.panel).indexOf('hist:') === 0) {
@@ -774,7 +938,17 @@
   }
 
   function show() {
-    if (state.panel !== 'charge' && state.panel !== 'exchange' && state.panel !== 'point') closePanel();
+    // Returning to mgmt grid (nav / back) — leave charge/exchange/point/betsLive
+    stopBetsLivePoll();
+    if (
+      state.panel === 'charge'
+      || state.panel === 'exchange'
+      || state.panel === 'point'
+      || state.panel === 'betsLive'
+    ) {
+      state.panel = null;
+    }
+    closePanel();
     renderProfile();
   }
 
@@ -783,6 +957,7 @@
     sync: sync,
     show: show,
     applyI18n: applyI18n,
+    stopLive: stopBetsLivePoll,
     onToast: function (fn) { hooks.toast = fn; },
     onApi: function (fn) { hooks.api = fn; },
     onLogout: function (fn) { hooks.logout = fn; },

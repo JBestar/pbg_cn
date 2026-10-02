@@ -152,6 +152,8 @@
     if (pageExchange) pageExchange.hidden = name !== 'exchange';
     var pagePoint = $('pagePoint');
     if (pagePoint) pagePoint.hidden = name !== 'point';
+    var pageBetsLive = $('pageBetsLive');
+    if (pageBetsLive) pageBetsLive.hidden = name !== 'betsLive';
   }
 
   function renderError() {
@@ -603,6 +605,9 @@
     Nav.bind();
     Nav.onPage(function (page) {
       showPage(page);
+      if (page !== 'betsLive' && Mgmt && typeof Mgmt.stopLive === 'function') {
+        Mgmt.stopLive();
+      }
       if (page === 'home') scaleMini();
       if (page === 'bet') syncBetBoard();
       if (page === 'mgmt' && Mgmt && typeof Mgmt.show === 'function') {
