@@ -5,6 +5,7 @@
   var Nav = window.PBGM_Nav;
   var Draws = window.PBGM_Draws;
   var Bet = window.PBGM_Bet;
+  var Mgmt = window.PBGM_Mgmt;
   var TOKEN_KEY = 'pbg_m_token';
   var REQUEST_TIMEOUT_MS = 10000;
   var API_BASE = resolveApiBase();
@@ -215,6 +216,7 @@
     $('headerUserName').textContent = state.member.name || state.member.uid || '-';
     $('headerBalance').textContent = fmtMoney(state.member.balance);
     $('headerPoint').textContent = fmtPoint(state.member.point);
+    if (Mgmt && typeof Mgmt.sync === 'function') Mgmt.sync(state.member);
     syncBetBoard();
   }
 
@@ -510,6 +512,7 @@
       applyPatternTitles();
       if (Draws && typeof Draws.rerender === 'function') Draws.rerender();
       if (Bet && typeof Bet.applyI18n === 'function') Bet.applyI18n();
+      if (Mgmt && typeof Mgmt.applyI18n === 'function') Mgmt.applyI18n();
       if (state.homeReady && state.token) {
         refreshPatternBox();
       }
@@ -570,11 +573,28 @@
       });
     }
 
+    if (Mgmt) {
+      Mgmt.bind();
+      Mgmt.onToast(toast);
+      Mgmt.onApi(api);
+      Mgmt.onLogout(doLogout);
+      Mgmt.onBalance(function (bal) {
+        if (!state.member) state.member = {};
+        if (bal.balance != null) state.member.balance = bal.balance;
+        if (bal.point != null) state.member.point = bal.point;
+        updateHeaderUser({ member: state.member });
+      });
+    }
+
     Nav.bind();
     Nav.onPage(function (page) {
       showPage(page);
       if (page === 'home') scaleMini();
       if (page === 'bet') syncBetBoard();
+      if (page === 'mgmt' && Mgmt && typeof Mgmt.show === 'function') {
+        Mgmt.sync(state.member);
+        Mgmt.show();
+      }
     });
     Nav.onLang(function () {
       I18N.cycleLang();
