@@ -148,6 +148,8 @@
     $('pageMgmt').hidden = name !== 'mgmt';
     var pageCharge = $('pageCharge');
     if (pageCharge) pageCharge.hidden = name !== 'charge';
+    var pageExchange = $('pageExchange');
+    if (pageExchange) pageExchange.hidden = name !== 'exchange';
   }
 
   function renderError() {

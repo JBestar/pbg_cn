@@ -275,6 +275,166 @@
     if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
   }
 
+  function renderExchangeForm(rows) {
+    var uid = (state.member && (state.member.uid || state.member.name)) || '-';
+    var html = ''
+      + '<div class="m-charge">'
+      + '<div class="m-charge-row">'
+      + '<label>' + esc(I18N().t('mgmtExchangeAmount')) + '</label>'
+      + '<input type="text" id="mExchangeAmount" class="m-charge-input" value="0" inputmode="numeric" readonly />'
+      + '</div>'
+      + '<div class="m-charge-presets" id="mExchangePresets">'
+      + [10, 30, 50, 100, 500, 1000, 5000, 10000].map(function (n) {
+        return '<button type="button" class="m-charge-preset" data-exchange-amt="' + n + '">' + n + 'u</button>';
+      }).join('')
+      + '</div>'
+      + '<div class="m-charge-row">'
+      + '<label>' + esc(I18N().t('mgmtExchangeId')) + '</label>'
+      + '<input type="text" class="m-charge-input" value="' + esc(uid) + '" readonly />'
+      + '</div>'
+      + '<div class="m-charge-actions">'
+      + '<button type="button" class="m-mgmt-btn m-mgmt-btn--ok" id="mExchangeSubmit">' + esc(I18N().t('mgmtExchangeDo')) + '</button>'
+      + '<button type="button" class="m-mgmt-btn m-mgmt-btn--danger" id="mExchangeCancel">' + esc(I18N().t('mgmtCancel')) + '</button>'
+      + '</div>'
+      + '<h4 class="m-charge-hist-title">' + esc(I18N().t('mgmtExchangeHist')) + '</h4>'
+      + '<div class="m-charge-table-wrap"><table class="m-charge-table"><thead><tr>'
+      + '<th>' + esc(I18N().t('mgmtExchangeColAmount')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtExchangeColState')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtExchangeColReq')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtExchangeColProc')) + '</th>'
+      + '</tr></thead><tbody id="mExchangeHistBody">';
+    if (!rows || !rows.length) {
+      html += '<tr><td colspan="4" class="m-charge-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</td></tr>';
+    } else {
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i] || {};
+        html += '<tr>'
+          + '<td>' + esc((Number(r.amount) || 0).toLocaleString()) + '</td>'
+          + '<td><span class="m-charge-badge ' + chargeStateCls(r.state) + '">' + esc(chargeStateLabel(r.state)) + '</span></td>'
+          + '<td>' + esc(r.requested_at || '-') + '</td>'
+          + '<td>' + esc(r.processed_at || '-') + '</td>'
+          + '</tr>';
+      }
+    }
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  function bindExchangeUi() {
+    var amount = 0;
+    var input = $('mExchangeAmount');
+    function setAmount(n) {
+      amount = Math.max(0, n | 0);
+      if (input) input.value = amount > 0 ? String(amount) + 'u' : '0';
+    }
+    setAmount(0);
+    $all('[data-exchange-amt]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        setAmount(amount + (parseInt(btn.getAttribute('data-exchange-amt'), 10) || 0));
+      });
+    });
+    var cancel = $('mExchangeCancel');
+    if (cancel) {
+      cancel.addEventListener('click', function () { setAmount(0); });
+    }
+    var submit = $('mExchangeSubmit');
+    if (submit) {
+      submit.addEventListener('click', function () { doExchangeRequest(amount); });
+    }
+  }
+
+  function fillExchangeHistory(rows) {
+    var tbody = $('mExchangeHistBody');
+    if (!tbody) return;
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="m-charge-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</td></tr>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i] || {};
+      html += '<tr>'
+        + '<td>' + esc((Number(r.amount) || 0).toLocaleString()) + '</td>'
+        + '<td><span class="m-charge-badge ' + chargeStateCls(r.state) + '">' + esc(chargeStateLabel(r.state)) + '</span></td>'
+        + '<td>' + esc(r.requested_at || '-') + '</td>'
+        + '<td>' + esc(r.processed_at || '-') + '</td>'
+        + '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function openExchange() {
+    var mgmtPanel = $('mgmtPanel');
+    if (mgmtPanel) mgmtPanel.hidden = true;
+    showGrid(true);
+    state.panel = 'exchange';
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('exchange');
+
+    var body = $('exchangePageBody');
+    if (!body) return;
+    body.innerHTML = renderExchangeForm([]);
+    bindExchangeUi();
+    var hist = $('mExchangeHistBody');
+    if (hist) {
+      hist.innerHTML = '<tr><td colspan="4" class="m-charge-empty">' + esc(I18N().t('mgmtLoading')) + '</td></tr>';
+    }
+
+    if (typeof hooks.api !== 'function') {
+      fillExchangeHistory([]);
+      return;
+    }
+    hooks.api('exchange_list', { qs: '&limit=30' }).then(function (r) {
+      if (state.panel !== 'exchange') return;
+      var json = (r && r.json) || {};
+      var rows = (json.status === 'success' && Array.isArray(json.data)) ? json.data : [];
+      fillExchangeHistory(rows);
+    }, function () {
+      if (state.panel !== 'exchange') return;
+      fillExchangeHistory([]);
+    });
+  }
+
+  function closeExchangePage() {
+    if (state.panel === 'exchange') state.panel = null;
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
+  }
+
+  function doExchangeRequest(amount) {
+    amount = parseInt(amount, 10) || 0;
+    if (amount < 1) {
+      toast(I18N().t('mgmtExchangeNeedAmount'));
+      return;
+    }
+    var bal = Number(state.member && state.member.balance) || 0;
+    if (bal < amount) {
+      toast(I18N().msg('BALANCE') || I18N().t('mgmtExchangeFail'));
+      return;
+    }
+    if (!window.confirm(I18N().t('mgmtExchangeConfirm'))) return;
+    if (typeof hooks.api !== 'function' || state.busy) return;
+    state.busy = true;
+    var btn = $('mExchangeSubmit');
+    if (btn) btn.disabled = true;
+    hooks.api('exchange_request', {
+      body: { amount: amount },
+    }).then(function (r) {
+      state.busy = false;
+      if (btn) btn.disabled = false;
+      var json = (r && r.json) || {};
+      if (json.status !== 'success') {
+        var code = json.code || '';
+        toast((code && I18N().msg(code)) || json.message || I18N().t('mgmtExchangeFail'));
+        return;
+      }
+      toast(I18N().t('mgmtExchangeOkMsg'));
+      openExchange();
+    }, function () {
+      state.busy = false;
+      if (btn) btn.disabled = false;
+      toast(I18N().t('mgmtExchangeFail'));
+    });
+  }
+
   function doChargeRequest(amount) {
     amount = parseInt(amount, 10) || 0;
     if (amount < 1) {
@@ -435,7 +595,7 @@
 
   function onMenu(action) {
     if (action === 'charge') return openCharge();
-    if (action === 'exchange') return openSoon('mgmtExchange');
+    if (action === 'exchange') return openExchange();
     if (action === 'point') return openPointConvert();
     if (action === 'betsLive') return openHistory('live');
     if (action === 'betsAll') return openHistory('all');
@@ -460,6 +620,10 @@
     var chargeClose = $('chargePageClose');
     if (chargeBack) chargeBack.addEventListener('click', closeChargePage);
     if (chargeClose) chargeClose.addEventListener('click', closeChargePage);
+    var exchangeBack = $('exchangePageBack');
+    var exchangeClose = $('exchangePageClose');
+    if (exchangeBack) exchangeBack.addEventListener('click', closeExchangePage);
+    if (exchangeClose) exchangeClose.addEventListener('click', closeExchangePage);
   }
 
   function sync(member) {
@@ -479,9 +643,12 @@
     if (root) I18N().applyStatic(root);
     var chargeRoot = $('pageCharge');
     if (chargeRoot) I18N().applyStatic(chargeRoot);
+    var exchangeRoot = $('pageExchange');
+    if (exchangeRoot) I18N().applyStatic(exchangeRoot);
     renderProfile();
     if (state.panel === 'point') openPointConvert();
     else if (state.panel === 'charge') openCharge();
+    else if (state.panel === 'exchange') openExchange();
     else if (state.panel === 'soon') {
       /* leave soon panel; title already set */
     } else if (state.panel && String(state.panel).indexOf('hist:') === 0) {
@@ -492,7 +659,7 @@
   }
 
   function show() {
-    if (state.panel !== 'charge') closePanel();
+    if (state.panel !== 'charge' && state.panel !== 'exchange') closePanel();
     renderProfile();
   }
 

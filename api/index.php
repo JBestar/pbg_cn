@@ -69,6 +69,12 @@ try {
         case 'account_request':
             api_account_request();
             break;
+        case 'exchange_request':
+            api_exchange_request();
+            break;
+        case 'exchange_list':
+            api_exchange_list();
+            break;
         default:
             pbg_json(['status' => 'fail', 'message' => 'unknown action'], 400);
     }
@@ -979,6 +985,111 @@ function api_account_request()
     $id = (int)$ins->insert_id;
     $ins->close();
     pbg_json(['status' => 'success', 'data' => ['id' => $id, 'dup' => false]]);
+}
+
+/**
+ * Mobile store → parent agency exchange request (member_exchange wait).
+ * Money moves only when agency confirms (exchangeproc_permit).
+ */
+function api_exchange_request()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        pbg_json(['status' => 'fail', 'message' => 'POST required'], 405);
+    }
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $body = pbg_body();
+    $amount = isset($body['amount']) ? (float)$body['amount'] : 0;
+    if ($amount < 1) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_AMOUNT', 'message' => '금액을 입력하세요']);
+    }
+    $balance = (float)$member['mb_money'];
+    if ($balance < $amount) {
+        pbg_json(['status' => 'fail', 'code' => 'BALANCE', 'message' => '잔액이 부족합니다']);
+    }
+    $empFid = (int)$member['mb_emp_fid'];
+    if ($empFid < 1) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_AGENCY', 'message' => '상위 총판이 없습니다']);
+    }
+    $agency = pbg_get_member_by_fid($empFid);
+    if (!$agency || (int)$agency['mb_level'] !== 8) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_AGENCY', 'message' => '상위 총판이 없습니다']);
+    }
+
+    $db = pbg_db();
+    $uid = (string)$member['mb_uid'];
+    $wait = pbg_prepare(
+        $db,
+        "SELECT exchange_fid FROM member_exchange
+         WHERE exchange_client_delete=0 AND exchange_type=0 AND exchange_action_state=0 AND exchange_mb_uid=?
+         LIMIT 1"
+    );
+    $wait->bind_param('s', $uid);
+    $wait->execute();
+    $pending = pbg_stmt_fetch_one($wait);
+    $wait->close();
+    if ($pending) {
+        pbg_json(['status' => 'fail', 'code' => 'EXCHANGE_PENDING', 'message' => '대기 중인 환전신청이 있습니다']);
+    }
+
+    $ins = $db->prepare(
+        'INSERT INTO member_exchange
+         (exchange_emp_fid, exchange_mb_uid, exchange_type, exchange_money,
+          exchange_time_require, exchange_action_state, exchange_money_before, exchange_money_after,
+          exchange_bank_name, exchange_bank_owner, exchange_bank_number,
+          exchange_state_delete, exchange_client_delete)
+         VALUES (?,?,0,?,NOW(),0,?,0,\'\',\'\',\'\',0,0)'
+    );
+    $ins->bind_param('isdd', $empFid, $uid, $amount, $balance);
+    if (!$ins->execute()) {
+        $ins->close();
+        pbg_json(['status' => 'fail', 'code' => 'DB', 'message' => '환전신청 실패']);
+    }
+    $id = (int)$ins->insert_id;
+    $ins->close();
+
+    pbg_json([
+        'status' => 'success',
+        'data' => [
+            'id' => $id,
+            'amount' => $amount,
+            'state' => 0,
+        ],
+    ]);
+}
+
+function api_exchange_list()
+{
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 30;
+    $db = pbg_db();
+    $uid = (string)$member['mb_uid'];
+    $stmt = pbg_prepare(
+        $db,
+        'SELECT exchange_fid, exchange_money, exchange_action_state,
+                exchange_time_require, exchange_time_process, exchange_money_before, exchange_money_after
+         FROM member_exchange
+         WHERE exchange_client_delete=0 AND exchange_mb_uid=?
+         ORDER BY exchange_fid DESC
+         LIMIT ' . $limit
+    );
+    $stmt->bind_param('s', $uid);
+    $stmt->execute();
+    $raw = pbg_stmt_fetch_all($stmt);
+    $stmt->close();
+    $rows = [];
+    foreach ($raw as $r) {
+        $st = (int)$r['exchange_action_state'];
+        $rows[] = [
+            'id' => (int)$r['exchange_fid'],
+            'amount' => (float)$r['exchange_money'],
+            'state' => $st,
+            'requested_at' => $r['exchange_time_require'],
+            'processed_at' => $r['exchange_time_process'],
+        ];
+    }
+    pbg_json(['status' => 'success', 'data' => $rows]);
 }
 
 function api_settle()
