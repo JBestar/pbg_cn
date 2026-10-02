@@ -9,6 +9,7 @@
     api: null,
     logout: null,
     onBalance: null,
+    onNavigate: null,
   };
 
   var state = {
@@ -126,6 +127,204 @@
     openPanel(I18N().t(titleKey), soonHtml());
   }
 
+  function chargeStateLabel(st) {
+    st = parseInt(st, 10);
+    if (st === 0) return I18N().t('mgmtChargeWait');
+    if (st === 1) return I18N().t('mgmtChargeOk');
+    if (st === 2) return I18N().t('mgmtChargeRefuse');
+    return '-';
+  }
+
+  function chargeStateCls(st) {
+    st = parseInt(st, 10);
+    if (st === 0) return 'is-wait';
+    if (st === 1) return 'is-win';
+    if (st === 2) return 'is-cancel';
+    return '';
+  }
+
+  function renderChargeForm(rows) {
+    var uid = (state.member && (state.member.uid || state.member.name)) || '-';
+    var html = ''
+      + '<div class="m-charge">'
+      + '<div class="m-charge-row">'
+      + '<label>' + esc(I18N().t('mgmtChargeAmount')) + '</label>'
+      + '<input type="text" id="mChargeAmount" class="m-charge-input" value="0" inputmode="numeric" readonly />'
+      + '</div>'
+      + '<div class="m-charge-presets" id="mChargePresets">'
+      + [10, 30, 50, 100, 500, 1000, 5000, 10000].map(function (n) {
+        return '<button type="button" class="m-charge-preset" data-charge-amt="' + n + '">' + n + 'u</button>';
+      }).join('')
+      + '</div>'
+      + '<div class="m-charge-row">'
+      + '<label>' + esc(I18N().t('mgmtChargeId')) + '</label>'
+      + '<input type="text" class="m-charge-input" value="' + esc(uid) + '" readonly />'
+      + '</div>'
+      + '<div class="m-charge-actions">'
+      + '<button type="button" class="m-mgmt-btn m-mgmt-btn--ok" id="mChargeSubmit">' + esc(I18N().t('mgmtCharge')) + '</button>'
+      + '<button type="button" class="m-mgmt-btn m-mgmt-btn--danger" id="mChargeCancel">' + esc(I18N().t('mgmtCancel')) + '</button>'
+      + '</div>'
+      + '<button type="button" class="m-charge-account" id="mChargeAccount">' + esc(I18N().t('mgmtChargeAccount')) + '</button>'
+      + '<h4 class="m-charge-hist-title">' + esc(I18N().t('mgmtChargeHist')) + '</h4>'
+      + '<div class="m-charge-table-wrap"><table class="m-charge-table"><thead><tr>'
+      + '<th>' + esc(I18N().t('mgmtChargeColAmount')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtChargeColState')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtChargeColReq')) + '</th>'
+      + '<th>' + esc(I18N().t('mgmtChargeColProc')) + '</th>'
+      + '</tr></thead><tbody id="mChargeHistBody">';
+    if (!rows || !rows.length) {
+      html += '<tr><td colspan="4" class="m-charge-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</td></tr>';
+    } else {
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i] || {};
+        html += '<tr>'
+          + '<td>' + esc((Number(r.amount) || 0).toLocaleString()) + '</td>'
+          + '<td><span class="m-charge-badge ' + chargeStateCls(r.state) + '">' + esc(chargeStateLabel(r.state)) + '</span></td>'
+          + '<td>' + esc(r.requested_at || '-') + '</td>'
+          + '<td>' + esc(r.processed_at || '-') + '</td>'
+          + '</tr>';
+      }
+    }
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  function bindChargeUi() {
+    var amount = 0;
+    var input = $('mChargeAmount');
+    function setAmount(n) {
+      amount = Math.max(0, n | 0);
+      if (input) input.value = amount > 0 ? String(amount) + 'u' : '0';
+    }
+    setAmount(0);
+    $all('[data-charge-amt]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        setAmount(amount + (parseInt(btn.getAttribute('data-charge-amt'), 10) || 0));
+      });
+    });
+    var cancel = $('mChargeCancel');
+    if (cancel) {
+      cancel.addEventListener('click', function () { setAmount(0); });
+    }
+    var submit = $('mChargeSubmit');
+    if (submit) {
+      submit.addEventListener('click', function () { doChargeRequest(amount); });
+    }
+    var acc = $('mChargeAccount');
+    if (acc) {
+      acc.addEventListener('click', doAccountRequest);
+    }
+  }
+
+  function fillChargeHistory(rows) {
+    var tbody = $('mChargeHistBody');
+    if (!tbody) return;
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="m-charge-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</td></tr>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i] || {};
+      html += '<tr>'
+        + '<td>' + esc((Number(r.amount) || 0).toLocaleString()) + '</td>'
+        + '<td><span class="m-charge-badge ' + chargeStateCls(r.state) + '">' + esc(chargeStateLabel(r.state)) + '</span></td>'
+        + '<td>' + esc(r.requested_at || '-') + '</td>'
+        + '<td>' + esc(r.processed_at || '-') + '</td>'
+        + '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function openCharge() {
+    // Hide mgmt overlay panel only — do NOT call closePanel()
+    // (closePanel nulls state.panel and would abort the charge_list callback)
+    var mgmtPanel = $('mgmtPanel');
+    if (mgmtPanel) mgmtPanel.hidden = true;
+    showGrid(true);
+    state.panel = 'charge';
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('charge');
+
+    var body = $('chargePageBody');
+    if (!body) return;
+    // Paint form immediately; history fills async
+    body.innerHTML = renderChargeForm([]);
+    bindChargeUi();
+    var hist = $('mChargeHistBody');
+    if (hist) {
+      hist.innerHTML = '<tr><td colspan="4" class="m-charge-empty">' + esc(I18N().t('mgmtLoading')) + '</td></tr>';
+    }
+
+    if (typeof hooks.api !== 'function') {
+      fillChargeHistory([]);
+      return;
+    }
+    hooks.api('charge_list', { qs: '&limit=30' }).then(function (r) {
+      if (state.panel !== 'charge') return;
+      var json = (r && r.json) || {};
+      var rows = (json.status === 'success' && Array.isArray(json.data)) ? json.data : [];
+      fillChargeHistory(rows);
+    }, function () {
+      if (state.panel !== 'charge') return;
+      fillChargeHistory([]);
+    });
+  }
+
+  function closeChargePage() {
+    if (state.panel === 'charge') state.panel = null;
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
+  }
+
+  function doChargeRequest(amount) {
+    amount = parseInt(amount, 10) || 0;
+    if (amount < 1) {
+      toast(I18N().t('mgmtChargeNeedAmount'));
+      return;
+    }
+    if (!window.confirm(I18N().t('mgmtChargeConfirm'))) return;
+    if (typeof hooks.api !== 'function' || state.busy) return;
+    state.busy = true;
+    var btn = $('mChargeSubmit');
+    if (btn) btn.disabled = true;
+    hooks.api('charge_request', {
+      body: { amount: amount, name: (state.member && state.member.uid) || '' },
+    }).then(function (r) {
+      state.busy = false;
+      if (btn) btn.disabled = false;
+      var json = (r && r.json) || {};
+      if (json.status !== 'success') {
+        var code = json.code || '';
+        toast((code && I18N().msg(code)) || json.message || I18N().t('mgmtChargeFail'));
+        return;
+      }
+      toast(I18N().t('mgmtChargeOkMsg'));
+      openCharge();
+    }, function () {
+      state.busy = false;
+      if (btn) btn.disabled = false;
+      toast(I18N().t('mgmtChargeFail'));
+    });
+  }
+
+  function doAccountRequest() {
+    if (!window.confirm(I18N().t('mgmtAccountConfirm'))) return;
+    if (typeof hooks.api !== 'function' || state.busy) return;
+    state.busy = true;
+    hooks.api('account_request', { body: {} }).then(function (r) {
+      state.busy = false;
+      var json = (r && r.json) || {};
+      if (json.status !== 'success') {
+        var code = json.code || '';
+        toast((code && I18N().msg(code)) || json.message || I18N().t('mgmtAccountFail'));
+        return;
+      }
+      toast(I18N().t('mgmtAccountOk'));
+    }, function () {
+      state.busy = false;
+      toast(I18N().t('mgmtAccountFail'));
+    });
+  }
+
   function openPointConvert() {
     state.panel = 'point';
     var pt = Number(state.member && state.member.point) || 0;
@@ -235,7 +434,7 @@
   }
 
   function onMenu(action) {
-    if (action === 'charge') return openSoon('mgmtCharge');
+    if (action === 'charge') return openCharge();
     if (action === 'exchange') return openSoon('mgmtExchange');
     if (action === 'point') return openPointConvert();
     if (action === 'betsLive') return openHistory('live');
@@ -257,6 +456,10 @@
     });
     var back = $('mgmtPanelBack');
     if (back) back.addEventListener('click', closePanel);
+    var chargeBack = $('chargePageBack');
+    var chargeClose = $('chargePageClose');
+    if (chargeBack) chargeBack.addEventListener('click', closeChargePage);
+    if (chargeClose) chargeClose.addEventListener('click', closeChargePage);
   }
 
   function sync(member) {
@@ -273,10 +476,12 @@
 
   function applyI18n() {
     var root = $('pageMgmt');
-    if (!root) return;
-    I18N().applyStatic(root);
+    if (root) I18N().applyStatic(root);
+    var chargeRoot = $('pageCharge');
+    if (chargeRoot) I18N().applyStatic(chargeRoot);
     renderProfile();
     if (state.panel === 'point') openPointConvert();
+    else if (state.panel === 'charge') openCharge();
     else if (state.panel === 'soon') {
       /* leave soon panel; title already set */
     } else if (state.panel && String(state.panel).indexOf('hist:') === 0) {
@@ -287,7 +492,7 @@
   }
 
   function show() {
-    closePanel();
+    if (state.panel !== 'charge') closePanel();
     renderProfile();
   }
 
@@ -300,5 +505,6 @@
     onApi: function (fn) { hooks.api = fn; },
     onLogout: function (fn) { hooks.logout = fn; },
     onBalance: function (fn) { hooks.onBalance = fn; },
+    onNavigate: function (fn) { hooks.onNavigate = fn; },
   };
 })();

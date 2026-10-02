@@ -60,6 +60,15 @@ try {
         case 'point_convert':
             api_point_convert();
             break;
+        case 'charge_request':
+            api_charge_request();
+            break;
+        case 'charge_list':
+            api_charge_list();
+            break;
+        case 'account_request':
+            api_account_request();
+            break;
         default:
             pbg_json(['status' => 'fail', 'message' => 'unknown action'], 400);
     }
@@ -807,6 +816,169 @@ function api_point_convert()
         $db->rollback();
         throw $e;
     }
+}
+
+/** Mobile store → parent agency charge request (member_charge wait). */
+function api_charge_request()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        pbg_json(['status' => 'fail', 'message' => 'POST required'], 405);
+    }
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $body = pbg_body();
+    $amount = isset($body['amount']) ? (float)$body['amount'] : 0;
+    $name = isset($body['name']) ? trim((string)$body['name']) : '';
+    if ($amount < 1) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_AMOUNT', 'message' => '금액을 입력하세요']);
+    }
+    if ($name === '') {
+        $name = (string)$member['mb_uid'];
+    }
+    $empFid = (int)$member['mb_emp_fid'];
+    if ($empFid < 1) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_AGENCY', 'message' => '상위 총판이 없습니다']);
+    }
+    $agency = pbg_get_member_by_fid($empFid);
+    if (!$agency || (int)$agency['mb_level'] !== 8) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_AGENCY', 'message' => '상위 총판이 없습니다']);
+    }
+
+    $db = pbg_db();
+    $uid = (string)$member['mb_uid'];
+    $wait = pbg_prepare(
+        $db,
+        "SELECT charge_fid FROM member_charge
+         WHERE charge_client_delete=0 AND charge_type=0 AND charge_action_state=0 AND charge_mb_uid=?
+         LIMIT 1"
+    );
+    $wait->bind_param('s', $uid);
+    $wait->execute();
+    $pending = pbg_stmt_fetch_one($wait);
+    $wait->close();
+    if ($pending) {
+        pbg_json(['status' => 'fail', 'code' => 'CHARGE_PENDING', 'message' => '대기 중인 충전신청이 있습니다']);
+    }
+
+    $before = (float)$member['mb_money'];
+    $ins = $db->prepare(
+        'INSERT INTO member_charge
+         (charge_emp_fid, charge_mb_uid, charge_mb_name, charge_type, charge_money,
+          charge_time_require, charge_action_state, charge_money_before, charge_state_delete, charge_client_delete)
+         VALUES (?,?,?,0,?,NOW(),0,?,0,0)'
+    );
+    $ins->bind_param('issdd', $empFid, $uid, $name, $amount, $before);
+    if (!$ins->execute()) {
+        $ins->close();
+        pbg_json(['status' => 'fail', 'code' => 'DB', 'message' => '충전신청 실패']);
+    }
+    $id = (int)$ins->insert_id;
+    $ins->close();
+
+    pbg_json([
+        'status' => 'success',
+        'data' => [
+            'id' => $id,
+            'amount' => $amount,
+            'state' => 0,
+        ],
+    ]);
+}
+
+function api_charge_list()
+{
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 30;
+    $db = pbg_db();
+    $uid = (string)$member['mb_uid'];
+    // Inline LIMIT — some mysqli builds mishandle bound LIMIT params
+    $stmt = pbg_prepare(
+        $db,
+        'SELECT charge_fid, charge_money, charge_mb_name, charge_action_state,
+                charge_time_require, charge_time_process, charge_money_before, charge_money_after
+         FROM member_charge
+         WHERE charge_client_delete=0 AND charge_mb_uid=?
+         ORDER BY charge_fid DESC
+         LIMIT ' . $limit
+    );
+    $stmt->bind_param('s', $uid);
+    $stmt->execute();
+    $raw = pbg_stmt_fetch_all($stmt);
+    $stmt->close();
+    $rows = [];
+    foreach ($raw as $r) {
+        $st = (int)$r['charge_action_state'];
+        $rows[] = [
+            'id' => (int)$r['charge_fid'],
+            'amount' => (float)$r['charge_money'],
+            'name' => (string)$r['charge_mb_name'],
+            'state' => $st,
+            'requested_at' => $r['charge_time_require'],
+            'processed_at' => $r['charge_time_process'],
+        ];
+    }
+    pbg_json(['status' => 'success', 'data' => $rows]);
+}
+
+/** First-charge bank account inquiry → memo to parent agency. */
+function api_account_request()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        pbg_json(['status' => 'fail', 'message' => 'POST required'], 405);
+    }
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $empFid = (int)$member['mb_emp_fid'];
+    if ($empFid < 1) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_AGENCY', 'message' => '상위 총판이 없습니다']);
+    }
+    $agency = pbg_get_member_by_fid($empFid);
+    if (!$agency || (int)$agency['mb_level'] !== 8) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_AGENCY', 'message' => '상위 총판이 없습니다']);
+    }
+
+    pbg_ensure_board_notice();
+    $db = pbg_db();
+    $sendUid = (string)$member['mb_uid'];
+    $recvUid = (string)$agency['mb_uid'];
+    $title = '충전계좌요청';
+    $content = '매장 ' . $sendUid . ' 에서 충전계좌를 요청했습니다.';
+    $type = 2; // NOTICE_TYPE_MSG
+
+    // Avoid flooding: one unread account-request memo per store
+    $dup = pbg_prepare(
+        $db,
+        "SELECT notice_fid FROM board_notice
+         WHERE notice_type=? AND notice_send_uid=? AND notice_recv_uid=?
+           AND notice_recv_delete=0 AND notice_recv_read=0 AND notice_title=?
+         LIMIT 1"
+    );
+    $dup->bind_param('isss', $type, $sendUid, $recvUid, $title);
+    $dup->execute();
+    $exists = pbg_stmt_fetch_one($dup);
+    $dup->close();
+    if ($exists) {
+        pbg_json([
+            'status' => 'success',
+            'data' => ['id' => (int)$exists['notice_fid'], 'dup' => true],
+        ]);
+    }
+
+    $ins = $db->prepare(
+        'INSERT INTO board_notice
+         (notice_type, notice_title, notice_content, notice_send_uid, notice_recv_uid, notice_create_time,
+          notice_send_read, notice_recv_read, notice_send_delete, notice_recv_delete, notice_answer_state)
+         VALUES (?,?,?,?,?,NOW(),0,0,0,0,0)'
+    );
+    $ins->bind_param('issss', $type, $title, $content, $sendUid, $recvUid);
+    if (!$ins->execute()) {
+        $ins->close();
+        pbg_json(['status' => 'fail', 'code' => 'DB', 'message' => '계좌요청 실패']);
+    }
+    $id = (int)$ins->insert_id;
+    $ins->close();
+    pbg_json(['status' => 'success', 'data' => ['id' => $id, 'dup' => false]]);
 }
 
 function api_settle()

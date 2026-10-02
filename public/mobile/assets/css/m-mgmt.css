@@ -316,10 +316,204 @@
   font-size: 13px;
 }
 
+/* ===== Charge page (standalone) ===== */
+.m-charge-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: calc(env(safe-area-inset-top, 0px) + 0px) 0 12px;
+  color: #eaf2ff;
+}
+
+.m-charge-page-h {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 10px;
+  background: linear-gradient(180deg, #8dff7a 0%, #3ecf4a 55%, #249a32 100%);
+  color: #0a1a0a;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+}
+
+.m-charge-page-title {
+  margin: 0;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.m-charge-page-back,
+.m-charge-page-close {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.35);
+  color: #0a1a0a;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.m-charge-page-close {
+  font-size: 24px;
+}
+
+.m-charge-page-b {
+  padding: 12px 10px;
+}
+
+.m-mgmt-btn--danger {
+  background: linear-gradient(180deg, #f06a6a 0%, #c82020 100%);
+  box-shadow: 0 3px 0 #7a1010;
+}
+
+.m-charge {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.m-charge-row {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.m-charge-row label {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(220, 232, 255, 0.85);
+}
+
+.m-charge-input {
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 190, 255, 0.25);
+  background: #fff;
+  color: #111;
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.m-charge-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.m-charge-preset {
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  color: #2a1700;
+  cursor: pointer;
+  background: linear-gradient(180deg, #ffe9a8 0%, #f5c542 50%, #c9921c 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 3px 0 #8a6410;
+}
+
+.m-charge-preset:active {
+  transform: translateY(1px);
+}
+
+.m-charge-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.m-charge-account {
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(180deg, #4ea3ff 0%, #1a6fd4 55%, #0d4fa3 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 4px 0 #0a3a7a;
+}
+
+.m-charge-hist-title {
+  margin: 6px 0 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: #9fd6ff;
+}
+
+.m-charge-table-wrap {
+  overflow: auto;
+  max-height: 220px;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 190, 255, 0.14);
+}
+
+.m-charge-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.m-charge-table th,
+.m-charge-table td {
+  padding: 8px 6px;
+  text-align: center;
+  border-bottom: 1px solid rgba(140, 190, 255, 0.1);
+  color: #dce8ff;
+}
+
+.m-charge-table th {
+  background: rgba(255,255,255,0.04);
+  font-weight: 800;
+  color: rgba(220,232,255,0.75);
+  position: sticky;
+  top: 0;
+}
+
+.m-charge-empty {
+  color: rgba(220,232,255,0.55) !important;
+  padding: 16px 8px !important;
+}
+
+.m-charge-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 10px;
+}
+
+.m-charge-badge.is-wait {
+  background: rgba(159, 214, 255, 0.2);
+  color: #9fd6ff;
+}
+
+.m-charge-badge.is-win {
+  background: rgba(93, 255, 138, 0.2);
+  color: #5dff8a;
+}
+
+.m-charge-badge.is-cancel {
+  background: rgba(255, 138, 138, 0.2);
+  color: #ff8a8a;
+}
+
 @media (max-width: 360px) {
   .m-mgmt-grid { gap: 10px 4px; padding: 12px 4px 6px; }
   .m-mgmt-ico { width: 48px; height: 48px; }
   .m-mgmt-ico svg { width: 22px; height: 22px; }
   .m-mgmt-label { font-size: 10px; }
   .m-mgmt-avatar { width: 56px; height: 56px; }
+  .m-charge-presets { grid-template-columns: repeat(4, 1fr); }
+  .m-charge-row { grid-template-columns: 68px 1fr; }
 }
+

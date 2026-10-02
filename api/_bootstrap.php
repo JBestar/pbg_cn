@@ -532,6 +532,41 @@ function pbg_ensure_bet_point_columns()
     }
 }
 
+/** Memo/쪽지 table used by admin Notice_Model (idempotent). */
+function pbg_ensure_board_notice()
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    $db = pbg_db();
+    $chk = @$db->query("SHOW TABLES LIKE 'board_notice'");
+    if ($chk && $chk->num_rows > 0) {
+        return;
+    }
+    @$db->query(
+        "CREATE TABLE IF NOT EXISTS `board_notice` (
+          `notice_fid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+          `notice_type` TINYINT NOT NULL DEFAULT 2,
+          `notice_title` VARCHAR(200) NOT NULL DEFAULT '',
+          `notice_content` TEXT NOT NULL,
+          `notice_send_uid` VARCHAR(50) NOT NULL DEFAULT '',
+          `notice_recv_uid` VARCHAR(50) NOT NULL DEFAULT '',
+          `notice_create_time` DATETIME NOT NULL,
+          `notice_send_read` TINYINT NOT NULL DEFAULT 0,
+          `notice_recv_read` TINYINT NOT NULL DEFAULT 0,
+          `notice_send_delete` TINYINT NOT NULL DEFAULT 0,
+          `notice_recv_delete` TINYINT NOT NULL DEFAULT 0,
+          `notice_answer_state` TINYINT NOT NULL DEFAULT 0,
+          `notice_answer` TEXT NULL,
+          PRIMARY KEY (`notice_fid`),
+          KEY `idx_recv` (`notice_recv_uid`, `notice_type`, `notice_recv_delete`),
+          KEY `idx_send` (`notice_send_uid`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    );
+}
+
 /**
  * lion getEmployeePbRatio — store + agency commission on bet amount.
  * Uses 0.01 precision (not integer round).

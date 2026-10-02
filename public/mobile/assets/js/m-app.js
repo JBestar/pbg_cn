@@ -146,6 +146,8 @@
     $('pageHome').hidden = name !== 'home';
     $('pageBet').hidden = name !== 'bet';
     $('pageMgmt').hidden = name !== 'mgmt';
+    var pageCharge = $('pageCharge');
+    if (pageCharge) pageCharge.hidden = name !== 'charge';
   }
 
   function renderError() {
@@ -583,6 +585,14 @@
         if (bal.balance != null) state.member.balance = bal.balance;
         if (bal.point != null) state.member.point = bal.point;
         updateHeaderUser({ member: state.member });
+      });
+      Mgmt.onNavigate(function (page) {
+        showPage(page);
+        if (page === 'mgmt') {
+          Nav.setActive('mgmt');
+          Mgmt.sync(state.member);
+          Mgmt.show();
+        }
       });
     }
 
