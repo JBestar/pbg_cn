@@ -8,7 +8,8 @@
   <title>파워볼 모바일</title>
   <link rel="preload" as="image" href="assets/img/login-bg.png" />
   <link rel="stylesheet" href="assets/css/mobile.css?v=2" />
-  <link rel="stylesheet" href="assets/css/m-home.css?v=1" />
+  <link rel="stylesheet" href="assets/css/m-home.css?v=3" />
+  <link rel="stylesheet" href="assets/css/m-bet.css?v=11" />
 </head>
 <body>
   <div class="m-screen" id="loginShell">
@@ -180,9 +181,160 @@
       </section>
 
       <section class="m-page" id="pageBet" hidden>
-        <div class="m-placeholder">
-          <h2 data-i18n="pageBetTitle">베팅하기</h2>
-          <p data-i18n="pageBetSoon">베팅 화면은 준비 중입니다.</p>
+        <div class="m-bet">
+          <div class="m-bet-head">
+            <div class="m-bet-live">
+              <div class="m-bet-live-meta">
+                <span data-i18n="betLiveRound">진행회차</span>
+                <strong id="betLiveRound">-</strong>
+              </div>
+              <div class="m-bet-live-count" id="betLiveCount">--:--</div>
+            </div>
+            <div class="m-bet-prev">
+              <p class="m-bet-prev-title" id="betPrevTitle">-</p>
+              <div class="m-bet-chips" id="betPrevChips">
+                <span class="m-bet-chip-empty" data-i18n="betNoResult">결과 대기</span>
+              </div>
+            </div>
+          </div>
+
+          <section class="m-bet-sec">
+            <div class="m-bet-heads m-bet-heads--4">
+              <h3 class="m-bet-sec-h" data-i18n="room1Title">제1번방</h3>
+              <h3 class="m-bet-sec-h" data-i18n="room2Title">제2번방</h3>
+              <h3 class="m-bet-sec-h" data-i18n="room3Title">제3번방</h3>
+              <h3 class="m-bet-sec-h" data-i18n="room4Title">제4번방</h3>
+            </div>
+            <div class="m-bet-sec-b m-bet-grid-8">
+              <button type="button" class="m-bet-opt is-p" data-bet-mode="1" data-kind="p">
+                <span class="m-bet-opt-mark" data-role="mark">P</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-b" data-bet-mode="2" data-kind="b">
+                <span class="m-bet-opt-mark" data-role="mark">B</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-p" data-bet-mode="3" data-kind="p">
+                <span class="m-bet-opt-mark" data-role="mark">P</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-b" data-bet-mode="4" data-kind="b">
+                <span class="m-bet-opt-mark" data-role="mark">B</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-p" data-bet-mode="9" data-kind="p">
+                <span class="m-bet-opt-mark" data-role="mark">P</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-b" data-bet-mode="10" data-kind="b">
+                <span class="m-bet-opt-mark" data-role="mark">B</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-p" data-bet-mode="11" data-kind="p">
+                <span class="m-bet-opt-mark" data-role="mark">P</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-b" data-bet-mode="12" data-kind="b">
+                <span class="m-bet-opt-mark" data-role="mark">B</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+            </div>
+          </section>
+
+          <section class="m-bet-sec">
+            <div class="m-bet-heads m-bet-heads--2">
+              <h3 class="m-bet-sec-h" data-i18n="betRoomCombo12">제1번방 + 제2번방</h3>
+              <h3 class="m-bet-sec-h" data-i18n="betRoomCombo34">제3번방 + 제4번방</h3>
+            </div>
+            <div class="m-bet-sec-b m-bet-grid-8">
+              <button type="button" class="m-bet-opt is-combo" data-bet-mode="5" data-kind="pp">
+                <span class="m-bet-opt-mark" data-role="mark">P+P</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-combo" data-bet-mode="7" data-kind="pb">
+                <span class="m-bet-opt-mark" data-role="mark">P+B</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-combo" data-bet-mode="6" data-kind="bp">
+                <span class="m-bet-opt-mark" data-role="mark">B+P</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-combo" data-bet-mode="8" data-kind="bb">
+                <span class="m-bet-opt-mark" data-role="mark">B+B</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-combo" data-bet-mode="13" data-kind="pp">
+                <span class="m-bet-opt-mark" data-role="mark">P+P</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-combo" data-bet-mode="15" data-kind="pb">
+                <span class="m-bet-opt-mark" data-role="mark">P+B</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-combo" data-bet-mode="14" data-kind="bp">
+                <span class="m-bet-opt-mark" data-role="mark">B+P</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+              <button type="button" class="m-bet-opt is-combo" data-bet-mode="16" data-kind="bb">
+                <span class="m-bet-opt-mark" data-role="mark">B+B</span>
+                <span class="m-bet-opt-odds" data-role="odds">—</span>
+                <span class="m-bet-opt-amt" data-role="amt"></span>
+              </button>
+            </div>
+          </section>
+
+          <section class="m-bet-sec">
+            <h3 class="m-bet-sec-h" data-i18n="betNumberGame">숫자 맞추기</h3>
+            <div class="m-bet-sec-b m-bet-grid-nums">
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="30" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">0</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="31" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">1</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="32" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">2</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="33" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">3</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="34" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">4</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="35" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">5</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="36" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">6</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="37" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">7</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="38" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">8</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+              <button type="button" class="m-bet-opt is-num" data-bet-mode="39" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">9</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
+            </div>
+          </section>
+
+          <div class="m-bet-dock">
+            <div class="m-bet-amounts">
+              <button type="button" class="m-bet-amt" data-bet-amount="10">10u</button>
+              <button type="button" class="m-bet-amt" data-bet-amount="50">50u</button>
+              <button type="button" class="m-bet-amt" data-bet-amount="100">100u</button>
+              <button type="button" class="m-bet-amt" data-bet-amount="500">500u</button>
+              <button type="button" class="m-bet-amt" data-bet-amount="1000">1000u</button>
+            </div>
+            <div class="m-bet-actions">
+              <button type="button" class="m-bet-btn m-bet-btn-reset" id="betResetBtn" data-i18n="betReset">초기화</button>
+              <button type="button" class="m-bet-btn m-bet-btn-place" id="betPlaceBtn">
+                <span class="m-bet-place-amt" id="betDraftAmount" hidden></span>
+                <span data-i18n="betPlace">베팅하기</span>
+              </button>
+            </div>
+            <div class="m-bet-wallet">
+              <span id="betUserName">-</span>
+              <span><span data-i18n="betHoldMoney">보유머니</span> <span id="betUserBalance">0u</span></span>
+              <span>P <span id="betUserPoint">0</span></span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -237,9 +389,10 @@
 
   <div class="m-toast" id="mToast" hidden role="status" aria-live="polite"></div>
 
-  <script src="assets/js/m-i18n.js?v=2"></script>
-  <script src="assets/js/m-draws.js?v=1"></script>
+  <script src="assets/js/m-i18n.js?v=6"></script>
+  <script src="assets/js/m-draws.js?v=2"></script>
   <script src="assets/js/m-nav.js?v=1"></script>
-  <script src="assets/js/m-app.js?v=2"></script>
+  <script src="assets/js/m-bet.js?v=4"></script>
+  <script src="assets/js/m-app.js?v=3"></script>
 </body>
 </html>

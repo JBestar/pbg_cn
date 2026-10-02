@@ -4,6 +4,7 @@
   var I18N = window.PBGM_I18N;
   var Nav = window.PBGM_Nav;
   var Draws = window.PBGM_Draws;
+  var Bet = window.PBGM_Bet;
   var TOKEN_KEY = 'pbg_m_token';
   var REQUEST_TIMEOUT_MS = 10000;
   var API_BASE = resolveApiBase();
@@ -17,6 +18,9 @@
     member: null,
     powerballBase: '',
     remainSeconds: 999,
+    round: 0,
+    canBet: true,
+    odds: {},
     lastFetchAt: 0,
     lastFetchRound: 0,
     pollTimer: null,
@@ -211,6 +215,19 @@
     $('headerUserName').textContent = state.member.name || state.member.uid || '-';
     $('headerBalance').textContent = fmtMoney(state.member.balance);
     $('headerPoint').textContent = fmtPoint(state.member.point);
+    syncBetBoard();
+  }
+
+  function syncBetBoard() {
+    if (!Bet || typeof Bet.sync !== 'function') return;
+    Bet.sync({
+      round: state.round,
+      remain: state.remainSeconds,
+      canBet: state.canBet,
+      odds: state.odds,
+      member: state.member,
+      lastDraw: (Draws && typeof Draws.getLatest === 'function') ? Draws.getLatest() : null,
+    });
   }
 
   /* ---------- home data ---------- */
@@ -263,6 +280,7 @@
           null
         );
       }
+      syncBetBoard();
     });
   }
 
@@ -292,6 +310,11 @@
       var prevRemain = state.remainSeconds;
       state.remainSeconds = (d.round && d.round.remain_seconds) | 0;
       state.powerballBase = d.powerball_base_url || state.powerballBase || '';
+      state.odds = d.odds || state.odds || {};
+      if (d.round) {
+        state.round = d.round.round | 0;
+        state.canBet = !!d.round.can_bet;
+      }
 
       updateHeaderUser(d);
       if (d.round) {
@@ -302,6 +325,7 @@
         $('serverDateTime').textContent = rawTime.length >= 16 ? rawTime.slice(11, 16) : '--:--';
       }
       ensureMiniFrame();
+      syncBetBoard();
 
       var crossedZero = prevRemain > 0 && state.remainSeconds === 0;
       var nearDraw = state.remainSeconds <= 5;
@@ -370,6 +394,9 @@
     state.homeReady = false;
     state.member = null;
     state.powerballBase = '';
+    state.odds = {};
+    state.round = 0;
+    if (Bet && typeof Bet.reset === 'function') Bet.reset();
     var frame = $('miniFrame');
     if (frame) {
       frame.src = 'about:blank';
@@ -482,6 +509,7 @@
       updateHeaderUser({ member: state.member });
       applyPatternTitles();
       if (Draws && typeof Draws.rerender === 'function') Draws.rerender();
+      if (Bet && typeof Bet.applyI18n === 'function') Bet.applyI18n();
       if (state.homeReady && state.token) {
         refreshPatternBox();
       }
@@ -507,10 +535,46 @@
       input.focus();
     });
 
+    if (Bet) {
+      Bet.bind();
+      Bet.onToast(toast);
+      Bet.onBalance(function (bal) {
+        if (!state.member) state.member = {};
+        if (bal.balance != null) state.member.balance = bal.balance;
+        if (bal.point != null) state.member.point = bal.point;
+        updateHeaderUser({ member: state.member });
+      });
+      Bet.onPlaceBet(function (payload) {
+        return api('bet', {
+          body: {
+            mode: payload.mode,
+            amount: payload.amount,
+            round: payload.round,
+            machine: '',
+          },
+        }).then(function (r) {
+          var json = r.json || {};
+          if (json.status !== 'success') {
+            var code = json.code || '';
+            return {
+              ok: false,
+              message: (code && I18N.msg(code)) || json.message || I18N.msg('betFail'),
+            };
+          }
+          return {
+            ok: true,
+            balance: json.data && json.data.balance,
+            point: json.data && json.data.point,
+          };
+        });
+      });
+    }
+
     Nav.bind();
     Nav.onPage(function (page) {
       showPage(page);
       if (page === 'home') scaleMini();
+      if (page === 'bet') syncBetBoard();
     });
     Nav.onLang(function () {
       I18N.cycleLang();

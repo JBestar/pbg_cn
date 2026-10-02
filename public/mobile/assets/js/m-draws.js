@@ -115,5 +115,11 @@
 
   function rerender() { render(); }
 
-  window.PBGM_Draws = { render: render, rerender: rerender };
+  window.PBGM_Draws = {
+    render: render,
+    rerender: rerender,
+    getLatest: function () {
+      return (cache.draws && cache.draws.length) ? cache.draws[0] : null;
+    },
+  };
 })();

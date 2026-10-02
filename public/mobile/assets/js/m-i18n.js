@@ -51,6 +51,25 @@
         langSwitched: '언어: 한국어',
         balance: '잔액',
         point: '포인트',
+        betLiveRound: '진행회차',
+        betPrevRound: '직전회차',
+        betRoomCombo12: '제1번방 + 제2번방',
+        betRoomCombo34: '제3번방 + 제4번방',
+        betNumberGame: '숫자 맞추기',
+        betPbLabel: '파워볼',
+        betSumLabel: '일반볼',
+        betOdd: '홀',
+        betEven: '짝',
+        betUnder: '언더',
+        betOver: '오버',
+        betReset: '초기화',
+        betPlace: '베팅하기',
+        betDraft: '배팅금액',
+        betClosed: '배팅 마감',
+        betHonorific: '님',
+        betHoldMoney: '보유머니',
+        betNoResult: '결과 대기',
+        betRoundSuffix: '회차',
       },
       msg: {
         NEED_CREDENTIALS: '아이디와 비밀번호를 입력하세요',
@@ -62,6 +81,18 @@
         TIMEOUT: '서버 응답이 지연되고 있습니다. 잠시 후 다시 시도하세요',
         BAD_RESPONSE: '서버 응답이 올바르지 않습니다',
         AUTH: '로그인이 필요합니다',
+        selectAmount: '금액을 선택하세요',
+        selectMode: '배팅 항목을 선택하세요',
+        betOk: '배팅 완료',
+        betFail: '배팅 실패',
+        amountReset: '금액이 초기화되었습니다',
+        CLOSED: '현재 회차는 배팅이 마감되었습니다',
+        BALANCE: '잔액이 부족합니다',
+        NO_AMOUNT: '금액을 선택하세요',
+        ROUND: '회차가 변경되었습니다. 다시 시도하세요',
+        INVALID_MODE: '유효하지 않은 배팅 항목입니다',
+        MIN_BET: '최소 배팅 금액보다 작습니다',
+        MAX_BET: '최대 배팅 금액을 초과했습니다',
       },
     },
     zh: {
@@ -92,8 +123,8 @@
         room2Title: '第2号房',
         room3Title: '第3号房',
         room4Title: '第4号房',
-        markP: '蓝',
-        markB: '红',
+        markP: 'P',
+        markB: 'B',
         patternLoading: '加载中…',
         patternFail: '加载失败',
         drawsEmpty: '暂无开奖记录',
@@ -112,6 +143,25 @@
         langSwitched: '语言: 中文',
         balance: '余额',
         point: '积分',
+        betLiveRound: '进行期次',
+        betPrevRound: '上期',
+        betRoomCombo12: '第1号房 + 第2号房',
+        betRoomCombo34: '第3号房 + 第4号房',
+        betNumberGame: '猜数字',
+        betPbLabel: '功率球',
+        betSumLabel: '普通球',
+        betOdd: '单',
+        betEven: '双',
+        betUnder: '小',
+        betOver: '大',
+        betReset: '重置',
+        betPlace: '投注',
+        betDraft: '投注金额',
+        betClosed: '已封盘',
+        betHonorific: '',
+        betHoldMoney: '余额',
+        betNoResult: '等待开奖',
+        betRoundSuffix: '期',
       },
       msg: {
         NEED_CREDENTIALS: '请输入账号和密码',
@@ -123,6 +173,18 @@
         TIMEOUT: '服务器响应超时，请稍后再试',
         BAD_RESPONSE: '服务器响应无效',
         AUTH: '需要登录',
+        selectAmount: '请选择金额',
+        selectMode: '请选择投注项',
+        betOk: '投注成功',
+        betFail: '投注失败',
+        amountReset: '金额已重置',
+        CLOSED: '当前期已封盘',
+        BALANCE: '余额不足',
+        NO_AMOUNT: '请选择金额',
+        ROUND: '期号已变更，请重试',
+        INVALID_MODE: '无效投注项目',
+        MIN_BET: '低于最小投注',
+        MAX_BET: '超过最大投注',
       },
     },
     en: {
@@ -173,6 +235,25 @@
         langSwitched: 'Language: English',
         balance: 'Balance',
         point: 'Points',
+        betLiveRound: 'Live round',
+        betPrevRound: 'Previous',
+        betRoomCombo12: 'Room 1 + Room 2',
+        betRoomCombo34: 'Room 3 + Room 4',
+        betNumberGame: 'Pick a number',
+        betPbLabel: 'Powerball',
+        betSumLabel: 'Sum',
+        betOdd: 'Odd',
+        betEven: 'Even',
+        betUnder: 'Under',
+        betOver: 'Over',
+        betReset: 'Reset',
+        betPlace: 'Place bet',
+        betDraft: 'Bet amount',
+        betClosed: 'Betting closed',
+        betHonorific: '',
+        betHoldMoney: 'Balance',
+        betNoResult: 'Awaiting result',
+        betRoundSuffix: '',
       },
       msg: {
         NEED_CREDENTIALS: 'Enter ID and password',
@@ -184,6 +265,18 @@
         TIMEOUT: 'Server is not responding. Please try again later',
         BAD_RESPONSE: 'Invalid server response',
         AUTH: 'Login required',
+        selectAmount: 'Select an amount',
+        selectMode: 'Select a bet option',
+        betOk: 'Bet placed',
+        betFail: 'Bet failed',
+        amountReset: 'Amount cleared',
+        CLOSED: 'Betting is closed for this round',
+        BALANCE: 'Insufficient balance',
+        NO_AMOUNT: 'Select an amount',
+        ROUND: 'Round changed. Please try again',
+        INVALID_MODE: 'Invalid bet option',
+        MIN_BET: 'Below minimum bet',
+        MAX_BET: 'Above maximum bet',
       },
     },
   };
@@ -227,6 +320,25 @@
     var r = parseInt(round, 10) || 0;
     if (current === 'en') return t('roundPrefix') + ' ' + r;
     return t('roundPrefix') + ' ' + r + (t('roundSuffix') ? ' ' + t('roundSuffix') : '');
+  }
+
+  /** Day slot within 288 rounds/day (5-min). 0 → 288. */
+  function dayRoundOf(round) {
+    var r = parseInt(round, 10) || 0;
+    if (r <= 0) return 0;
+    var d = r % 288;
+    return d === 0 ? 288 : d;
+  }
+
+  /** e.g. 1626490(147)회차 */
+  function formatRoundWithDay(round, withSuffix) {
+    var r = parseInt(round, 10) || 0;
+    if (r <= 0) return '-';
+    var body = r + '(' + dayRoundOf(r) + ')';
+    if (withSuffix === false) return body;
+    var suffix = t('betRoundSuffix');
+    if (!suffix) return body;
+    return body + suffix;
   }
 
   function formatPatternTitleHtml(roomN) {
@@ -280,6 +392,8 @@
     applyStatic: applyStatic,
     formatDateLabel: formatDateLabel,
     formatRoundLabel: formatRoundLabel,
+    dayRoundOf: dayRoundOf,
+    formatRoundWithDay: formatRoundWithDay,
     formatPatternTitleHtml: formatPatternTitleHtml,
     onChange: function (fn) { if (typeof fn === 'function') listeners.push(fn); },
   };
