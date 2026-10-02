@@ -30,6 +30,7 @@ run_sql($db, "CREATE TABLE IF NOT EXISTS `member` (
   `mb_uid` VARCHAR(50) NOT NULL,
   `mb_pwd` VARCHAR(255) NOT NULL,
   `mb_level` INT NOT NULL,
+  `mb_channel` TINYINT NOT NULL DEFAULT 0,
   `mb_emp_fid` INT NOT NULL DEFAULT 0,
   `mb_nickname` VARCHAR(50) NOT NULL DEFAULT '',
   `mb_money` DECIMAL(14,2) UNSIGNED NOT NULL DEFAULT 0,
@@ -61,11 +62,16 @@ run_sql($db, "CREATE TABLE IF NOT EXISTS `member` (
   PRIMARY KEY (`mb_fid`),
   UNIQUE KEY `uk_mb_uid` (`mb_uid`),
   KEY `idx_emp` (`mb_emp_fid`),
-  KEY `idx_level` (`mb_level`)
+  KEY `idx_level` (`mb_level`),
+  KEY `idx_level_channel` (`mb_level`, `mb_channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
 if (!col_exists($db, 'member', 'mb_lang')) {
     run_sql($db, "ALTER TABLE `member` ADD COLUMN `mb_lang` VARCHAR(8) NOT NULL DEFAULT 'ko' AFTER `mb_point`");
+}
+if (!col_exists($db, 'member', 'mb_channel')) {
+    run_sql($db, "ALTER TABLE `member` ADD COLUMN `mb_channel` TINYINT NOT NULL DEFAULT 0 AFTER `mb_level`");
+    run_sql($db, "ALTER TABLE `member` ADD KEY `idx_level_channel` (`mb_level`, `mb_channel`)");
 }
 
 run_sql($db, "CREATE TABLE IF NOT EXISTS `sess_list` (

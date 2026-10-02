@@ -89,6 +89,17 @@ function api_login()
     if ((int)$member['mb_level'] !== 7) {
         pbg_json(['status' => 'fail', 'code' => 'NOT_STORE', 'message' => '매장 계정으로 로그인하세요']);
     }
+    // 게임기 클라이언트는 client 를 보내지 않으므로 항상 게임기(0) 계정만 허용됨
+    $client = isset($body['client']) ? (string)$body['client'] : '';
+    $requiredChannel = ($client === 'mobile') ? 1 : 0;
+    $memberChannel = isset($member['mb_channel']) ? (int)$member['mb_channel'] : 0;
+    if ($memberChannel !== $requiredChannel) {
+        pbg_json([
+            'status' => 'fail',
+            'code' => ($client === 'mobile') ? 'NOT_MOBILE' : 'NOT_CABINET',
+            'message' => ($client === 'mobile') ? '모바일 계정으로 로그인하세요' : '게임기 계정으로 로그인하세요',
+        ]);
+    }
     // 매장·총판은 평문 비번 유지 (관리자만 해시)
 
     $db = pbg_db();
