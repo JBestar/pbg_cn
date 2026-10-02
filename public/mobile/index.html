@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="assets/css/mobile.css?v=2" />
   <link rel="stylesheet" href="assets/css/m-home.css?v=3" />
   <link rel="stylesheet" href="assets/css/m-bet.css?v=11" />
-  <link rel="stylesheet" href="assets/css/m-mgmt.css?v=9" />
+  <link rel="stylesheet" href="assets/css/m-mgmt.css?v=11" />
 </head>
 <body>
   <div class="m-screen" id="loginShell">
@@ -470,6 +470,38 @@
           </div>
         </div>
       </section>
+
+      <section class="m-page" id="pageBetsAll" hidden>
+        <div class="m-charge-page m-bets-page">
+          <header class="m-charge-page-h">
+            <button type="button" class="m-charge-page-back" id="betsAllPageBack" aria-label="Back">←</button>
+            <h2 class="m-charge-page-title" data-i18n="mgmtBetsAllTitle">베팅내역</h2>
+            <button type="button" class="m-charge-page-close" id="betsAllPageClose" aria-label="Close">×</button>
+          </header>
+          <div class="m-charge-page-b">
+            <div class="m-bets-roll">
+              <span class="m-bets-roll-k" data-i18n="mgmtBetsRolling">롤링</span>
+              <span class="m-bets-roll-v" id="betsAllRolling">-</span>
+            </div>
+            <form class="m-bets-filter" id="betsAllFilter" autocomplete="off">
+              <label class="m-bets-filter-f">
+                <span class="m-bets-filter-k" data-i18n="mgmtBetColRound">회차</span>
+                <input type="number" inputmode="numeric" min="0" class="m-bets-filter-in" id="betsAllRound" />
+              </label>
+              <label class="m-bets-filter-f">
+                <span class="m-bets-filter-k" data-i18n="mgmtBetsDate">베팅일자</span>
+                <input type="date" class="m-bets-filter-in" id="betsAllDate" />
+              </label>
+              <button type="submit" class="m-bets-filter-btn" id="betsAllSearch" aria-label="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.2-4.2"/></svg>
+              </button>
+            </form>
+            <div id="betsAllPageBody">
+              <p class="m-mgmt-loading" data-i18n="mgmtLoading">불러오는 중…</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!--
@@ -515,11 +547,11 @@
 
   <div class="m-toast" id="mToast" hidden role="status" aria-live="polite"></div>
 
-  <script src="assets/js/m-i18n.js?v=12"></script>
+  <script src="assets/js/m-i18n.js?v=13"></script>
   <script src="assets/js/m-draws.js?v=2"></script>
   <script src="assets/js/m-nav.js?v=1"></script>
   <script src="assets/js/m-bet.js?v=4"></script>
-  <script src="assets/js/m-mgmt.js?v=10"></script>
-  <script src="assets/js/m-app.js?v=8"></script>
+  <script src="assets/js/m-mgmt.js?v=13"></script>
+  <script src="assets/js/m-app.js?v=9"></script>
 </body>
 </html>

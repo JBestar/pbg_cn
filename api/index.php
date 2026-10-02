@@ -245,14 +245,35 @@ function api_history()
     $auth = pbg_auth_member(true);
     $m = $auth['member'];
     $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 30;
+    $round = isset($_GET['round']) ? (int)$_GET['round'] : 0;
+    $date = isset($_GET['date']) ? trim((string)$_GET['date']) : '';
+    if ($date !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        $date = '';
+    }
     $db = pbg_db();
     $fid = (int)$m['mb_fid'];
+
+    $sql = 'SELECT * FROM bets WHERE mb_fid=?';
+    $types = 'i';
+    $args = [$fid];
+    if ($round > 0) {
+        $sql .= ' AND round=?';
+        $types .= 'i';
+        $args[] = $round;
+    }
+    if ($date !== '') {
+        $from = $date . ' 00:00:00';
+        $to = $date . ' 23:59:59';
+        $sql .= ' AND created_at BETWEEN ? AND ?';
+        $types .= 'ss';
+        $args[] = $from;
+        $args[] = $to;
+    }
     // Inline LIMIT — some mysqli builds mishandle bound LIMIT params
-    $stmt = pbg_prepare(
-        $db,
-        'SELECT * FROM bets WHERE mb_fid=? ORDER BY id DESC LIMIT ' . $limit
-    );
-    $stmt->bind_param('i', $fid);
+    $sql .= ' ORDER BY id DESC LIMIT ' . $limit;
+
+    $stmt = pbg_prepare($db, $sql);
+    $stmt->bind_param($types, ...$args);
     $stmt->execute();
     $raw = pbg_stmt_fetch_all($stmt);
     $stmt->close();
@@ -260,7 +281,14 @@ function api_history()
     foreach ($raw as $r) {
         $rows[] = format_bet_row($r);
     }
-    pbg_json(['status' => 'success', 'data' => $rows]);
+    pbg_json([
+        'status' => 'success',
+        'data' => $rows,
+        'meta' => [
+            // mb_game_pb_ratio is a percent (3.5 = 3.5%); display as a fraction like 0.03500
+            'rolling' => round(((float)$m['mb_game_pb_ratio']) / 100.0, 5),
+        ],
+    ]);
 }
 
 function format_bet_row($r)
@@ -269,10 +297,13 @@ function format_bet_row($r)
     $st = (int)$r['state'];
     return [
         'id' => (int)$r['id'],
+        'uid' => isset($r['mb_uid']) ? (string)$r['mb_uid'] : '',
         'round' => (int)$r['round'],
         'mode' => (int)$r['mode'],
         'label' => pbg_mode_label_cn($r['mode']),
         'amount' => (float)$r['amount'],
+        'after_money' => isset($r['after_money']) ? (float)$r['after_money'] : 0.0,
+        'point' => isset($r['empl_point']) ? (float)$r['empl_point'] : 0.0,
         'win_amount' => (float)$r['win_amount'],
         'ratio' => (float)$r['ratio'],
         'state' => $st,

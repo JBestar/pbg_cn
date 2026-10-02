@@ -17,6 +17,7 @@
     busy: false,
     panel: null,
     liveTimer: null,
+    betsAllSeq: 0,
   };
 
   function I18N() { return window.PBGM_I18N; }
@@ -718,15 +719,15 @@
   }
 
   /** HTML for 선택 column (number modes → yellow 3D ball). */
-  function betsLivePickHtml(row) {
+  function betsLivePickHtml(row, noRatio) {
     var m = parseInt(row.mode, 10) || 0;
     var ratio = Number(row.ratio);
-    var rTxt = ratio > 0 ? ' [' + (Math.round(ratio * 100) / 100).toString() + ']' : '';
+    var rTxt = (!noRatio && ratio > 0) ? ' [' + (Math.round(ratio * 100) / 100).toString() + ']' : '';
     if (m >= 30 && m <= 39) {
       var n = m - 30;
       return '<span class="m-bets-pick-inner">'
         + '<span class="m-bets-pb-ball" aria-label="' + n + '">' + n + '</span>'
-        + '<span class="m-bets-pick-ratio">' + esc(rTxt) + '</span>'
+        + (rTxt ? '<span class="m-bets-pick-ratio">' + esc(rTxt) + '</span>' : '')
         + '</span>';
     }
     return '<span class="m-bets-pick-inner">'
@@ -829,6 +830,147 @@
     if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
   }
 
+  function fmtRatio(v) {
+    var n = Number(v);
+    if (!(n > 0)) return '-';
+    return (Math.round(n * 100) / 100).toFixed(2);
+  }
+
+  function fmtBetTime(s) {
+    var str = String(s || '');
+    var sp = str.indexOf(' ');
+    if (sp < 0) return esc(str || '-');
+    return esc(str.slice(0, sp)) + '<br>' + esc(str.slice(sp + 1));
+  }
+
+  function roundCellHtml(round) {
+    var txt = I18N().formatRoundWithDay
+      ? I18N().formatRoundWithDay(round, false)
+      : String(round);
+    var p = txt.indexOf('(');
+    if (p <= 0) return esc(txt);
+    return esc(txt.slice(0, p)) + '<br><span class="m-bets-round-day">' + esc(txt.slice(p)) + '</span>';
+  }
+
+  function renderBetsAllTable(rows) {
+    var t = function (k) { return esc(I18N().t(k)); };
+    var html = ''
+      + '<div class="m-bets-table-wrap m-bets-table-wrap--all"><table class="m-bets-table m-bets-table--all"><thead><tr>'
+      + '<th>' + t('mgmtBetColRound') + '</th>'
+      + '<th>' + t('mgmtBetColUser') + '</th>'
+      + '<th>' + t('mgmtBetColTime') + '</th>'
+      + '<th>' + t('mgmtBetColPick') + '</th>'
+      + '<th>' + t('mgmtBetColWinResult') + '</th>'
+      + '<th>' + t('mgmtBetColBetAmt') + '</th>'
+      + '<th>' + t('mgmtBetColAfter') + '</th>'
+      + '<th>' + t('mgmtBetColRatio') + '</th>'
+      + '<th>' + t('mgmtBetColPoint') + '</th>'
+      + '<th>' + t('mgmtBetColHitAmt') + '</th>'
+      + '</tr></thead><tbody>';
+    if (!rows || !rows.length) {
+      html += '<tr><td colspan="10" class="m-charge-empty">' + t('mgmtHistEmpty') + '</td></tr>';
+    } else {
+      var prevRound = null;
+      var stripeDark = false;
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i] || {};
+        var round = parseInt(r.round, 10) || 0;
+        var st = betResultMeta(r.state);
+        var winAmt = parseInt(r.state, 10) === 3 ? (Number(r.win_amount) || 0) : 0;
+        if (prevRound != null && prevRound !== round) {
+          stripeDark = !stripeDark;
+        }
+        var trCls = stripeDark ? 'm-bets-row--dark' : 'm-bets-row--light';
+        if (prevRound != null && prevRound !== round) trCls += ' m-bets-sep';
+        html += '<tr class="' + trCls + '">'
+          + '<td class="m-bets-round">' + roundCellHtml(round) + '</td>'
+          + '<td>' + esc(r.uid || state.member.uid || '-') + '</td>'
+          + '<td class="m-bets-time">' + fmtBetTime(r.created_at) + '</td>'
+          + '<td class="m-bets-pick">' + betsLivePickHtml(r, true) + '</td>'
+          + '<td><span class="m-bets-badge ' + st.cls + '">' + esc(I18N().t(st.key) || '-') + '</span></td>'
+          + '<td class="m-bets-amt">' + esc(fmtMoney(r.amount)) + '</td>'
+          + '<td>' + esc(fmtMoney(r.after_money)) + '</td>'
+          + '<td>' + esc(fmtRatio(r.ratio)) + '</td>'
+          + '<td>' + esc(fmtPoint(r.point)) + '</td>'
+          + '<td class="m-bets-win">' + esc(fmtMoney(winAmt)) + '</td>'
+          + '</tr>';
+        prevRound = round;
+      }
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function setBetsAllRolling(v) {
+    var el = $('betsAllRolling');
+    if (!el) return;
+    var n = Number(v);
+    el.textContent = isFinite(n) && v != null && v !== '' ? n.toFixed(5) : '-';
+  }
+
+  function loadBetsAll() {
+    var body = $('betsAllPageBody');
+    if (!body) return;
+    body.innerHTML = '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>';
+    if (typeof hooks.api !== 'function') {
+      body.innerHTML = renderBetsAllTable([]);
+      return;
+    }
+    var roundEl = $('betsAllRound');
+    var dateEl = $('betsAllDate');
+    var round = roundEl ? (parseInt(roundEl.value, 10) || 0) : 0;
+    var date = dateEl ? String(dateEl.value || '').trim() : '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) date = '';
+    var qs = '&limit=100';
+    if (round > 0) qs += '&round=' + round;
+    if (date) qs += '&date=' + encodeURIComponent(date);
+
+    // Drop stale responses when the user searches again before the previous one returns
+    var seq = (state.betsAllSeq || 0) + 1;
+    state.betsAllSeq = seq;
+    hooks.api('history', { qs: qs }).then(function (r) {
+      if (state.panel !== 'betsAll' || state.betsAllSeq !== seq) return;
+      var json = (r && r.json) || {};
+      if (json.status !== 'success') {
+        body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+        return;
+      }
+      if (json.meta && json.meta.rolling != null) setBetsAllRolling(json.meta.rolling);
+      body.innerHTML = renderBetsAllTable(Array.isArray(json.data) ? json.data : []);
+    }, function () {
+      if (state.panel !== 'betsAll' || state.betsAllSeq !== seq) return;
+      body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+    });
+  }
+
+  function todayYmd() {
+    var d = new Date();
+    var mm = d.getMonth() + 1;
+    var dd = d.getDate();
+    return d.getFullYear() + '-' + (mm < 10 ? '0' : '') + mm + '-' + (dd < 10 ? '0' : '') + dd;
+  }
+
+  function openBetsAll(resetFilter) {
+    if (resetFilter) {
+      var roundEl = $('betsAllRound');
+      var dateEl = $('betsAllDate');
+      if (roundEl) roundEl.value = '';
+      if (dateEl) dateEl.value = todayYmd();
+    }
+    var mgmtPanel = $('mgmtPanel');
+    if (mgmtPanel) mgmtPanel.hidden = true;
+    showGrid(true);
+    state.panel = 'betsAll';
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('betsAll');
+    loadBetsAll();
+  }
+
+  function closeBetsAllPage() {
+    state.betsAllSeq = (state.betsAllSeq || 0) + 1;
+    if (state.panel === 'betsAll') state.panel = null;
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
+  }
+
   function openHistory(kind) {
     var titleKey = kind === 'wins' ? 'mgmtWins' : 'mgmtBetsAll';
     state.panel = 'hist:' + kind;
@@ -864,7 +1006,7 @@
     if (action === 'exchange') return openExchange();
     if (action === 'point') return openPointConvert();
     if (action === 'betsLive') return openBetsLive();
-    if (action === 'betsAll') return openHistory('all');
+    if (action === 'betsAll') return openBetsAll(true);
     if (action === 'wins') return openHistory('wins');
     if (action === 'inquiry') return openSoon('mgmtInquiry');
     if (action === 'notice') return openSoon('mgmtNotice');
@@ -898,6 +1040,17 @@
     var betsLiveClose = $('betsLivePageClose');
     if (betsLiveBack) betsLiveBack.addEventListener('click', closeBetsLivePage);
     if (betsLiveClose) betsLiveClose.addEventListener('click', closeBetsLivePage);
+    var betsAllBack = $('betsAllPageBack');
+    var betsAllClose = $('betsAllPageClose');
+    if (betsAllBack) betsAllBack.addEventListener('click', closeBetsAllPage);
+    if (betsAllClose) betsAllClose.addEventListener('click', closeBetsAllPage);
+    var betsAllFilter = $('betsAllFilter');
+    if (betsAllFilter) {
+      betsAllFilter.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (state.panel === 'betsAll') loadBetsAll();
+      });
+    }
   }
 
   function sync(member) {
@@ -923,11 +1076,14 @@
     if (pointRoot) I18N().applyStatic(pointRoot);
     var betsLiveRoot = $('pageBetsLive');
     if (betsLiveRoot) I18N().applyStatic(betsLiveRoot);
+    var betsAllRoot = $('pageBetsAll');
+    if (betsAllRoot) I18N().applyStatic(betsAllRoot);
     renderProfile();
     if (state.panel === 'point') openPointConvert();
     else if (state.panel === 'charge') openCharge();
     else if (state.panel === 'exchange') openExchange();
     else if (state.panel === 'betsLive') openBetsLive();
+    else if (state.panel === 'betsAll') openBetsAll();
     else if (state.panel === 'soon') {
       /* leave soon panel; title already set */
     } else if (state.panel && String(state.panel).indexOf('hist:') === 0) {
@@ -945,7 +1101,9 @@
       || state.panel === 'exchange'
       || state.panel === 'point'
       || state.panel === 'betsLive'
+      || state.panel === 'betsAll'
     ) {
+      if (state.panel === 'betsAll') state.betsAllSeq = (state.betsAllSeq || 0) + 1;
       state.panel = null;
     }
     closePanel();

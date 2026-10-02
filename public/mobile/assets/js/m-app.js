@@ -154,6 +154,8 @@
     if (pagePoint) pagePoint.hidden = name !== 'point';
     var pageBetsLive = $('pageBetsLive');
     if (pageBetsLive) pageBetsLive.hidden = name !== 'betsLive';
+    var pageBetsAll = $('pageBetsAll');
+    if (pageBetsAll) pageBetsAll.hidden = name !== 'betsAll';
   }
 
   function renderError() {
