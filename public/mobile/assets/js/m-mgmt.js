@@ -18,6 +18,7 @@
     panel: null,
     liveTimer: null,
     betsAllSeq: 0,
+    winsSeq: 0,
   };
 
   function I18N() { return window.PBGM_I18N; }
@@ -672,25 +673,6 @@
     });
   }
 
-  function histRowHtml(row) {
-    var st = stateMeta(row.state);
-    var roundTxt = I18N().formatRoundWithDay
-      ? I18N().formatRoundWithDay(row.round, true)
-      : String(row.round || '');
-    var winExtra = (parseInt(row.state, 10) === 3 && row.win_amount)
-      ? ' / +' + fmtMoney(row.win_amount)
-      : '';
-    return ''
-      + '<li class="m-mgmt-hist-row">'
-      + '<div class="m-mgmt-hist-main">' + esc(modeLabel(row.mode)) + '</div>'
-      + '<div class="m-mgmt-hist-amt">' + esc(fmtMoney(row.amount)) + winExtra + '</div>'
-      + '<div class="m-mgmt-hist-sub">' + esc(roundTxt)
-      + (row.created_at ? ' · ' + esc(row.created_at) : '')
-      + '</div>'
-      + '<div class="m-mgmt-hist-state ' + st.cls + '">' + esc(I18N().t(st.key) || '') + '</div>'
-      + '</li>';
-  }
-
   function betResultMeta(st) {
     st = parseInt(st, 10) || 0;
     if (st === 1) return { cls: 'is-wait', key: 'mgmtStateWait' };
@@ -990,34 +972,44 @@
     if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
   }
 
-  function openHistory(kind) {
-    var titleKey = kind === 'wins' ? 'mgmtWins' : 'mgmtBetsAll';
-    state.panel = 'hist:' + kind;
-    openPanel(I18N().t(titleKey), '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>');
-    if (typeof hooks.api !== 'function') return;
-    hooks.api('history', { qs: '&limit=50' }).then(function (r) {
-      if (state.panel !== 'hist:' + kind) return;
+  function loadWins() {
+    var body = $('winsPageBody');
+    if (!body) return;
+    body.innerHTML = '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>';
+    if (typeof hooks.api !== 'function') {
+      body.innerHTML = renderBetsLiveTable([]);
+      return;
+    }
+    var seq = (state.winsSeq || 0) + 1;
+    state.winsSeq = seq;
+    hooks.api('history', { qs: '&limit=100&state=3' }).then(function (r) {
+      if (state.panel !== 'wins' || state.winsSeq !== seq) return;
       var json = (r && r.json) || {};
       if (json.status !== 'success') {
-        openPanel(I18N().t(titleKey), '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>');
+        body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
         return;
       }
-      var rows = (json.data || []).slice();
-      if (kind === 'wins') {
-        rows = rows.filter(function (x) { return parseInt(x.state, 10) === 3; });
-      }
-      if (!rows.length) {
-        openPanel(I18N().t(titleKey), '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</p>');
-        return;
-      }
-      var html = '<ul class="m-mgmt-hist">';
-      for (var i = 0; i < rows.length; i++) html += histRowHtml(rows[i] || {});
-      html += '</ul>';
-      openPanel(I18N().t(titleKey), html);
+      body.innerHTML = renderBetsLiveTable(Array.isArray(json.data) ? json.data : []);
     }, function () {
-      if (state.panel !== 'hist:' + kind) return;
-      openPanel(I18N().t(titleKey), '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>');
+      if (state.panel !== 'wins' || state.winsSeq !== seq) return;
+      body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
     });
+  }
+
+  function openWins() {
+    var mgmtPanel = $('mgmtPanel');
+    if (mgmtPanel) mgmtPanel.hidden = true;
+    showGrid(true);
+    stopBetsLivePoll();
+    state.panel = 'wins';
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('wins');
+    loadWins();
+  }
+
+  function closeWinsPage() {
+    state.winsSeq = (state.winsSeq || 0) + 1;
+    if (state.panel === 'wins') state.panel = null;
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
   }
 
   function onMenu(action) {
@@ -1026,7 +1018,7 @@
     if (action === 'point') return openPointConvert();
     if (action === 'betsLive') return openBetsLive();
     if (action === 'betsAll') return openBetsAll(true);
-    if (action === 'wins') return openHistory('wins');
+    if (action === 'wins') return openWins();
     if (action === 'inquiry') return openSoon('mgmtInquiry');
     if (action === 'notice') return openSoon('mgmtNotice');
     if (action === 'logout') {
@@ -1070,6 +1062,10 @@
         if (state.panel === 'betsAll') loadBetsAll();
       });
     }
+    var winsBack = $('winsPageBack');
+    var winsClose = $('winsPageClose');
+    if (winsBack) winsBack.addEventListener('click', closeWinsPage);
+    if (winsClose) winsClose.addEventListener('click', closeWinsPage);
   }
 
   function sync(member) {
@@ -1097,16 +1093,17 @@
     if (betsLiveRoot) I18N().applyStatic(betsLiveRoot);
     var betsAllRoot = $('pageBetsAll');
     if (betsAllRoot) I18N().applyStatic(betsAllRoot);
+    var winsRoot = $('pageWins');
+    if (winsRoot) I18N().applyStatic(winsRoot);
     renderProfile();
     if (state.panel === 'point') openPointConvert();
     else if (state.panel === 'charge') openCharge();
     else if (state.panel === 'exchange') openExchange();
     else if (state.panel === 'betsLive') openBetsLive();
     else if (state.panel === 'betsAll') openBetsAll();
+    else if (state.panel === 'wins') openWins();
     else if (state.panel === 'soon') {
       /* leave soon panel; title already set */
-    } else if (state.panel && String(state.panel).indexOf('hist:') === 0) {
-      openHistory(String(state.panel).slice(5));
     } else {
       closePanel();
     }
@@ -1121,8 +1118,10 @@
       || state.panel === 'point'
       || state.panel === 'betsLive'
       || state.panel === 'betsAll'
+      || state.panel === 'wins'
     ) {
       if (state.panel === 'betsAll') state.betsAllSeq = (state.betsAllSeq || 0) + 1;
+      if (state.panel === 'wins') state.winsSeq = (state.winsSeq || 0) + 1;
       state.panel = null;
     }
     closePanel();

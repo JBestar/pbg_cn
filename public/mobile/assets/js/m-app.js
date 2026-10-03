@@ -156,10 +156,12 @@
     if (pageBetsLive) pageBetsLive.hidden = name !== 'betsLive';
     var pageBetsAll = $('pageBetsAll');
     if (pageBetsAll) pageBetsAll.hidden = name !== 'betsAll';
+    var pageWins = $('pageWins');
+    if (pageWins) pageWins.hidden = name !== 'wins';
     var appMain = $('appMain');
     if (appMain) {
       var detailBg = name === 'mgmt' || name === 'charge' || name === 'exchange'
-        || name === 'point' || name === 'betsLive' || name === 'betsAll';
+        || name === 'point' || name === 'betsLive' || name === 'betsAll' || name === 'wins';
       appMain.classList.toggle('m-app-main--detail', detailBg);
     }
   }

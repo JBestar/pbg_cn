@@ -250,6 +250,11 @@ function api_history()
     if ($date !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
         $date = '';
     }
+    // 1=대기 2=미적중 3=적중 4=취소 — omitted or out of range = all states
+    $betState = isset($_GET['state']) ? (int)$_GET['state'] : 0;
+    if ($betState < 1 || $betState > 4) {
+        $betState = 0;
+    }
     $db = pbg_db();
     $fid = (int)$m['mb_fid'];
 
@@ -260,6 +265,11 @@ function api_history()
         $sql .= ' AND round=?';
         $types .= 'i';
         $args[] = $round;
+    }
+    if ($betState > 0) {
+        $sql .= ' AND state=?';
+        $types .= 'i';
+        $args[] = $betState;
     }
     if ($date !== '') {
         $from = $date . ' 00:00:00';
