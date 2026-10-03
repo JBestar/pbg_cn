@@ -531,7 +531,7 @@
       + '<div class="m-charge-row m-point-amount-row">'
       + '<label>' + esc(I18N().t('mgmtPointAsk')) + '</label>'
       + '<div class="m-point-amount-wrap">'
-      + '<input type="text" id="mPointAmount" class="m-charge-input" value="" inputmode="numeric" />'
+      + '<input type="text" id="mPointAmount" class="m-charge-input" value="" inputmode="decimal" autocomplete="off" />'
       + '<button type="button" class="m-point-full" id="mPointFull">' + esc(I18N().t('mgmtPointFull')) + '</button>'
       + '</div></div>'
       + '<div class="m-charge-actions">'
@@ -557,34 +557,53 @@
     return html;
   }
 
+  // Points are DECIMAL(14,2) on the server; compare/convert in integer cents to avoid float drift.
+  function toCents(n) {
+    var v = Number(n);
+    if (!isFinite(v) || v <= 0) return 0;
+    return Math.round(v * 100);
+  }
+
+  function centsToInput(c) {
+    if (!(c > 0)) return '';
+    var whole = Math.floor(c / 100);
+    var frac = c % 100;
+    if (frac === 0) return String(whole);
+    return whole + '.' + (frac < 10 ? '0' + frac : String(frac)).replace(/0$/, '');
+  }
+
+  function sanitizePointInput(raw) {
+    var s = String(raw || '').replace(/[^\d.]/g, '');
+    var dot = s.indexOf('.');
+    if (dot >= 0) {
+      s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, '').slice(0, 2);
+      if (dot === 0) s = '0' + s;
+    }
+    return s;
+  }
+
   function bindPointUi() {
     var input = $('mPointAmount');
     var full = $('mPointFull');
     var cancel = $('mPointCancel');
     var submit = $('mPointSubmit');
-    function havePt() {
-      return Math.floor(Number(state.member && state.member.point) || 0);
-    }
-    function setAmount(n) {
-      n = Math.max(0, Math.floor(Number(n) || 0));
-      if (input) input.value = n > 0 ? String(n) : '';
-    }
     if (full) {
-      full.addEventListener('click', function () { setAmount(havePt()); });
+      full.addEventListener('click', function () {
+        if (input) input.value = centsToInput(toCents(state.member && state.member.point));
+      });
     }
     if (cancel) {
-      cancel.addEventListener('click', function () { setAmount(0); });
+      cancel.addEventListener('click', function () { if (input) input.value = ''; });
     }
     if (submit) {
       submit.addEventListener('click', function () {
-        var amt = parseInt((input && input.value) || '0', 10) || 0;
-        doPointConvert(amt);
+        doPointConvert(toCents((input && input.value) || '0'));
       });
     }
     if (input) {
       input.addEventListener('input', function () {
-        var v = String(input.value || '').replace(/[^\d]/g, '');
-        input.value = v;
+        var v = sanitizePointInput(input.value);
+        if (v !== input.value) input.value = v;
       });
     }
   }
@@ -607,18 +626,18 @@
     tbody.innerHTML = html;
   }
 
-  function doPointConvert(amount) {
-    amount = parseInt(amount, 10) || 0;
-    if (amount < 1) {
+  function doPointConvert(amountCents) {
+    amountCents = Math.floor(Number(amountCents) || 0);
+    if (amountCents < 1) {
       toast(I18N().t('mgmtPointNeedAmount'));
       return;
     }
-    var have = Math.floor(Number(state.member && state.member.point) || 0);
-    if (have <= 0) {
+    var haveCents = toCents(state.member && state.member.point);
+    if (haveCents <= 0) {
       toast(I18N().msg('NO_POINT') || I18N().t('mgmtNoPoint'));
       return;
     }
-    if (amount > have) {
+    if (amountCents > haveCents) {
       toast(I18N().msg('BALANCE') || I18N().t('mgmtConvertFail'));
       return;
     }
@@ -627,7 +646,7 @@
     state.busy = true;
     var btn = $('mPointSubmit');
     if (btn) btn.disabled = true;
-    hooks.api('point_convert', { body: { amount: amount } }).then(function (r) {
+    hooks.api('point_convert', { body: { amount: amountCents / 100 } }).then(function (r) {
       state.busy = false;
       if (btn) btn.disabled = false;
       var json = (r && r.json) || {};

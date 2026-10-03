@@ -156,6 +156,12 @@
     if (pageBetsLive) pageBetsLive.hidden = name !== 'betsLive';
     var pageBetsAll = $('pageBetsAll');
     if (pageBetsAll) pageBetsAll.hidden = name !== 'betsAll';
+    var appMain = $('appMain');
+    if (appMain) {
+      var detailBg = name === 'mgmt' || name === 'charge' || name === 'exchange'
+        || name === 'point' || name === 'betsLive' || name === 'betsAll';
+      appMain.classList.toggle('m-app-main--detail', detailBg);
+    }
   }
 
   function renderError() {

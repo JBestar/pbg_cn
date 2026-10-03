@@ -804,7 +804,7 @@ function api_cancel()
     }
 }
 
-/** F1: 포인트 → 게임머니 (money_history type 10). body.amount 있으면 일부, 없으면 전액. */
+/** F1: 포인트 → 게임머니 (money_history type 10). body.amount 있으면 일부, 없으면 전액. 소수 2자리(최소 0.01). */
 function api_point_convert()
 {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -827,24 +827,28 @@ function api_point_convert()
         if (!$row) {
             throw new RuntimeException('member lock failed');
         }
-        $have = (float)$row['mb_point'];
-        if ($have <= 0) {
+        // Columns are DECIMAL(14,2): do the arithmetic in integer cents so float noise can never
+        // push the unsigned mb_point below zero or leave a 0.0000001 remainder.
+        $haveC = (int)round(((float)$row['mb_point']) * 100);
+        if ($haveC <= 0) {
             $db->rollback();
             pbg_json(['status' => 'fail', 'code' => 'NO_POINT', 'message' => '전환할 포인트가 없습니다']);
         }
         // amount omitted or <=0 → convert all (legacy)
-        $convert = ($reqAmount > 0) ? $reqAmount : $have;
-        if ($convert < 1) {
+        $convC = ($reqAmount > 0) ? (int)round($reqAmount * 100) : $haveC;
+        if ($convC < 1) {
             $db->rollback();
             pbg_json(['status' => 'fail', 'code' => 'NO_AMOUNT', 'message' => '금액을 입력하세요']);
         }
-        if ($convert > $have) {
+        if ($convC > $haveC) {
             $db->rollback();
             pbg_json(['status' => 'fail', 'code' => 'BALANCE', 'message' => '포인트가 부족합니다']);
         }
-        $bal = (float)$row['mb_money'];
-        $afterMoney = $bal + $convert;
-        $afterPoint = $have - $convert;
+        $balC = (int)round(((float)$row['mb_money']) * 100);
+        $convert = $convC / 100;
+        $bal = $balC / 100;
+        $afterMoney = ($balC + $convC) / 100;
+        $afterPoint = ($haveC - $convC) / 100;
         $upd = $db->prepare('UPDATE member SET mb_money=?, mb_point=? WHERE mb_fid=?');
         $upd->bind_param('ddi', $afterMoney, $afterPoint, $fid);
         $upd->execute();
