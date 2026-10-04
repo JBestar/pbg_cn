@@ -13,7 +13,7 @@
         <link rel="stylesheet" href="/assets/css/lib/jquery-ui.css">
         <link rel="stylesheet" href="/assets/css/lib/all.css">
 
-        <link rel="stylesheet" href="/assets/css/main.css?v=20">
+        <link rel="stylesheet" href="/assets/css/main.css?v=22">
         <link rel="stylesheet" href="/assets/css/button1.css">
         <link rel="stylesheet" href="/assets/css/button2.css">
         <link rel="stylesheet" href="/assets/css/simplePagination.css">        
@@ -28,8 +28,8 @@
         <script src="/assets/js/lib/sweetalert2.min.js"></script> -->
         <script src="/assets/js/lib/sweetalert2.all.min.js"></script>
 
-        <script src="/assets/js/util.js?v=9"></script>
-        <script src="/assets/js/header.js?v=4"></script>
+        <script src="/assets/js/util.js?v=10"></script>
+        <script src="/assets/js/header.js?v=6"></script>
         <script src="/assets/js/window.js"></script>
         <script>
         window.ADMIN_I18N = {
@@ -66,8 +66,13 @@
             channel_cabinet: <?= json_encode(lang('Admin.channel_cabinet'), JSON_UNESCAPED_UNICODE) ?>,
             channel_mobile: <?= json_encode(lang('Admin.channel_mobile'), JSON_UNESCAPED_UNICODE) ?>,
             role_store: <?= json_encode(lang('Admin.role_store'), JSON_UNESCAPED_UNICODE) ?>,
-            role_agency: <?= json_encode(lang('Admin.role_agency'), JSON_UNESCAPED_UNICODE) ?>
+            role_agency: <?= json_encode(lang('Admin.role_agency'), JSON_UNESCAPED_UNICODE) ?>,
+            voice_charge_wait: <?= json_encode(lang('Admin.voice_charge_wait'), JSON_UNESCAPED_UNICODE) ?>,
+            voice_exchange_wait: <?= json_encode(lang('Admin.voice_exchange_wait'), JSON_UNESCAPED_UNICODE) ?>,
+            voice_account_wait: <?= json_encode(lang('Admin.voice_account_wait'), JSON_UNESCAPED_UNICODE) ?>,
+            voice_qna_wait: <?= json_encode(lang('Admin.voice_qna_wait'), JSON_UNESCAPED_UNICODE) ?>
         };
+        window.ADMIN_LOCALE = <?= json_encode(service('request')->getLocale() ?: 'ko', JSON_UNESCAPED_UNICODE) ?>;
         </script>
     </head>
 

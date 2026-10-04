@@ -14,22 +14,34 @@ function reqSearch() {
 function showPage(arrInfo) {
     let tHtml = "";
     mArrNotice = arrInfo;
+    var me = window.ADMIN_UID || '';
+    var t = window.ADMIN_I18N || {};
     if (arrInfo != null) {
 
         for (let idx in arrInfo) {
-            tHtml += "<tr>";
-            tHtml += "<td class=\"tdDate\">" + arrInfo[idx].notice_recv_uid + "</td>";
-            tHtml += "<td class=\"tdDate\">" + arrInfo[idx].notice_title + "</td>";
-            tHtml += "<td class=\"tdDate\">" + arrInfo[idx].notice_create_time + "</td>";
+            var row = arrInfo[idx];
+            var incoming = (row.notice_recv_uid === me);
+            var unread = incoming && String(row.notice_recv_read) === '0';
+            tHtml += "<tr" + (unread ? " class=\"memo-unread\"" : "") + ">";
+            tHtml += "<td class=\"tdDate\">" + row.notice_send_uid + "</td>";
+            tHtml += "<td class=\"tdDate\">" + row.notice_recv_uid + "</td>";
+            tHtml += "<td class=\"tdDate\">" + row.notice_title + "</td>";
+            tHtml += "<td class=\"tdDate\">" + row.notice_create_time + "</td>";
 
             tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn_blue\" ";
             tHtml += "onclick=\"showViewMemo(" + idx + ");\"> ";
-            tHtml += "내용보기</button></td>";
-            tHtml += "<td class=\"tdDate\"><button type=\"button\" class=\"btn_blue btn_icon\" title=\"수정\" aria-label=\"수정\" ";
-            tHtml += "onclick=\"showModeMemo(" + idx + ");\" style=\"margin-right:5px;\">";
-            tHtml += "<i class=\"fas fa-pencil-alt\"></i></button>";
-            tHtml += "<button type=\"button\" class=\"btn_red btn_icon\" title=\"삭제\" aria-label=\"삭제\" ";
-            tHtml += "onclick=\"deleteMemo(" + arrInfo[idx].notice_fid + ");\"><i class=\"fas fa-trash-alt\"></i></button></td>";
+            tHtml += (t.th_view_content || "내용보기") + "</button></td>";
+            tHtml += "<td class=\"tdDate\">";
+            if (incoming) {
+                tHtml += "<button type=\"button\" class=\"btn_blue\" onclick=\"showEditMemo('" + String(row.notice_send_uid).replace(/'/g, '') + "');\" style=\"margin-right:5px;\">";
+                tHtml += (t.btn_send_memo || "쪽지발송") + "</button>";
+            } else {
+                tHtml += "<button type=\"button\" class=\"btn_blue btn_icon\" title=\"수정\" aria-label=\"수정\" ";
+                tHtml += "onclick=\"showModeMemo(" + idx + ");\" style=\"margin-right:5px;\">";
+                tHtml += "<i class=\"fas fa-pencil-alt\"></i></button>";
+            }
+            tHtml += "<button type=\"button\" class=\"btn_red btn_icon\" title=\"" + (t.btn_delete || "삭제") + "\" aria-label=\"" + (t.btn_delete || "삭제") + "\" ";
+            tHtml += "onclick=\"deleteMemo(" + row.notice_fid + ");\"><i class=\"fas fa-trash-alt\"></i></button></td>";
             tHtml += "</tr>";
 
         }
@@ -41,6 +53,10 @@ function showPage(arrInfo) {
 
 
 function deleteMemo(no) {
+    var t = window.ADMIN_I18N || {};
+    if (!confirm((t.btn_delete || '삭제') + '?')) {
+        return;
+    }
     var objData = {
         "no": no
     };
@@ -57,6 +73,7 @@ function deleteMemo(no) {
 
             if (jResult.status == "success") {
                 reqCount();
+                if (typeof reqWaitTransfer === 'function') reqWaitTransfer();
             } else if (jResult.status == "logout") {
                 location.reload();
             }
@@ -69,15 +86,26 @@ function deleteMemo(no) {
 }
 
 
+function memoListQuery(extra) {
+    var start = $('#inputDateS').val() || '';
+    var end = $('#inputDateE').val() || '';
+    var obj = {
+        start: start,
+        end: end,
+        recv_uid: $('#inputUserID').val() || '',
+        pending: (start === '' && end === '') ? 1 : 0
+    };
+    if (extra) {
+        for (var k in extra) {
+            if (extra.hasOwnProperty(k)) obj[k] = extra[k];
+        }
+    }
+    return obj;
+}
+
 function reqCount() {
 
-    var objData = {
-        "start": $('#inputDateS').val(),
-        "end": $('#inputDateE').val(),
-        "recv_uid": $('#inputUserID').val()
-    };
-
-    var jsonData = JSON.stringify(objData);
+    var jsonData = JSON.stringify(memoListQuery());
 
     $.ajax({
         url: '/api/memolist_count',
@@ -104,15 +132,10 @@ function reqCount() {
 }
 
 function reqPage() {
-    var objData = {
-        "start": $('#inputDateS').val(),
-        "end": $('#inputDateE').val(),
-        "recv_uid": $('#inputUserID').val(),
-        "page": getActivePage(),
-        "cntper": CountPerPage
-    };
-
-    var jsonData = JSON.stringify(objData);
+    var jsonData = JSON.stringify(memoListQuery({
+        page: getActivePage(),
+        cntper: CountPerPage
+    }));
 
     $.ajax({
         url: '/api/memolist_page',
@@ -184,10 +207,29 @@ function showViewMemo(idx) {
         closeViewMemo();
         return;
     }
-    $('#tdViewRecvUid').text(mArrNotice[idx].notice_recv_uid);
-    $('#tdViewTitle').text(mArrNotice[idx].notice_title);
-    $('#memoViewContent').val(mArrNotice[idx].notice_content);
+    var row = mArrNotice[idx];
+    $('#tdViewSendUid').text(row.notice_send_uid);
+    $('#tdViewRecvUid').text(row.notice_recv_uid);
+    $('#tdViewTitle').text(row.notice_title);
+    $('#memoViewContent').text(row.notice_content == null ? '' : row.notice_content);
     $('#divViewMemo').show();
+
+    var me = window.ADMIN_UID || '';
+    if (row.notice_recv_uid === me && String(row.notice_recv_read) === '0') {
+        $.ajax({
+            url: '/api/memolist_read',
+            data: { json_: JSON.stringify({ no: row.notice_fid }) },
+            type: 'post',
+            dataType: 'json',
+            success: function (jResult) {
+                if (jResult.status === 'success') {
+                    mArrNotice[idx].notice_recv_read = 1;
+                    if (typeof reqWaitTransfer === 'function') reqWaitTransfer();
+                    reqCount();
+                }
+            }
+        });
+    }
 
 }
 
@@ -202,8 +244,8 @@ function closeViewMemo() {
 ///---------------------------------
 
 
-function showEditMemo() {
-    $('#memoEditRecverId').val('');
+function showEditMemo(recvUid) {
+    $('#memoEditRecverId').val(recvUid || '');
     $('#memoEditTitle').val('');
     $('#memoEditContent').val('');
 
@@ -258,6 +300,7 @@ function reqEditMemo() {
             if (jResult.status == "success") {
                 showAlert('쪽지가 발송되었습니다.');
                 closeEditMemo();
+                if (typeof reqWaitTransfer === 'function') reqWaitTransfer();
                 reqCount();
             } else if (jResult.status == "fail") {
                 showAlert('발송이 실패되었습니다.');

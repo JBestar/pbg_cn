@@ -276,48 +276,110 @@ class Charge_Model extends Model {
     }
 
 
+    /**
+     * WAIT → $newState in a single conditional UPDATE so two concurrent
+     * confirm/cancel clicks cannot both succeed.
+     */
+    public function claimWait($charge_id, $action_uid, $newState)
+    {
+        $this->mDb->query(
+            "UPDATE ".$this->mTbName."
+                SET charge_action_state = ?, charge_action_uid = ?, charge_time_process = NOW()
+              WHERE charge_fid = ? AND charge_action_state = ?",
+            [(int)$newState, (string)$action_uid, (int)$charge_id, CHARGE_STATE_WAIT]
+        );
+        return $this->mDb->affectedRows() === 1;
+    }
+
+    /** Compensation for engines without transactions: restore WAIT if this admin's claim must be undone. */
+    public function revertClaim($objCharge, $action_uid, $claimedState)
+    {
+        $this->mDb->query(
+            "UPDATE ".$this->mTbName."
+                SET charge_action_state = ?, charge_action_uid = ?, charge_time_process = ?
+              WHERE charge_fid = ? AND charge_action_state = ? AND charge_action_uid = ?",
+            [
+                CHARGE_STATE_WAIT,
+                isset($objCharge->charge_action_uid) ? $objCharge->charge_action_uid : null,
+                isset($objCharge->charge_time_process) ? $objCharge->charge_time_process : null,
+                (int)$objCharge->charge_fid,
+                (int)$claimedState,
+                (string)$action_uid,
+            ]
+        );
+    }
+
+    public function setMoneyAfter($charge_id, $moneyAfter)
+    {
+        return $this->mDb->query(
+            "UPDATE ".$this->mTbName." SET charge_money_after = ? WHERE charge_fid = ?",
+            [$moneyAfter, (int)$charge_id]
+        );
+    }
+
+    private function procWhere($arrRqData)
+    {
+        $db = $this->mDb;
+        $start = isset($arrRqData['start']) ? trim((string)$arrRqData['start']) : '';
+        $end = isset($arrRqData['end']) ? trim((string)$arrRqData['end']) : '';
+        $uid = isset($arrRqData['mb_uid']) ? trim((string)$arrRqData['mb_uid']) : '';
+
+        $where = "charge_state_delete = '0' ";
+        if ($start !== '') {
+            $where .= " AND charge_time_require >= ".$db->escape($start)." ";
+        }
+        if ($end !== '') {
+            $where .= " AND charge_time_require <= ".$db->escape($end.' 23:59:59')." ";
+        }
+        if ($uid !== '') {
+            $where .= " AND charge_mb_uid = ".$db->escape($uid)." ";
+        }
+        if (!empty($arrRqData['pending'])) {
+            $where .= " AND charge_action_state = '".CHARGE_STATE_WAIT."' ";
+        }
+        if (array_key_exists('mb_emp_fid', $arrRqData)) {
+            $empFid = (int)$arrRqData['mb_emp_fid'];
+            $empUid = isset($arrRqData['mb_emp_uid']) ? (string)$arrRqData['mb_emp_uid'] : '';
+            if ($empUid !== '') {
+                $where .= " AND ( charge_emp_fid = '".$empFid."' OR charge_action_uid = ".$db->escape($empUid)." ) ";
+            } else {
+                $where .= " AND charge_emp_fid = '".$empFid."' ";
+            }
+        }
+        return $where;
+    }
+
+    private function procBuilder($arrRqData)
+    {
+        $builder = $this->mDb->table($this->mTbName);
+        $builder->where($this->procWhere($arrRqData));
+        $channelSql = trim(preg_replace('/^\s*AND\s+/i', '', channel_filter_sql($arrRqData, 'charge_mb_uid')));
+        if ($channelSql !== '') {
+            // 서브쿼리가 쿼리빌더 식별자 보호에 깨지지 않도록 escape=false 로 별도 추가
+            $builder->where($channelSql, null, false);
+        }
+        return $builder;
+    }
+
     function searchProcCount($arrRqData){
-        
-        try { 
-            
-            $where = "charge_state_delete = '0' ";
-            if(strlen($arrRqData['start']) > 0){
-                $where .= " AND charge_time_require >= '".$arrRqData['start']."' ";    
-            }
-            if(strlen($arrRqData['end']) > 0){
-                $where .= " AND charge_time_require <= '".$arrRqData['end']." 23:59:59' ";    
-            }    
-            if(strlen($arrRqData['mb_uid'])> 0 ){
-                $where .= " AND charge_mb_uid = '".$arrRqData['mb_uid']."' ";    
-            }
-
-            if(array_key_exists('mb_emp_fid', $arrRqData)){
-
-                if(strlen($arrRqData['mb_emp_uid'])> 0 ){
-                    $where .= " AND ( charge_emp_fid = '".$arrRqData['mb_emp_fid']."' OR ";
-                    $where .= " charge_action_uid = '".$arrRqData['mb_emp_uid']."' ) ";
-                } else {
-                    $where .= " AND charge_emp_fid = '".$arrRqData['mb_emp_fid']."' ";    
-                }
-
-                
-            }     
-                    
-
-            $this->mBuilder ->where($where);
-            $channelSql = trim(preg_replace('/^\s*AND\s+/i', '', channel_filter_sql($arrRqData, 'charge_mb_uid')));
-            if ($channelSql !== '') {
-                // 서브쿼리가 쿼리빌더 식별자 보호에 깨지지 않도록 escape=false 로 별도 추가
-                $this->mBuilder->where($channelSql, null, false);
-            }
-            $this->mBuilder->getCompiledSelect(false);
-
-            return $this->mBuilder->countAllResults();
-            
-        } catch (\Exception $e) {  
+        try {
+            return $this->procBuilder($arrRqData)->countAllResults();
+        } catch (\Exception $e) {
             return 0;
         }
-        return 0;
+    }
+
+    /** Sum of requested amounts over the same filter as searchProcCount (all pages). */
+    function searchProcSum($arrRqData){
+        try {
+            $row = $this->procBuilder($arrRqData)
+                ->select('COALESCE(SUM(charge_money), 0) AS money_sum', false)
+                ->get()
+                ->getRow();
+            return $row ? (float)$row->money_sum : 0.0;
+        } catch (\Exception $e) {
+            return 0.0;
+        }
     }
 
     function searchProcList($arrRqData, $page, $cntPer = 20){
@@ -329,48 +391,26 @@ class Charge_Model extends Model {
             if($cntPer < 1)
                 return NULL;
 
-            $where = "charge_state_delete = '0' ";
-            if(strlen($arrRqData['start']) > 0){
-                $where .= " AND charge_time_require >= '".$arrRqData['start']."' ";    
-            }
-            if(strlen($arrRqData['end']) > 0){
-                $where .= " AND charge_time_require <= '".$arrRqData['end']." 23:59:59' ";    
-            }    
-            if(strlen($arrRqData['mb_uid']) > 0 ){
-                $where .= " AND charge_mb_uid = '".$arrRqData['mb_uid']."' ";    
-            }
-            if(array_key_exists('mb_emp_fid', $arrRqData)){
-                if(strlen($arrRqData['mb_emp_uid'])> 0 ){
-                    $where .= " AND ( charge_emp_fid = '".$arrRqData['mb_emp_fid']."' OR ";
-                    $where .= " charge_action_uid = '".$arrRqData['mb_emp_uid']."' ) ";
-                } else {
-                    $where .= " AND charge_emp_fid = '".$arrRqData['mb_emp_fid']."' ";    
-                }
-            }             
-
-            if(!in_array('mb_nickname', $this->mTbColumn)){
-                array_push($this->mTbColumn, 'mb_nickname');
-                array_push($this->mTbColumn, 'mb_level');
-            }
+            $columns = $this->mTbColumn;
+            $columns[] = 'mb_nickname';
+            $columns[] = 'mb_level';
 
             $joinTbName = 'member';
-            $this->mBuilder ->select($this->mTbColumn)   
-                            ->join($joinTbName, $joinTbName.'.mb_uid = '.$this->mTbName.'.charge_mb_uid')  
-                            ->where($where);
+            $builder = $this->mDb->table($this->mTbName);
+            $builder->select($columns)
+                    ->join($joinTbName, $joinTbName.'.mb_uid = '.$this->mTbName.'.charge_mb_uid')
+                    ->where($this->procWhere($arrRqData));
             $channelSql = trim(preg_replace('/^\s*AND\s+/i', '', channel_filter_sql($arrRqData, '', $joinTbName)));
             if ($channelSql !== '') {
-                $this->mBuilder->where($channelSql, null, false);
+                $builder->where($channelSql, null, false);
             }
-            $this->mBuilder ->orderBy('charge_fid', 'DESC')
-                            ->getCompiledSelect(false);
-
-            $query = $this->mBuilder->get($cntPer, $cntPer*($page-1));
+            $query = $builder->orderBy('charge_fid', 'DESC')
+                             ->get($cntPer, $cntPer*($page-1));
             return $query->getResult();
            
         } catch (\Exception $e) {  
-            return $e;
+            return NULL;
         }
-        return NULL;
         
     }
 

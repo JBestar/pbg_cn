@@ -223,6 +223,9 @@ a:active {
     background-color: #999999;
     border-radius: 10px
 }
+.admin-wait-badge[hidden] {
+    display: none !important;
+}
 
 .spanTitle01 {
     font-weight: bold;
@@ -739,6 +742,28 @@ button.btn_search.btn_icon {
 .btn_icon:active {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4) inset !important;
     transform: translateY(1px);
+}
+
+/* Table action buttons: same height as trash/icon buttons (30px) */
+.default_table tbody td button,
+.default_table tbody td .btn_blue,
+.default_table tbody td .btn_red {
+    height: 30px;
+    min-height: 30px;
+    line-height: 28px;
+    padding-top: 0;
+    padding-bottom: 0;
+    box-sizing: border-box;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.default_table tbody td button.btn_icon {
+    width: 34px;
+    min-width: 34px;
+    padding-left: 0;
+    padding-right: 0;
 }
 .btn-store-action.btn_icon {
     min-width: 34px;

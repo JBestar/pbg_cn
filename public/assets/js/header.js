@@ -131,27 +131,44 @@ function showAccountInfo(arrInfo) {
     $('#tbAccount').html(tHtml);
 }
 
+function setWaitBadge(id, n) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    n = parseInt(n, 10) || 0;
+    if (n > 0) {
+        el.textContent = String(n);
+        el.hidden = false;
+    } else {
+        el.textContent = '';
+        el.hidden = true;
+    }
+}
+
 function showWaitTansfer(arrInfo) {
     if (arrInfo == null)
         return;
 
-    $('#spanChargeCnt').text(arrInfo['charge']);
-    $('#spanExchangeCnt').text(arrInfo['exchange']);
+    setWaitBadge('spanChargeCnt', arrInfo['charge']);
+    setWaitBadge('spanExchangeCnt', arrInfo['exchange']);
+    setWaitBadge('spanMemoCnt', arrInfo['memo']);
+    setWaitBadge('spanQnaCnt', arrInfo['notice']);
 
+    var t = window.ADMIN_I18N || {};
     if (arrInfo['charge'] > 0) {
 
-        speak("사랑합니다.", { rate: 1, pitch: 1.2 });
+        speak(t.voice_charge_wait || "하부 충전요청이 도착하였습니다.", { rate: 1, pitch: 1.2 });
     } else if (arrInfo['exchange'] > 0) {
-        speak("미안합니다.", { rate: 1, pitch: 1.2 });
+        speak(t.voice_exchange_wait || "하부 환전요청이 도착하였습니다.", { rate: 1, pitch: 1.2 });
+    } else if (arrInfo['memo_account'] > 0) {
+        speak(t.voice_account_wait || "충전계좌요청이 도착하였습니다.", { rate: 1, pitch: 1.2 });
     }
 
     if (arrInfo['level'] == 8) {
-        $('#spanQnaCnt').text(arrInfo['notice']);
         if (arrInfo['notice'] > 0) {
             if (mUser != null) {
                 speak(mUser.mb_nickname, { rate: 1, pitch: 1.2 });
             }
-            setTimeout(function() { speak("문의가 도착하였습니다.", { rate: 1, pitch: 1.2 }); }, 1000);
+            setTimeout(function() { speak(t.voice_qna_wait || "문의가 도착하였습니다.", { rate: 1, pitch: 1.2 }); }, 1000);
 
         }
     }

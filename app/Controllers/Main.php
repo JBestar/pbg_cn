@@ -457,16 +457,56 @@ class Main extends BaseController
 		]);
 	}
 
-	/** @deprecated 사이드바에서 제거됨 — 매장 충환전으로 리다이렉트 */
+	/** 하부(매장/모바일) 충전신청 확인 */
 	public function charge_list()
 	{
-		$this->response->redirect('/Main/store_ce_list');
+		if(!is_login())
+		{
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->session->uid;
+		$objMember = $this->member_model->getByUid($uid);
+		if (is_null($objMember) || (int)$objMember->mb_level < LEVEL_AGENCY) {
+			$this->response->redirect('/');
+			return;
+		}
+
+		$siteName = $this->confsite_model->getSiteName();
+		$arrItem = getSidebarArray();
+		$arrItem['menuitem_12'] = " spanActiveMenu";
+		$arrItem['mb_level'] = $objMember->mb_level;
+
+		echo view('main/main_header', array("site_name"=>$siteName));
+		echo view('main/main_menu', $arrItem);
+		echo view('main/charge_list');
+		echo view('main/main_footer');
 	}
 
-	/** @deprecated 사이드바에서 제거됨 — 총판 충환전으로 리다이렉트 */
+	/** 하부(매장/모바일) 환전신청 확인 */
 	public function exchange_list()
 	{
-		$this->response->redirect('/Main/agency_ce_list');
+		if(!is_login())
+		{
+			$this->response->redirect('/pages/login');
+			return;
+		}
+		$uid = $this->session->uid;
+		$objMember = $this->member_model->getByUid($uid);
+		if (is_null($objMember) || (int)$objMember->mb_level < LEVEL_AGENCY) {
+			$this->response->redirect('/');
+			return;
+		}
+
+		$siteName = $this->confsite_model->getSiteName();
+		$arrItem = getSidebarArray();
+		$arrItem['menuitem_13'] = " spanActiveMenu";
+		$arrItem['mb_level'] = $objMember->mb_level;
+
+		echo view('main/main_header', array("site_name"=>$siteName));
+		echo view('main/main_menu', $arrItem);
+		echo view('main/exchange_list');
+		echo view('main/main_footer');
 	}
 
 	/** @deprecated */
@@ -498,8 +538,34 @@ class Main extends BaseController
 			
 			echo view('main/main_header', array("site_name"=>$siteName));
 			echo view('main/main_menu', $arrItem);		
-			echo view('main/memo_list');
+			echo view('main/memo_list', array('memo_me_uid' => $uid));
 			echo view('main/main_footer');	
+		}
+	}
+
+	public function notice_list()
+	{
+		if(!is_login())
+		{
+			$this->response->redirect('/pages/login');
+		}
+		else {
+			$uid = $this->session->uid;
+			$objMember = $this->member_model->getByUid($uid);
+			if (is_null($objMember) || (int)$objMember->mb_level !== LEVEL_AGENCY) {
+				$this->response->redirect('/Main/term_list');
+				return;
+			}
+
+			$siteName = $this->confsite_model->getSiteName();
+			$arrItem = getSidebarArray();
+			$arrItem['menuitem_14'] = " spanActiveMenu";
+			$arrItem['mb_level'] = $objMember->mb_level;
+
+			echo view('main/main_header', array("site_name"=>$siteName));
+			echo view('main/main_menu', $arrItem);
+			echo view('main/notice_list');
+			echo view('main/main_footer');
 		}
 	}
 

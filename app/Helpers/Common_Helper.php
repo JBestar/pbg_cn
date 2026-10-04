@@ -28,8 +28,11 @@
               'menuitem_9' => '',
               'menuitem_10' => '',
               'menuitem_11' => '',
+              'menuitem_12' => '',
+              'menuitem_13' => '',
+              'menuitem_14' => '',
               'admin_locale' => $locale,
-          );
+            );
 
     }
 

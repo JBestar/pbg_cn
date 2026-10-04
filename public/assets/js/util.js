@@ -644,20 +644,29 @@ function getZeroString(num) {
 
 function speak(text, opt_prop) {
     if (typeof SpeechSynthesisUtterance === "undefined" || typeof window.speechSynthesis === "undefined") {
-        //alert("이 브라우저는 음성 합성을 지원하지 않습니다.");
         return;
     }
 
-    window.speechSynthesis.cancel(); // 현재 읽고있다면 초기화
+    window.speechSynthesis.cancel();
 
-    const prop = opt_prop; // {}
+    const prop = opt_prop || {};
+    const loc = String(window.ADMIN_LOCALE || document.documentElement.lang || 'ko').slice(0, 2);
+    const langMap = { ko: 'ko-KR', zh: 'zh-CN', en: 'en-US' };
+    const bcp = langMap[loc] || 'ko-KR';
 
     const speechMsg = new SpeechSynthesisUtterance();
-    speechMsg.rate = prop.rate; // 1 // 속도: 0.1 ~ 10      
-    speechMsg.pitch = prop.pitch; // 1 // 음높이: 0 ~ 2
-    speechMsg.lang = "ko-KR"; //prop.lang ;// "ko-KR"
+    speechMsg.rate = prop.rate != null ? prop.rate : 1;
+    speechMsg.pitch = prop.pitch != null ? prop.pitch : 1;
+    speechMsg.lang = prop.lang || bcp;
     speechMsg.text = text;
 
-    // SpeechSynthesisUtterance에 저장된 내용을 바탕으로 음성합성 실행
+    try {
+        var voices = window.speechSynthesis.getVoices() || [];
+        var matched = voices.filter(function (v) {
+            return v.lang && v.lang.toLowerCase().indexOf(loc) === 0;
+        })[0];
+        if (matched) speechMsg.voice = matched;
+    } catch (e) {}
+
     window.speechSynthesis.speak(speechMsg);
 }

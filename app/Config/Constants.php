@@ -168,6 +168,7 @@ defined('CHARGE_TYPE_PRESENT')         || define('CHARGE_TYPE_PRESENT', 1);
 defined('NOTICE_TYPE_POP')         || define('NOTICE_TYPE_POP', 0);   
 defined('NOTICE_TYPE_QNA')         || define('NOTICE_TYPE_QNA', 1);   
 defined('NOTICE_TYPE_MSG')         || define('NOTICE_TYPE_MSG', 2);
+defined('NOTICE_TYPE_NOTICE')      || define('NOTICE_TYPE_NOTICE', 3);
 
 
 defined('SITE_MASTER_NAME')         || define('SITE_MASTER_NAME', 'admin');

@@ -3,13 +3,26 @@
     
     
     <div class="divTitle"><?= lang('Admin.title_memo_mgmt') ?></div>
+    <style>
+    .memo-unread td{font-weight:700;background:#fff6e8;}
+    .memo-view-table{width:100%;table-layout:fixed;}
+    .memo-view-table th{background:#f1f5f9;white-space:nowrap;}
+    .memo-view-table th.memo-col-uid,.memo-view-table td.memo-col-uid{width:120px;}
+    .memo-view-table th.memo-col-title,.memo-view-table td.memo-col-title{width:200px;}
+    .memo-view-table td{vertical-align:top;text-align:center;padding:8px 6px;word-break:break-all;}
+    .memo-view-table td.memo-col-body{text-align:left;}
+    .memo-view-body{white-space:pre-wrap;line-height:1.6;max-height:260px;overflow-y:auto;word-break:break-all;}
+    .memo-view-actions{text-align:center;padding:12px 0 6px;}
+    </style>
     <div class="divSearch">
         <!--
 		<form id="formSearch" method="get" action="/Main/bet_list">
         -->
-			<input type="date" id="inputDateS" name="inputDateS" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">&nbsp;~&nbsp;
-            <input type="date" id="inputDateE" name="inputDateE" value="<?php echo date('Y-m-d'); ?>" class="inputDate hasDatepicker">
-			&nbsp;&nbsp;&nbsp;<?= lang('Admin.label_receiver') ?> : <input type="text" id="inputUserID" name="inputUserID" class="inputDate" value="">
+			<input type="text" id="inputDateS" name="inputDateS" value="" placeholder="" autocomplete="off" class="inputDate"
+                   onfocus="this.type='date'" onblur="if(!this.value)this.type='text'">&nbsp;~&nbsp;
+            <input type="text" id="inputDateE" name="inputDateE" value="" placeholder="" autocomplete="off" class="inputDate"
+                   onfocus="this.type='date'" onblur="if(!this.value)this.type='text'">
+			&nbsp;&nbsp;&nbsp;<?= lang('Admin.label_uid') ?> : <input type="text" id="inputUserID" name="inputUserID" class="inputDate" value="">
 			&nbsp;&nbsp;<button type="button" class="btn_search btn_icon" onclick="reqSearch();" title="<?= lang('Admin.btn_search') ?>" aria-label="<?= lang('Admin.btn_search') ?>"><i class="fas fa-search"></i></button>
             <button class="btn_blue" style="float:right; margin-right:10px; padding:5px 14px; white-space:nowrap;" onclick="showEditMemo();"><?= lang('Admin.btn_send_memo') ?></button>
 	</div>
@@ -17,11 +30,12 @@
 		<table class="default_table">
 			<thead>
                 <tr>
+                    <th><?= lang('Admin.th_sender') ?></th>
                     <th><?= lang('Admin.th_receiver') ?></th>
-                    <th><?= lang('Admin.th_title') ?></th>					
+                    <th><?= lang('Admin.th_title') ?></th>
 					<th><?= lang('Admin.th_reg_date') ?></th>
 					<th><?= lang('Admin.th_view_content') ?></th>
-                    <th><?= lang('Admin.th_edit_delete') ?></th>               
+                    <th><?= lang('Admin.th_edit_delete') ?></th>
                 </tr>
             </thead>
             <tbody id="tbodyList">
@@ -105,29 +119,37 @@
 
     <div class="divTitle">쪽지보기</div>
 
-    <div class="divList" style="text-align:center; height: 320px;">
-        <table class="default_table">
+    <div class="divList" style="height:auto; padding:8px;">
+        <table class="default_table memo-view-table">
+            <thead>
+                <tr>
+                    <th class="memo-col-uid"><?= lang('Admin.th_sender') ?></th>
+                    <th class="memo-col-uid"><?= lang('Admin.th_receiver') ?></th>
+                    <th class="memo-col-title"><?= lang('Admin.th_title') ?></th>
+                    <th><?= lang('Admin.th_content') ?></th>
+                </tr>
+            </thead>
             <tbody>
                 <tr>
-                    <td style="width:60px; text-align:center;">수신자</td>
-                    <td id="tdViewRecvUid" style="padding:0px 5px 0px 5px;"></td>
-                </tr>
-                <tr>
-                    <td style="width:60px; text-align:center;">제목</td>
-                    <td id="tdViewTitle" style="padding:0px 5px 0px 5px;"></td>
-                </tr>
-                <tr>
-                    <td style="width:60px; text-align:center;">내용</td>
-                    <td>
-                        <textarea id="memoViewContent" style="width:900px; height:190px; resize:none; line-height:26px;"></textarea>
-                    </td>
+                    <td id="tdViewSendUid" class="memo-col-uid"></td>
+                    <td id="tdViewRecvUid" class="memo-col-uid"></td>
+                    <td id="tdViewTitle" class="memo-col-title"></td>
+                    <td class="memo-col-body"><div id="memoViewContent" class="memo-view-body"></div></td>
                 </tr>
             </tbody>
-    
         </table>
-        <div class="btn btn-secondary" style="position:absolute; left:calc(50% - 40px); top:270px; width:80px; height:25px; line-height:25px;" onclick="closeViewMemo();">닫기</div>
+        <div class="memo-view-actions">
+            <button type="button" class="btn_red" onclick="closeViewMemo();"><?= lang('Admin.btn_close') ?></button>
+        </div>
     </div>
     
 </div>
 
-<script src="/assets/js/memo_list.js?v=2"></script>
+<script>
+window.ADMIN_UID = <?= json_encode((string)(isset($memo_me_uid) ? $memo_me_uid : ''), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N = window.ADMIN_I18N || {};
+window.ADMIN_I18N.btn_send_memo = <?= json_encode(lang('Admin.btn_send_memo'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.btn_delete = <?= json_encode(lang('Admin.btn_delete'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.th_view_content = <?= json_encode(lang('Admin.th_view_content'), JSON_UNESCAPED_UNICODE) ?>;
+</script>
+<script src="/assets/js/memo_list.js?v=5"></script>

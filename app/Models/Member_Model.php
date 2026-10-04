@@ -283,6 +283,31 @@ class Member_Model extends Model {
         return $this->mDb->simpleQuery($strSql);
     }
 
+    /** Atomic debit: succeeds only when the balance covers $nMoney (no negative balance under concurrency). */
+    public function deductMoneyIfEnough($mb_fid, $nMoney)
+    {
+        $mb_fid = (int)$mb_fid;
+        $nMoney = round((float)$nMoney, 2);
+        if ($mb_fid < 1 || $nMoney <= 0) {
+            return false;
+        }
+        $this->mDb->query(
+            "UPDATE ".$this->mTbName." SET mb_money = mb_money - ? WHERE mb_fid = ? AND mb_money >= ?",
+            [$nMoney, $mb_fid, $nMoney]
+        );
+        return $this->mDb->affectedRows() === 1;
+    }
+
+    /** Current balance with a row lock when the engine supports it (InnoDB). */
+    public function getMoneyForUpdate($mb_fid)
+    {
+        $row = $this->mDb->query(
+            "SELECT mb_money FROM ".$this->mTbName." WHERE mb_fid = ? FOR UPDATE",
+            [(int)$mb_fid]
+        )->getRow();
+        return $row ? (float)$row->mb_money : 0.0;
+    }
+
     public function login($uid, $pwd){
         
         try { 

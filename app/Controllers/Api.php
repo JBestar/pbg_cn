@@ -1321,16 +1321,19 @@ class Api extends BaseController
             $result->status = STATUS_LOGOUT;		
         } else {
 			$uid = $this->session->uid;
+			$objAdmin = $this->member_model->getByUid($uid);
 
 			$charge_model = new Charge_Model();
 
-			$objCharge = $charge_model->getById($arrReqData['charge_id']);
+			$chargeId = isset($arrReqData['charge_id']) ? (int)$arrReqData['charge_id'] : 0;
+			$objCharge = $chargeId > 0 ? $charge_model->getById($chargeId) : null;
 			
-			if(is_null($objCharge) || $objCharge->charge_action_state == CHARGE_STATE_WAIT){
+			if(is_null($objAdmin) || is_null($objCharge) || (int)$objCharge->charge_action_state === CHARGE_STATE_WAIT){
 				$result->status = STATUS_FAIL;
-				
+			} else if(!$this->canManageProc($objAdmin, $objCharge->charge_emp_fid)){
+				$result->status = STATUS_FAIL;
 			} else {
-				$bResult = $charge_model->deleteChargeProc($objCharge->charge_fid);
+				$charge_model->deleteChargeProc($objCharge->charge_fid);
 				$result->status = STATUS_SUCCESS;
 			}			
         }
@@ -1338,6 +1341,73 @@ class Api extends BaseController
 		echo json_encode($result);
 
     }
+
+	/** Agency may only touch requests of its own sub stores; HQ keeps its existing scope. */
+	private function canManageProc($objAdmin, $empFid)
+	{
+		if (is_null($objAdmin)) {
+			return false;
+		}
+		$level = (int)$objAdmin->mb_level;
+		if ($level === LEVEL_AGENCY) {
+			return (int)$objAdmin->mb_fid === (int)$empFid;
+		}
+		return $level > LEVEL_AGENCY;
+	}
+
+	private function procReqData()
+	{
+		$arrReqData = json_decode(isset($_REQUEST['json_']) ? (string)$_REQUEST['json_'] : '', true);
+		return is_array($arrReqData) ? $arrReqData : array();
+	}
+
+	private function procScope(&$arrReqData, $objMember)
+	{
+		$arrReqData['mb_emp_fid'] = $objMember->mb_level == LEVEL_AGENCY ? $objMember->mb_fid : 0;
+		$arrReqData['mb_emp_uid'] = $objMember->mb_level > LEVEL_AGENCY ? $objMember->mb_uid : "";
+		$this->applyChannelScope($arrReqData, $objMember);
+	}
+
+	/** Requested-amount total over the whole filter (not just the current page). */
+	public function chargeproc_sum()
+	{
+		$result = new \StdClass;
+		if(!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$objMember = $this->member_model->getAllByUid($this->session->uid);
+			if (is_null($objMember)) {
+				$result->status = STATUS_FAIL;
+			} else {
+				$arrReqData = $this->procReqData();
+				$this->procScope($arrReqData, $objMember);
+				$charge_model = new Charge_Model();
+				$result->data = $charge_model->searchProcSum($arrReqData);
+				$result->status = STATUS_SUCCESS;
+			}
+		}
+		echo json_encode($result);
+	}
+
+	public function exchangeproc_sum()
+	{
+		$result = new \StdClass;
+		if(!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$objMember = $this->member_model->getAllByUid($this->session->uid);
+			if (is_null($objMember)) {
+				$result->status = STATUS_FAIL;
+			} else {
+				$arrReqData = $this->procReqData();
+				$this->procScope($arrReqData, $objMember);
+				$exchange_model = new Exchange_Model();
+				$result->data = $exchange_model->searchProcSum($arrReqData);
+				$result->status = STATUS_SUCCESS;
+			}
+		}
+		echo json_encode($result);
+	}
 
 		
 	public function chargeproc_permit()
@@ -1356,40 +1426,65 @@ class Api extends BaseController
 			$charge_model = new Charge_Model();
 			$moneyhist_model = new MoneyHist_Model();
 
-			$objCharge = $charge_model->getById($arrReqData['charge_id']);
+			$chargeId = isset($arrReqData['charge_id']) ? (int)$arrReqData['charge_id'] : 0;
+			$objCharge = $chargeId > 0 ? $charge_model->getById($chargeId) : null;
 			
 			$objMember = null;
 			if(!is_null($objCharge)) {
 				$objMember = $this->member_model->getByUid($objCharge->charge_mb_uid);
 			}
+			$isAgency = !is_null($objAdmin) && (int)$objAdmin->mb_level === LEVEL_AGENCY;
+			$amount = is_null($objCharge) ? 0 : round((float)$objCharge->charge_money, 2);
 
-			if(is_null($objMember) || $objCharge->charge_action_state != CHARGE_STATE_WAIT){
+			if(is_null($objAdmin) || is_null($objMember) || (int)$objCharge->charge_action_state !== CHARGE_STATE_WAIT || $amount <= 0){
 				$result->status = STATUS_FAIL;
 				$result->code = RESULT_FAIL;
-			} else if($objAdmin->mb_level == LEVEL_AGENCY && $objAdmin->mb_fid !== $objCharge->charge_emp_fid){
+			} else if(!$this->canManageProc($objAdmin, $objCharge->charge_emp_fid)){
 				$result->status = STATUS_FAIL;
 				$result->code = RESULT_FAIL;
-			} else if($objAdmin->mb_level == LEVEL_AGENCY && intval($objAdmin->mb_money) < intval($objCharge->charge_money)){
-				$result->code = RESULT_OVERMONEY;		
-				$result->status = STATUS_FAIL;
 			} else {
+				$db = \Config\Database::connect();
+				$code = RESULT_OK;
+				$db->transBegin();
+				try {
+					if (!$charge_model->claimWait($chargeId, $objAdmin->mb_uid, CHARGE_STATE_PERMIT)) {
+						// another request already confirmed/cancelled this charge
+						$code = RESULT_FAIL;
+					} else if ($isAgency && !$this->member_model->deductMoneyIfEnough($objAdmin->mb_fid, $amount)) {
+						$code = RESULT_OVERMONEY;
+					} else {
+						if ($isAgency) {
+							$adminAfter = $this->member_model->getMoneyForUpdate($objAdmin->mb_fid);
+							$objAdmin->mb_money = $adminAfter + $amount;
+							$objAdmin->mb_ech_uid = $objMember->mb_uid;
+							$moneyhist_model->registerChargeFrom($objAdmin, $amount);
+							$objMember->mb_ech_uid = $objAdmin->mb_uid;
+						} else {
+							$objMember->mb_ech_uid = SITE_MASTER_NAME;
+						}
 
-				if($objAdmin->mb_level == LEVEL_AGENCY){
-					$objAdmin->mb_ech_uid = $objMember->mb_uid;
-					$this->member_model->updateAssets($objAdmin->mb_fid, 0-$objCharge->charge_money);
-					$moneyhist_model->registerChargeFrom($objAdmin, $objCharge->charge_money);
-				
-					$objMember->mb_ech_uid = $objAdmin->mb_uid;
-				} else {
-					$objMember->mb_ech_uid = SITE_MASTER_NAME;
+						$storeBefore = $this->member_model->getMoneyForUpdate($objMember->mb_fid);
+						$this->member_model->updateAssets($objMember->mb_fid, $amount);
+						$objMember->mb_money = $storeBefore;
+						$moneyhist_model->registerCharge($objMember, $amount);
+						$charge_model->setMoneyAfter($chargeId, $storeBefore + $amount);
+					}
+				} catch (\Throwable $e) {
+					$code = RESULT_ERROR;
 				}
-				
-				$this->member_model->updateAssets($objMember->mb_fid, $objCharge->charge_money);
-				$moneyhist_model->registerCharge($objMember, $objCharge->charge_money);
-				
 
-				$bResult = $charge_model->procCharge($objCharge, $objAdmin, CHARGE_STATE_PERMIT);
-				$result->status = STATUS_SUCCESS;
+				if ($code === RESULT_OK && $db->transStatus() !== false) {
+					$db->transCommit();
+					$result->status = STATUS_SUCCESS;
+				} else {
+					$db->transRollback();
+					if ($code === RESULT_OVERMONEY) {
+						// no money moved; undo the claim in case the engine ignored the rollback
+						$charge_model->revertClaim($objCharge, $objAdmin->mb_uid, CHARGE_STATE_PERMIT);
+					}
+					$result->status = STATUS_FAIL;
+					$result->code = $code === RESULT_OK ? RESULT_ERROR : $code;
+				}
 			}			
         }
 		
@@ -1413,17 +1508,19 @@ class Api extends BaseController
 
 			$charge_model = new Charge_Model();
 
-			$objCharge = $charge_model->getById($arrReqData['charge_id']);			
+			$chargeId = isset($arrReqData['charge_id']) ? (int)$arrReqData['charge_id'] : 0;
+			$objCharge = $chargeId > 0 ? $charge_model->getById($chargeId) : null;
 
-			if(is_null($objCharge) || $objCharge->charge_action_state != CHARGE_STATE_WAIT){
+			if(is_null($objAdmin) || is_null($objCharge) || (int)$objCharge->charge_action_state !== CHARGE_STATE_WAIT){
 				$result->status = STATUS_FAIL;
 				$result->code = RESULT_FAIL;
-			} else if($objAdmin->mb_level == LEVEL_AGENCY && $objAdmin->mb_fid !== $objCharge->charge_emp_fid){
+			} else if(!$this->canManageProc($objAdmin, $objCharge->charge_emp_fid)){
+				$result->status = STATUS_FAIL;
+				$result->code = RESULT_FAIL;
+			} else if(!$charge_model->claimWait($chargeId, $objAdmin->mb_uid, CHARGE_STATE_REFUSE)){
 				$result->status = STATUS_FAIL;
 				$result->code = RESULT_FAIL;
 			} else {
-
-				$bResult = $charge_model->procCharge($objCharge, $objAdmin, CHARGE_STATE_REFUSE);
 				$result->status = STATUS_SUCCESS;
 			}				
         }
@@ -1678,15 +1775,18 @@ class Api extends BaseController
         } else {
 			$uid = $this->session->uid;
 
+			$objAdmin = $this->member_model->getByUid($uid);
 			$exchange_model = new Exchange_Model();
 
-			$objExChange = $exchange_model->getById($arrReqData['exchange_id']);
+			$exchangeId = isset($arrReqData['exchange_id']) ? (int)$arrReqData['exchange_id'] : 0;
+			$objExChange = $exchangeId > 0 ? $exchange_model->getById($exchangeId) : null;
 			
-			if(is_null($objExChange) || $objExChange->exchange_action_state == CHARGE_STATE_WAIT){
+			if(is_null($objAdmin) || is_null($objExChange) || (int)$objExChange->exchange_action_state === CHARGE_STATE_WAIT){
 				$result->status = STATUS_FAIL;
-				
+			} else if(!$this->canManageProc($objAdmin, $objExChange->exchange_emp_fid)){
+				$result->status = STATUS_FAIL;
 			} else {
-				$bResult = $exchange_model->deleteExchangeProc($objExChange->exchange_fid);
+				$exchange_model->deleteExchangeProc($objExChange->exchange_fid);
 				$result->status = STATUS_SUCCESS;
 			}			
         }
@@ -1712,24 +1812,105 @@ class Api extends BaseController
 			$exchange_model = new Exchange_Model();
 			$moneyhist_model = new MoneyHist_Model();
 
-			$objExchange = $exchange_model->getById($arrReqData['exchange_id']);
+			$exchangeId = isset($arrReqData['exchange_id']) ? (int)$arrReqData['exchange_id'] : 0;
+			$objExchange = $exchangeId > 0 ? $exchange_model->getById($exchangeId) : null;
+
+			$objMember = null;
+			if (!is_null($objExchange)) {
+				$objMember = $this->member_model->getByUid($objExchange->exchange_mb_uid);
+			}
+			// Store→agency (mobile): money moves on confirm. Agency→HQ (legacy): already deducted at request — state only.
+			$isStoreReq = !is_null($objMember) && (int)$objMember->mb_level === LEVEL_EMPLOYEE;
+			$amount = is_null($objExchange) ? 0 : round((float)$objExchange->exchange_money, 2);
 			
-			if(is_null($objExchange) || $objExchange->exchange_action_state != CHARGE_STATE_WAIT){
+			if(is_null($objAdmin) || is_null($objExchange) || (int)$objExchange->exchange_action_state !== CHARGE_STATE_WAIT){
 				$result->status = STATUS_FAIL;
 				$result->code = RESULT_ERROR;
-			} else if($objAdmin->mb_level == LEVEL_AGENCY && $objAdmin->mb_fid !== $objExchange->exchange_emp_fid){
+			} else if(!$this->canManageProc($objAdmin, $objExchange->exchange_emp_fid)){
+				$result->status = STATUS_FAIL;
+				$result->code = RESULT_FAIL;
+			} else if ($isStoreReq && $amount <= 0) {
 				$result->status = STATUS_FAIL;
 				$result->code = RESULT_FAIL;
 			} else {
-				
-				$bResult = $exchange_model->procExchange($objExchange, $objAdmin, CHARGE_STATE_PERMIT);
-				$result->status = STATUS_SUCCESS;
+				$db = \Config\Database::connect();
+				$code = RESULT_OK;
+				$db->transBegin();
+				try {
+					if (!$exchange_model->claimWait($exchangeId, $objAdmin->mb_uid, CHARGE_STATE_PERMIT)) {
+						// another request already confirmed/cancelled this exchange
+						$code = RESULT_FAIL;
+					} else if ($isStoreReq && !$this->member_model->deductMoneyIfEnough($objMember->mb_fid, $amount)) {
+						$code = RESULT_OVERMONEY;
+					} else if ($isStoreReq) {
+						$storeAfter = $this->member_model->getMoneyForUpdate($objMember->mb_fid);
+						$objMember->mb_money = $storeAfter + $amount;
+						$objMember->mb_ech_uid = $objAdmin->mb_uid;
+						$moneyhist_model->registerExchange($objMember, $amount);
+
+						if ((int)$objAdmin->mb_level === LEVEL_AGENCY) {
+							$adminBefore = $this->member_model->getMoneyForUpdate($objAdmin->mb_fid);
+							$this->member_model->updateAssets($objAdmin->mb_fid, $amount);
+							$objAdmin->mb_money = $adminBefore;
+							$objAdmin->mb_ech_uid = $objMember->mb_uid;
+							$moneyhist_model->registerExchangeTo($objAdmin, $amount);
+						}
+					}
+				} catch (\Throwable $e) {
+					$code = RESULT_ERROR;
+				}
+
+				if ($code === RESULT_OK && $db->transStatus() !== false) {
+					$db->transCommit();
+					$result->status = STATUS_SUCCESS;
+				} else {
+					$db->transRollback();
+					if ($code === RESULT_OVERMONEY) {
+						// no money moved; undo the claim in case the engine ignored the rollback
+						$exchange_model->revertClaim($objExchange, $objAdmin->mb_uid, CHARGE_STATE_PERMIT);
+					}
+					$result->status = STATUS_FAIL;
+					$result->code = $code === RESULT_OK ? RESULT_ERROR : $code;
+				}
 			}			
         }
 		
 		echo json_encode($result);
 
     }
+
+	/** Refuse store exchange wait (no money was held at request). */
+	public function exchangeproc_cancel()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+
+		$result = new \StdClass;
+		if (!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->session->uid;
+			$objAdmin = $this->member_model->getAllByUid($uid);
+			$exchange_model = new Exchange_Model();
+			$exchangeId = isset($arrReqData['exchange_id']) ? (int)$arrReqData['exchange_id'] : 0;
+			$objExchange = $exchangeId > 0 ? $exchange_model->getById($exchangeId) : null;
+
+			if (is_null($objAdmin) || is_null($objExchange) || (int)$objExchange->exchange_action_state !== CHARGE_STATE_WAIT) {
+				$result->status = STATUS_FAIL;
+				$result->code = RESULT_FAIL;
+			} else if (!$this->canManageProc($objAdmin, $objExchange->exchange_emp_fid)) {
+				$result->status = STATUS_FAIL;
+				$result->code = RESULT_FAIL;
+			} else if (!$exchange_model->claimWait($exchangeId, $objAdmin->mb_uid, CHARGE_STATE_REFUSE)) {
+				$result->status = STATUS_FAIL;
+				$result->code = RESULT_FAIL;
+			} else {
+				$result->status = STATUS_SUCCESS;
+			}
+		}
+
+		echo json_encode($result);
+	}
 
 
 
@@ -1800,9 +1981,9 @@ class Api extends BaseController
 		{
             $result->status = STATUS_LOGOUT;		
         } else {
-			$arrReqData['send_uid'] = $this->session->uid;
+			$arrReqData['me_uid'] = $this->session->uid;
 
-			$count = $this->notice_model->searchCount($arrReqData, NOTICE_TYPE_MSG);
+			$count = $this->notice_model->mailboxCount($this->session->uid, $arrReqData, NOTICE_TYPE_MSG);
 
 			$result->data = $count;
 			$result->status = STATUS_SUCCESS;
@@ -1823,9 +2004,7 @@ class Api extends BaseController
 		{
             $result->status = STATUS_LOGOUT;		
         } else {
-			$arrReqData['send_uid'] = $this->session->uid;
-
-			$arrNotice = $this->notice_model->searchList($arrReqData, NOTICE_TYPE_MSG, $arrReqData['page'], $arrReqData['cntper']);
+			$arrNotice = $this->notice_model->mailboxList($this->session->uid, $arrReqData, NOTICE_TYPE_MSG, $arrReqData['page'], $arrReqData['cntper']);
 
 			$result->data = $arrNotice;
 			$result->status = STATUS_SUCCESS;
@@ -1851,18 +2030,46 @@ class Api extends BaseController
 			
 			$objNotice = $this->notice_model->getById($arrReqData['no'], NOTICE_TYPE_MSG);
 			
-			if(is_null($objNotice) || $objNotice->notice_send_uid != $uid){
+			if(is_null($objNotice)){
 				$result->status = STATUS_FAIL;
-			} else {
-				$bResult = $this->notice_model->deleteSendById($arrReqData['no']);
-
+			} else if($objNotice->notice_send_uid == $uid){
+				$this->notice_model->deleteSendById($arrReqData['no']);
 				$result->status = STATUS_SUCCESS;
+			} else if($objNotice->notice_recv_uid == $uid){
+				$this->notice_model->deleteRecvById($arrReqData['no']);
+				$result->status = STATUS_SUCCESS;
+			} else {
+				$result->status = STATUS_FAIL;
 			}
 			
         }
 		
-		echo json_encode($result);
+        echo json_encode($result);
 
+    }
+
+
+	public function memolist_read()
+	{
+		$jsonData = $_REQUEST['json_'];
+		$arrReqData = json_decode($jsonData, true);
+
+		$result = new \StdClass;
+		if(!is_login())
+		{
+            $result->status = STATUS_LOGOUT;
+        } else {
+			$uid = $this->session->uid;
+			$objNotice = $this->notice_model->getById($arrReqData['no'], NOTICE_TYPE_MSG);
+			if(is_null($objNotice) || $objNotice->notice_recv_uid != $uid){
+				$result->status = STATUS_FAIL;
+			} else {
+				$this->notice_model->readById($arrReqData['no'], false);
+				$result->status = STATUS_SUCCESS;
+			}
+        }
+
+		echo json_encode($result);
     }
 
 
@@ -1886,8 +2093,12 @@ class Api extends BaseController
 				$arrReqData['send_uid'] = $uid;
 
 				$bResult = $this->notice_model->registerMemo($arrReqData);
-	
-				$result->status = STATUS_SUCCESS;
+				if ($bResult) {
+					$this->notice_model->markReadFromSender($uid, (string)$arrReqData['recv_uid']);
+					$result->status = STATUS_SUCCESS;
+				} else {
+					$result->status = STATUS_FAIL;
+				}
 			}
 
         }
@@ -1918,6 +2129,136 @@ class Api extends BaseController
 		echo json_encode($result);
 
     }
+
+
+	//------------- Notice (agency → stores, read-only for stores) ------------------
+
+	/** Returns the agency uid of the session, or '' when not an agency account. */
+	private function noticeAgencyUid()
+	{
+		$uid = (string)$this->session->uid;
+		if ($uid === '') {
+			return '';
+		}
+		$objMember = $this->member_model->getByUid($uid);
+		if (is_null($objMember) || (int)$objMember->mb_level !== LEVEL_AGENCY) {
+			return '';
+		}
+		return $uid;
+	}
+
+	private function noticeReqData()
+	{
+		$jsonData = isset($_REQUEST['json_']) ? $_REQUEST['json_'] : '';
+		$arrReqData = json_decode((string)$jsonData, true);
+		return is_array($arrReqData) ? $arrReqData : array();
+	}
+
+	private function noticeCleanText($arrReqData, $key, $maxLen)
+	{
+		$val = isset($arrReqData[$key]) ? trim((string)$arrReqData[$key]) : '';
+		if ($maxLen > 0 && mb_strlen($val, 'UTF-8') > $maxLen) {
+			$val = mb_substr($val, 0, $maxLen, 'UTF-8');
+		}
+		return $val;
+	}
+
+	public function noticelist_count()
+	{
+		$result = new \StdClass;
+		if(!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->noticeAgencyUid();
+			if ($uid === '') {
+				$result->status = STATUS_FAIL;
+			} else {
+				$result->data = $this->notice_model->announceCount($uid, $this->noticeReqData());
+				$result->status = STATUS_SUCCESS;
+			}
+		}
+		echo json_encode($result);
+	}
+
+	public function noticelist_page()
+	{
+		$result = new \StdClass;
+		if(!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->noticeAgencyUid();
+			if ($uid === '') {
+				$result->status = STATUS_FAIL;
+			} else {
+				$arrReqData = $this->noticeReqData();
+				$page = isset($arrReqData['page']) ? (int)$arrReqData['page'] : 1;
+				$cntPer = isset($arrReqData['cntper']) ? (int)$arrReqData['cntper'] : 20;
+				$result->data = $this->notice_model->announceList($uid, $arrReqData, $page, $cntPer);
+				$result->status = STATUS_SUCCESS;
+			}
+		}
+		echo json_encode($result);
+	}
+
+	public function noticelist_reg()
+	{
+		$result = new \StdClass;
+		if(!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->noticeAgencyUid();
+			$arrReqData = $this->noticeReqData();
+			$title = $this->noticeCleanText($arrReqData, 'title', 200);
+			$content = $this->noticeCleanText($arrReqData, 'content', 0);
+			if ($uid === '' || $title === '' || $content === '') {
+				$result->status = STATUS_FAIL;
+			} else {
+				$bResult = $this->notice_model->registerAnnounce($uid, $title, $content);
+				$result->status = $bResult ? STATUS_SUCCESS : STATUS_FAIL;
+			}
+		}
+		echo json_encode($result);
+	}
+
+	public function noticelist_mod()
+	{
+		$result = new \StdClass;
+		if(!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->noticeAgencyUid();
+			$arrReqData = $this->noticeReqData();
+			$no = isset($arrReqData['no']) ? (int)$arrReqData['no'] : 0;
+			$title = $this->noticeCleanText($arrReqData, 'title', 200);
+			$content = $this->noticeCleanText($arrReqData, 'content', 0);
+			if ($uid === '' || $no < 1 || $title === '' || $content === '') {
+				$result->status = STATUS_FAIL;
+			} else {
+				$bResult = $this->notice_model->modifyAnnounce($uid, $no, $title, $content);
+				$result->status = $bResult ? STATUS_SUCCESS : STATUS_FAIL;
+			}
+		}
+		echo json_encode($result);
+	}
+
+	public function noticelist_delete()
+	{
+		$result = new \StdClass;
+		if(!is_login()) {
+			$result->status = STATUS_LOGOUT;
+		} else {
+			$uid = $this->noticeAgencyUid();
+			$arrReqData = $this->noticeReqData();
+			$no = isset($arrReqData['no']) ? (int)$arrReqData['no'] : 0;
+			if ($uid === '' || $no < 1) {
+				$result->status = STATUS_FAIL;
+			} else {
+				$bResult = $this->notice_model->deleteAnnounce($uid, $no);
+				$result->status = $bResult ? STATUS_SUCCESS : STATUS_FAIL;
+			}
+		}
+		echo json_encode($result);
+	}
 
 
 	//------------- Qna ------------------
@@ -2463,9 +2804,15 @@ class Api extends BaseController
 				$arrData['level'] =  $objMember->mb_level;
 				$arrData['charge'] =  $charge_model->waitProc($emp_fid);
 				$arrData['exchange'] =  $exchange_model->waitProc($emp_fid);
-				if($objMember->mb_level == LEVEL_AGENCY)
+				if($objMember->mb_level == LEVEL_AGENCY) {
 					$arrData['notice'] =  $this->notice_model->waitProc($emp_uid);
-				else $arrData['notice'] = 0;
+					$arrData['memo'] = $this->notice_model->waitMemoUnread($emp_uid);
+					$arrData['memo_account'] = $this->notice_model->waitMemoUnread($emp_uid, '충전계좌요청');
+				} else {
+					$arrData['notice'] = 0;
+					$arrData['memo'] = 0;
+					$arrData['memo_account'] = 0;
+				}
 
 				$result->data = $arrData;
 				$result->status = STATUS_SUCCESS;
