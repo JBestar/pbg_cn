@@ -897,6 +897,122 @@
   max-width: none;
 }
 
+.m-inquiry-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+.m-inquiry-tab {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--m-label-color);
+  text-shadow: var(--m-text-outline);
+  padding-bottom: 4px;
+  border-bottom: 2px solid #4ea3ff;
+}
+.m-inquiry-account {
+  height: 36px;
+  padding: 0 12px;
+  font-size: 12px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.m-inquiry-table-wrap {
+  max-height: min(52vh, 360px);
+}
+.m-inquiry-table td.m-inquiry-body {
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 120px;
+}
+.m-inquiry-table td.m-inquiry-date {
+  white-space: nowrap;
+  font-size: 10px;
+}
+.m-inquiry-unread td {
+  color: #fff6c8;
+}
+.m-inquiry-del {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: #e2556a;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.m-inquiry-del svg {
+  width: 16px;
+  height: 16px;
+}
+.m-inquiry-del:active {
+  transform: translateY(1px);
+}
+
+.m-notice-table-wrap {
+  max-height: min(62vh, 440px);
+}
+.m-notice-table th.m-notice-no,
+.m-notice-table td.m-notice-no {
+  width: 44px;
+}
+.m-notice-table th.m-notice-date,
+.m-notice-table td.m-notice-date {
+  width: 82px;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.m-notice-row {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.m-notice-row td.m-notice-title {
+  text-align: left;
+  word-break: break-word;
+  font-weight: 700;
+}
+.m-notice-row td.m-notice-title::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 6px;
+  color: #8fc4ff;
+  transition: transform 0.15s ease;
+}
+.m-notice-row.is-open td.m-notice-title::before {
+  transform: rotate(90deg);
+}
+.m-notice-row.is-open td {
+  background: rgba(78, 163, 255, 0.18) !important;
+}
+.m-notice-row:focus-visible {
+  outline: 2px solid #4ea3ff;
+  outline-offset: -2px;
+}
+.m-notice-detail td {
+  text-align: left;
+  padding: 10px 12px 12px;
+  background: rgba(10, 26, 58, 0.92) !important;
+}
+.m-notice-meta {
+  font-size: 10px;
+  color: rgba(200, 220, 255, 0.75);
+  margin-bottom: 6px;
+}
+.m-notice-content {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #eef4ff;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 @media (max-width: 360px) {
   .m-mgmt-grid { gap: 18px 8px; max-width: 270px; }
   .m-mgmt-ico { width: 48px; height: 48px; }

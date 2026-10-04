@@ -19,6 +19,7 @@
     liveTimer: null,
     betsAllSeq: 0,
     winsSeq: 0,
+    inquirySeq: 0,
   };
 
   function I18N() { return window.PBGM_I18N; }
@@ -482,6 +483,7 @@
         return;
       }
       toast(I18N().t('mgmtAccountOk'));
+      if (state.panel === 'inquiry') loadInquiry();
     }, function () {
       state.busy = false;
       toast(I18N().t('mgmtAccountFail'));
@@ -1012,6 +1014,215 @@
     if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
   }
 
+  function trashIconHtml() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+  }
+
+  function renderInquiryTable(rows) {
+    var t = function (k) { return esc(I18N().t(k)); };
+    var html = ''
+      + '<div class="m-charge-table-wrap m-inquiry-table-wrap"><table class="m-charge-table m-inquiry-table"><thead><tr>'
+      + '<th>' + t('mgmtMemoColFrom') + '</th>'
+      + '<th>' + t('mgmtMemoColDate') + '</th>'
+      + '<th>' + t('mgmtMemoColTitle') + '</th>'
+      + '<th>' + t('mgmtMemoColBody') + '</th>'
+      + '<th></th>'
+      + '</tr></thead><tbody>';
+    if (!rows || !rows.length) {
+      html += '<tr><td colspan="5" class="m-charge-empty">' + t('mgmtHistEmpty') + '</td></tr>';
+    } else {
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i] || {};
+        var id = parseInt(r.id, 10) || 0;
+        html += '<tr' + (r.read ? '' : ' class="m-inquiry-unread"') + '>'
+          + '<td>' + esc(r.from || '-') + '</td>'
+          + '<td class="m-inquiry-date">' + esc(r.created_at || '-') + '</td>'
+          + '<td>' + esc(r.title || '-') + '</td>'
+          + '<td class="m-inquiry-body">' + esc(r.content || '-') + '</td>'
+          + '<td><button type="button" class="m-inquiry-del" data-memo-id="' + id + '" aria-label="' + t('mgmtCancel') + '">' + trashIconHtml() + '</button></td>'
+          + '</tr>';
+      }
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function bindInquiryDeletes() {
+    $all('[data-memo-id]', $('inquiryPageBody')).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = parseInt(btn.getAttribute('data-memo-id'), 10) || 0;
+        if (id < 1) return;
+        if (!window.confirm(I18N().t('mgmtMemoDeleteConfirm'))) return;
+        if (typeof hooks.api !== 'function' || state.busy) return;
+        state.busy = true;
+        hooks.api('memo_delete', { body: { id: id } }).then(function (r) {
+          state.busy = false;
+          var json = (r && r.json) || {};
+          if (json.status !== 'success') {
+            toast(json.message || I18N().t('mgmtLoadFail'));
+            return;
+          }
+          loadInquiry();
+        }, function () {
+          state.busy = false;
+          toast(I18N().t('mgmtLoadFail'));
+        });
+      });
+    });
+  }
+
+  function loadInquiry() {
+    var body = $('inquiryPageBody');
+    if (!body) return;
+    body.innerHTML = '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>';
+    if (typeof hooks.api !== 'function') {
+      body.innerHTML = renderInquiryTable([]);
+      return;
+    }
+    var seq = (state.inquirySeq || 0) + 1;
+    state.inquirySeq = seq;
+    hooks.api('memo_list', { qs: '&limit=100' }).then(function (r) {
+      if (state.panel !== 'inquiry' || state.inquirySeq !== seq) return;
+      var json = (r && r.json) || {};
+      if (json.status !== 'success') {
+        body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+        return;
+      }
+      body.innerHTML = renderInquiryTable(Array.isArray(json.data) ? json.data : []);
+      bindInquiryDeletes();
+    }, function () {
+      if (state.panel !== 'inquiry' || state.inquirySeq !== seq) return;
+      body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+    });
+  }
+
+  function openInquiry() {
+    var mgmtPanel = $('mgmtPanel');
+    if (mgmtPanel) mgmtPanel.hidden = true;
+    showGrid(true);
+    stopBetsLivePoll();
+    state.panel = 'inquiry';
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('inquiry');
+    loadInquiry();
+  }
+
+  function closeInquiryPage() {
+    state.inquirySeq = (state.inquirySeq || 0) + 1;
+    if (state.panel === 'inquiry') state.panel = null;
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
+  }
+
+  function noticeDateOnly(v) {
+    var s = String(v == null ? '' : v);
+    return s.length >= 10 ? s.slice(0, 10) : (s || '-');
+  }
+
+  function renderNoticeTable(rows) {
+    var t = function (k) { return esc(I18N().t(k)); };
+    var html = ''
+      + '<div class="m-charge-table-wrap m-notice-table-wrap"><table class="m-charge-table m-notice-table"><thead><tr>'
+      + '<th class="m-notice-no">' + t('mgmtNoticeColNo') + '</th>'
+      + '<th>' + t('mgmtNoticeColTitle') + '</th>'
+      + '<th class="m-notice-date">' + t('mgmtNoticeColDate') + '</th>'
+      + '</tr></thead><tbody>';
+    if (!rows || !rows.length) {
+      html += '<tr><td colspan="3" class="m-charge-empty">' + t('mgmtNoticeEmpty') + '</td></tr>';
+    } else {
+      var total = rows.length;
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i] || {};
+        var id = parseInt(r.id, 10) || 0;
+        var open = id > 0 && state.noticeOpenId === id;
+        html += '<tr class="m-notice-row' + (open ? ' is-open' : '') + '" data-notice-id="' + id + '"'
+          + ' role="button" tabindex="0" aria-expanded="' + (open ? 'true' : 'false') + '">'
+          + '<td class="m-notice-no">' + (total - i) + '</td>'
+          + '<td class="m-notice-title">' + esc(r.title || '-') + '</td>'
+          + '<td class="m-notice-date">' + esc(noticeDateOnly(r.created_at)) + '</td>'
+          + '</tr>'
+          + '<tr class="m-notice-detail" data-notice-detail="' + id + '"' + (open ? '' : ' hidden') + '>'
+          + '<td colspan="3"><div class="m-notice-meta">' + esc(r.created_at || '') + '</div>'
+          + '<div class="m-notice-content">' + esc(r.content || '') + '</div></td>'
+          + '</tr>';
+      }
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function toggleNoticeRow(row) {
+    var body = $('noticePageBody');
+    if (!body || !row) return;
+    var id = parseInt(row.getAttribute('data-notice-id'), 10) || 0;
+    if (id < 1) return;
+    var willOpen = state.noticeOpenId !== id;
+    $all('.m-notice-row', body).forEach(function (r) {
+      var rid = parseInt(r.getAttribute('data-notice-id'), 10) || 0;
+      var on = willOpen && rid === id;
+      r.classList.toggle('is-open', on);
+      r.setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+    $all('.m-notice-detail', body).forEach(function (d) {
+      var did = parseInt(d.getAttribute('data-notice-detail'), 10) || 0;
+      d.hidden = !(willOpen && did === id);
+    });
+    state.noticeOpenId = willOpen ? id : 0;
+  }
+
+  function bindNoticeRows() {
+    $all('.m-notice-row', $('noticePageBody')).forEach(function (row) {
+      row.addEventListener('click', function () { toggleNoticeRow(row); });
+      row.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleNoticeRow(row);
+        }
+      });
+    });
+  }
+
+  function loadNotice() {
+    var body = $('noticePageBody');
+    if (!body) return;
+    body.innerHTML = '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>';
+    if (typeof hooks.api !== 'function') {
+      body.innerHTML = renderNoticeTable([]);
+      return;
+    }
+    var seq = (state.noticeSeq || 0) + 1;
+    state.noticeSeq = seq;
+    hooks.api('notice_list', { qs: '&limit=100' }).then(function (r) {
+      if (state.panel !== 'notice' || state.noticeSeq !== seq) return;
+      var json = (r && r.json) || {};
+      if (json.status !== 'success') {
+        body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+        return;
+      }
+      body.innerHTML = renderNoticeTable(Array.isArray(json.data) ? json.data : []);
+      bindNoticeRows();
+    }, function () {
+      if (state.panel !== 'notice' || state.noticeSeq !== seq) return;
+      body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+    });
+  }
+
+  function openNotice(keepOpenRow) {
+    var mgmtPanel = $('mgmtPanel');
+    if (mgmtPanel) mgmtPanel.hidden = true;
+    showGrid(true);
+    stopBetsLivePoll();
+    if (!keepOpenRow) state.noticeOpenId = 0;
+    state.panel = 'notice';
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('notice');
+    loadNotice();
+  }
+
+  function closeNoticePage() {
+    state.noticeSeq = (state.noticeSeq || 0) + 1;
+    state.noticeOpenId = 0;
+    if (state.panel === 'notice') state.panel = null;
+    if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
+  }
+
   function onMenu(action) {
     if (action === 'charge') return openCharge();
     if (action === 'exchange') return openExchange();
@@ -1019,8 +1230,8 @@
     if (action === 'betsLive') return openBetsLive();
     if (action === 'betsAll') return openBetsAll(true);
     if (action === 'wins') return openWins();
-    if (action === 'inquiry') return openSoon('mgmtInquiry');
-    if (action === 'notice') return openSoon('mgmtNotice');
+    if (action === 'inquiry') return openInquiry();
+    if (action === 'notice') return openNotice(false);
     if (action === 'logout') {
       if (typeof hooks.logout === 'function') hooks.logout();
       return;
@@ -1066,6 +1277,16 @@
     var winsClose = $('winsPageClose');
     if (winsBack) winsBack.addEventListener('click', closeWinsPage);
     if (winsClose) winsClose.addEventListener('click', closeWinsPage);
+    var inquiryBack = $('inquiryPageBack');
+    var inquiryClose = $('inquiryPageClose');
+    if (inquiryBack) inquiryBack.addEventListener('click', closeInquiryPage);
+    if (inquiryClose) inquiryClose.addEventListener('click', closeInquiryPage);
+    var inquiryAcc = $('inquiryAccount');
+    if (inquiryAcc) inquiryAcc.addEventListener('click', doAccountRequest);
+    var noticeBack = $('noticePageBack');
+    var noticeClose = $('noticePageClose');
+    if (noticeBack) noticeBack.addEventListener('click', closeNoticePage);
+    if (noticeClose) noticeClose.addEventListener('click', closeNoticePage);
   }
 
   function sync(member) {
@@ -1095,6 +1316,10 @@
     if (betsAllRoot) I18N().applyStatic(betsAllRoot);
     var winsRoot = $('pageWins');
     if (winsRoot) I18N().applyStatic(winsRoot);
+    var inquiryRoot = $('pageInquiry');
+    if (inquiryRoot) I18N().applyStatic(inquiryRoot);
+    var noticeRoot = $('pageNotice');
+    if (noticeRoot) I18N().applyStatic(noticeRoot);
     renderProfile();
     if (state.panel === 'point') openPointConvert();
     else if (state.panel === 'charge') openCharge();
@@ -1102,6 +1327,8 @@
     else if (state.panel === 'betsLive') openBetsLive();
     else if (state.panel === 'betsAll') openBetsAll();
     else if (state.panel === 'wins') openWins();
+    else if (state.panel === 'inquiry') openInquiry();
+    else if (state.panel === 'notice') openNotice(true);
     else if (state.panel === 'soon') {
       /* leave soon panel; title already set */
     } else {
@@ -1119,9 +1346,16 @@
       || state.panel === 'betsLive'
       || state.panel === 'betsAll'
       || state.panel === 'wins'
+      || state.panel === 'inquiry'
+      || state.panel === 'notice'
     ) {
       if (state.panel === 'betsAll') state.betsAllSeq = (state.betsAllSeq || 0) + 1;
       if (state.panel === 'wins') state.winsSeq = (state.winsSeq || 0) + 1;
+      if (state.panel === 'inquiry') state.inquirySeq = (state.inquirySeq || 0) + 1;
+      if (state.panel === 'notice') {
+        state.noticeSeq = (state.noticeSeq || 0) + 1;
+        state.noticeOpenId = 0;
+      }
       state.panel = null;
     }
     closePanel();

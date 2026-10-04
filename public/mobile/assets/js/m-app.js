@@ -158,10 +158,15 @@
     if (pageBetsAll) pageBetsAll.hidden = name !== 'betsAll';
     var pageWins = $('pageWins');
     if (pageWins) pageWins.hidden = name !== 'wins';
+    var pageInquiry = $('pageInquiry');
+    if (pageInquiry) pageInquiry.hidden = name !== 'inquiry';
+    var pageNotice = $('pageNotice');
+    if (pageNotice) pageNotice.hidden = name !== 'notice';
     var appMain = $('appMain');
     if (appMain) {
       var detailBg = name === 'mgmt' || name === 'charge' || name === 'exchange'
-        || name === 'point' || name === 'betsLive' || name === 'betsAll' || name === 'wins';
+        || name === 'point' || name === 'betsLive' || name === 'betsAll' || name === 'wins'
+        || name === 'inquiry' || name === 'notice';
       appMain.classList.toggle('m-app-main--detail', detailBg);
     }
   }

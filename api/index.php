@@ -72,6 +72,15 @@ try {
         case 'account_request':
             api_account_request();
             break;
+        case 'memo_list':
+            api_memo_list();
+            break;
+        case 'memo_delete':
+            api_memo_delete();
+            break;
+        case 'notice_list':
+            api_notice_list();
+            break;
         case 'exchange_request':
             api_exchange_request();
             break;
@@ -1082,6 +1091,117 @@ function api_account_request()
     $id = (int)$ins->insert_id;
     $ins->close();
     pbg_json(['status' => 'success', 'data' => ['id' => $id, 'dup' => false]]);
+}
+
+/** Received memos for the logged-in store (1:1 inbox). */
+function api_memo_list()
+{
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    pbg_ensure_board_notice();
+    $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 50;
+    $db = pbg_db();
+    $uid = (string)$member['mb_uid'];
+    $type = 2;
+    $stmt = pbg_prepare(
+        $db,
+        'SELECT notice_fid, notice_title, notice_content, notice_send_uid, notice_recv_uid,
+                notice_create_time, notice_recv_read
+         FROM board_notice
+         WHERE notice_type=? AND notice_recv_uid=? AND notice_recv_delete=0
+         ORDER BY notice_fid DESC
+         LIMIT ' . $limit
+    );
+    $stmt->bind_param('is', $type, $uid);
+    $stmt->execute();
+    $raw = pbg_stmt_fetch_all($stmt);
+    $stmt->close();
+    $rows = [];
+    foreach ($raw as $r) {
+        $rows[] = [
+            'id' => (int)$r['notice_fid'],
+            'from' => (string)$r['notice_send_uid'],
+            'title' => (string)$r['notice_title'],
+            'content' => (string)$r['notice_content'],
+            'created_at' => $r['notice_create_time'],
+            'read' => ((int)$r['notice_recv_read'] === 1),
+        ];
+    }
+    pbg_json(['status' => 'success', 'data' => $rows]);
+}
+
+/** Soft-delete a received memo (store inbox). */
+function api_memo_delete()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        pbg_json(['status' => 'fail', 'message' => 'POST required'], 405);
+    }
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $body = pbg_body();
+    $id = isset($body['id']) ? (int)$body['id'] : 0;
+    if ($id < 1) {
+        pbg_json(['status' => 'fail', 'code' => 'NO_ID', 'message' => '삭제할 쪽지가 없습니다']);
+    }
+    pbg_ensure_board_notice();
+    $db = pbg_db();
+    $uid = (string)$member['mb_uid'];
+    $type = 2;
+    $stmt = pbg_prepare(
+        $db,
+        'UPDATE board_notice SET notice_recv_delete=1, notice_recv_read=1
+         WHERE notice_fid=? AND notice_type=? AND notice_recv_uid=? AND notice_recv_delete=0'
+    );
+    $stmt->bind_param('iis', $id, $type, $uid);
+    $stmt->execute();
+    $n = $stmt->affected_rows;
+    $stmt->close();
+    if ($n < 1) {
+        pbg_json(['status' => 'fail', 'code' => 'NOT_FOUND', 'message' => '쪽지를 찾을 수 없습니다']);
+    }
+    pbg_json(['status' => 'success', 'data' => ['id' => $id]]);
+}
+
+/** Notices posted by the store's parent agency (read-only for stores). */
+function api_notice_list()
+{
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 50;
+
+    $empFid = (int)$member['mb_emp_fid'];
+    $agency = $empFid > 0 ? pbg_get_member_by_fid($empFid) : null;
+    if (!$agency || (int)$agency['mb_level'] !== 8) {
+        pbg_json(['status' => 'success', 'data' => []]);
+    }
+
+    pbg_ensure_board_notice();
+    $db = pbg_db();
+    $agencyUid = (string)$agency['mb_uid'];
+    $type = 3; // NOTICE_TYPE_NOTICE
+    $stmt = pbg_prepare(
+        $db,
+        'SELECT notice_fid, notice_title, notice_content, notice_create_time
+         FROM board_notice
+         WHERE notice_type=? AND notice_send_uid=? AND notice_send_delete=0
+         ORDER BY notice_fid DESC
+         LIMIT ' . $limit
+    );
+    $stmt->bind_param('is', $type, $agencyUid);
+    $stmt->execute();
+    $raw = pbg_stmt_fetch_all($stmt);
+    $stmt->close();
+
+    $rows = [];
+    foreach ($raw as $r) {
+        $rows[] = [
+            'id' => (int)$r['notice_fid'],
+            'title' => (string)$r['notice_title'],
+            'content' => (string)$r['notice_content'],
+            'created_at' => $r['notice_create_time'],
+        ];
+    }
+    pbg_json(['status' => 'success', 'data' => $rows]);
 }
 
 /**
