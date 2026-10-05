@@ -55,7 +55,7 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
-  background: #050814 url('../img/login-bg.png') center center / cover no-repeat;
+  background: #050814 url('../img/login-bg.jpg?v=1') center center / cover no-repeat;
   overflow: hidden;
 }
 

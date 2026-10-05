@@ -15,7 +15,7 @@
 
 /* Background on the scroll container stays put while content scrolls (no background-attachment: fixed, which iOS ignores) */
 .m-app-main.m-app-main--detail {
-  background: #050a1a url('../img/bg-mgmt-detail.png') center top / cover no-repeat;
+  background: #050a1a url('../img/bg-mgmt-detail.jpg?v=1') center top / cover no-repeat;
 }
 
 .m-mgmt {
