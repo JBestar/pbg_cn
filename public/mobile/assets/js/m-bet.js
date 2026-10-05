@@ -4,7 +4,30 @@
 (function () {
   'use strict';
 
-  var AMOUNTS = [10, 50, 100, 500, 1000];
+  var AMOUNTS = [5, 10, 50, 100, 500, 1000];
+
+  /* Same mapping as api pbg_mode_meta: combo target = [left room][right room] */
+  var MODE_INFO = {
+    1: { rooms: [1], marks: 'P' },
+    2: { rooms: [1], marks: 'B' },
+    3: { rooms: [2], marks: 'P' },
+    4: { rooms: [2], marks: 'B' },
+    9: { rooms: [3], marks: 'P' },
+    10: { rooms: [3], marks: 'B' },
+    11: { rooms: [4], marks: 'P' },
+    12: { rooms: [4], marks: 'B' },
+    5: { rooms: [1, 2], marks: 'PP' },
+    6: { rooms: [1, 2], marks: 'BP' },
+    7: { rooms: [1, 2], marks: 'PB' },
+    8: { rooms: [1, 2], marks: 'BB' },
+    13: { rooms: [3, 4], marks: 'PP' },
+    14: { rooms: [3, 4], marks: 'BP' },
+    15: { rooms: [3, 4], marks: 'PB' },
+    16: { rooms: [3, 4], marks: 'BB' },
+  };
+
+  /* After a successful bet, ignore an older (smaller) status total for this long */
+  var TOTAL_HOLD_MS = 2500;
 
   var state = {
     mode: null,
@@ -16,6 +39,8 @@
     member: { uid: '', name: '', balance: 0, point: 0 },
     lastDraw: null,
     busy: false,
+    roundTotal: 0,
+    totalHoldUntil: 0,
   };
 
   var hooks = {
@@ -59,6 +84,21 @@
     });
   }
 
+  function modeLabel(mode) {
+    var t = function (k) { return I18N().t(k); };
+    if (mode >= 30 && mode <= 39) {
+      return t('betNumberGame') + ' ' + (mode - 30);
+    }
+    var info = MODE_INFO[mode];
+    if (!info) return '';
+    var parts = [];
+    for (var i = 0; i < info.rooms.length; i++) {
+      var mk = info.marks.charAt(i) === 'P' ? t('markP') : t('markB');
+      parts.push(t('room' + info.rooms[i] + 'Title') + ' ' + mk);
+    }
+    return parts.join('+');
+  }
+
   function renderSelection() {
     $all('[data-bet-mode]').forEach(function (btn) {
       var mode = parseInt(btn.getAttribute('data-bet-mode'), 10);
@@ -67,18 +107,20 @@
       var amt = btn.querySelector('[data-role="amt"]');
       if (amt) amt.textContent = active && state.amount > 0 ? fmtMoney(state.amount) : '';
     });
-    var draft = $('betDraftAmount');
-    if (draft) {
-      if (state.amount > 0) {
-        draft.textContent = fmtMoney(state.amount);
-        draft.hidden = false;
-      } else {
-        draft.textContent = '';
-        draft.hidden = true;
-      }
-    }
+    var armed = !!state.mode && state.amount > 0;
+    var wallet = $('betWallet');
+    var bar = $('betDraftBar');
+    var label = $('betDraftLabel');
+    if (wallet) wallet.hidden = armed;
+    if (bar) bar.hidden = !armed;
+    if (label) label.textContent = armed ? modeLabel(state.mode) + ' : ' + fmtMoney(state.amount) : '';
     var place = $('betPlaceBtn');
-    if (place) place.disabled = state.busy || !state.canBet;
+    if (place) place.disabled = state.busy || !state.canBet || !armed;
+  }
+
+  function renderTotal() {
+    var el = $('betRoundTotal');
+    if (el) el.textContent = fmtMoney(state.roundTotal);
   }
 
   function renderWallet() {
@@ -188,23 +230,26 @@
     renderLive();
     renderWallet();
     renderOdds();
+    renderTotal();
     renderSelection();
   }
 
   function selectMode(mode) {
     mode = parseInt(mode, 10);
-    if (!mode) return;
+    if (!mode || state.busy) return;
     if (state.mode === mode) {
-      /* keep selection; amount still accumulates via chips */
-    } else {
-      state.mode = mode;
+      /* tapping the selected option again cancels the draft */
+      resetDraft(true);
+      return;
     }
+    /* switching option keeps the accumulated amount */
+    state.mode = mode;
     renderSelection();
   }
 
   function addAmount(n) {
     n = parseInt(n, 10) || 0;
-    if (n <= 0) return;
+    if (n <= 0 || state.busy) return;
     if (!state.mode) {
       toast(I18N().msg('selectMode') || I18N().t('selectMode'));
       return;
@@ -236,16 +281,19 @@
     }
     if (typeof hooks.placeBet !== 'function') return;
 
+    var sentRound = state.round;
     state.busy = true;
     renderSelection();
     Promise.resolve(hooks.placeBet({
       mode: state.mode,
       amount: state.amount,
-      round: state.round,
+      round: sentRound,
     })).then(function (r) {
       state.busy = false;
       if (!r || !r.ok) {
-        renderSelection();
+        /* a draft for a finished round can never be placed */
+        if (state.round !== sentRound) resetDraft(true);
+        else renderSelection();
         toast((r && r.message) || I18N().msg('betFail'));
         return;
       }
@@ -257,18 +305,39 @@
           hooks.onBalance({ balance: state.member.balance, point: state.member.point });
         }
       }
+      if (r.roundTotal != null && (r.round == null || r.round === state.round)) {
+        state.roundTotal = Number(r.roundTotal) || 0;
+        state.totalHoldUntil = Date.now() + TOTAL_HOLD_MS;
+        renderTotal();
+      }
       resetDraft(true);
       toast(I18N().msg('betOk'));
     }, function () {
       state.busy = false;
-      renderSelection();
+      if (state.round !== sentRound) resetDraft(true);
+      else renderSelection();
       toast(I18N().msg('betFail'));
     });
   }
 
   function sync(payload) {
     payload = payload || {};
-    if (payload.round != null) state.round = payload.round;
+    if (payload.round != null) {
+      var nextRound = parseInt(payload.round, 10) || 0;
+      if (state.round && nextRound && nextRound !== state.round) {
+        state.totalHoldUntil = 0;
+        if (!state.busy) {
+          state.mode = null;
+          state.amount = 0;
+        }
+      }
+      state.round = nextRound;
+    }
+    if (payload.roundTotal != null) {
+      var total = Number(payload.roundTotal) || 0;
+      var holding = Date.now() < state.totalHoldUntil && total < state.roundTotal;
+      if (!holding) state.roundTotal = total;
+    }
     if (payload.remain != null) state.remain = payload.remain;
     if (payload.canBet != null) state.canBet = !!payload.canBet;
     if (payload.odds) state.odds = payload.odds;
@@ -285,6 +354,7 @@
     renderWallet();
     renderOdds();
     renderPrev();
+    renderTotal();
     renderSelection();
   }
 
@@ -306,9 +376,7 @@
       }
     });
 
-    var resetBtn = $('betResetBtn');
     var placeBtn = $('betPlaceBtn');
-    if (resetBtn) resetBtn.addEventListener('click', function () { resetDraft(false); });
     if (placeBtn) placeBtn.addEventListener('click', placeBet);
 
     applyI18nStatic();
@@ -318,7 +386,13 @@
     bind: bind,
     sync: sync,
     applyI18n: applyI18nStatic,
-    reset: function () { resetDraft(true); },
+    reset: function () {
+      state.round = 0;
+      state.roundTotal = 0;
+      state.totalHoldUntil = 0;
+      renderTotal();
+      resetDraft(true);
+    },
     onPlaceBet: function (fn) { hooks.placeBet = fn; },
     onToast: function (fn) { hooks.toast = fn; },
     onBalance: function (fn) { hooks.onBalance = fn; },

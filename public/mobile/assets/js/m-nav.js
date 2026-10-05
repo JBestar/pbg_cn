@@ -9,12 +9,11 @@
     { id: 'home', i18n: 'navHome', page: 'home' },
     { id: 'bet', i18n: 'navBet', page: 'bet' },
     { id: 'mgmt', i18n: 'navMgmt', page: 'mgmt' },
-    { id: 'lang', i18n: 'navLang', page: null, action: 'lang' },
     { id: 'logout', i18n: 'navLogout', page: null, action: 'logout' },
   ];
 
   var activeId = 'home';
-  var handlers = { page: null, lang: null, logout: null };
+  var handlers = { page: null, logout: null };
 
   function $(sel, root) {
     return (root || document).querySelector(sel);
@@ -40,10 +39,6 @@
     var item = ITEMS.filter(function (it) { return it.id === id; })[0];
     if (!item) return;
 
-    if (item.action === 'lang') {
-      if (typeof handlers.lang === 'function') handlers.lang();
-      return;
-    }
     if (item.action === 'logout') {
       if (typeof handlers.logout === 'function') handlers.logout();
       return;
@@ -72,7 +67,6 @@
     show: show,
     getActive: function () { return activeId; },
     onPage: function (fn) { handlers.page = fn; },
-    onLang: function (fn) { handlers.lang = fn; },
     onLogout: function (fn) { handlers.logout = fn; },
   };
 })();

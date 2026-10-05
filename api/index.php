@@ -192,6 +192,28 @@ function api_me()
     ]);
 }
 
+/** Sum of the member's non-cancelled bets (1=wait 2=lose 3=win) in one round. */
+function pbg_round_bet_total($mbFid, $round)
+{
+    $mbFid = (int)$mbFid;
+    $round = (int)$round;
+    if ($mbFid < 1 || $round < 1) {
+        return 0.0;
+    }
+    $db = pbg_db();
+    // state IN (...) AND round=? lets MySQL use idx_state_round
+    $stmt = pbg_prepare(
+        $db,
+        'SELECT COALESCE(SUM(amount),0) AS total FROM bets
+         WHERE state IN (1,2,3) AND round=? AND mb_fid=?'
+    );
+    $stmt->bind_param('ii', $round, $mbFid);
+    $stmt->execute();
+    $row = pbg_stmt_fetch_one($stmt);
+    $stmt->close();
+    return $row ? (float)$row['total'] : 0.0;
+}
+
 function api_status()
 {
     $auth = pbg_auth_member(true);
@@ -202,6 +224,7 @@ function api_status()
     pbg_json([
         'status' => 'success',
         'data' => [
+            'round_total' => pbg_round_bet_total($m['mb_fid'], $round['round']),
             'machine' => [
                 'code' => $m['mb_uid'],
                 'name' => $m['mb_nickname'],
@@ -690,6 +713,7 @@ function api_bet()
                 'balance' => (float)$fresh['mb_money'],
                 'point' => (float)$fresh['mb_point'],
                 'round' => $round,
+                'round_total' => pbg_round_bet_total($fid, $round),
                 'label' => pbg_mode_label_cn($mode),
             ],
         ]);
@@ -1056,14 +1080,14 @@ function api_account_request()
     $recvUid = (string)$agency['mb_uid'];
     $title = '충전계좌요청';
     $content = '매장 ' . $sendUid . ' 에서 충전계좌를 요청했습니다.';
-    $type = 2; // NOTICE_TYPE_MSG
+    $type = 1; // NOTICE_TYPE_QNA
 
-    // Avoid flooding: one unread account-request memo per store
+    // Avoid flooding: one unanswered account-request inquiry per store
     $dup = pbg_prepare(
         $db,
         "SELECT notice_fid FROM board_notice
          WHERE notice_type=? AND notice_send_uid=? AND notice_recv_uid=?
-           AND notice_recv_delete=0 AND notice_recv_read=0 AND notice_title=?
+           AND notice_recv_delete=0 AND notice_answer_state=0 AND notice_title=?
          LIMIT 1"
     );
     $dup->bind_param('isss', $type, $sendUid, $recvUid, $title);
@@ -1093,7 +1117,7 @@ function api_account_request()
     pbg_json(['status' => 'success', 'data' => ['id' => $id, 'dup' => false]]);
 }
 
-/** Received memos for the logged-in store (1:1 inbox). */
+/** 1:1 inbox for the logged-in store: received memos + answered inquiries it sent. */
 function api_memo_list()
 {
     $auth = pbg_auth_member(true);
@@ -1102,17 +1126,30 @@ function api_memo_list()
     $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 50;
     $db = pbg_db();
     $uid = (string)$member['mb_uid'];
-    $type = 2;
+    $typeMsg = 2;
+    $typeQna = 1;
     $stmt = pbg_prepare(
         $db,
-        'SELECT notice_fid, notice_title, notice_content, notice_send_uid, notice_recv_uid,
-                notice_create_time, notice_recv_read
-         FROM board_notice
-         WHERE notice_type=? AND notice_recv_uid=? AND notice_recv_delete=0
+        'SELECT * FROM (
+            (SELECT notice_fid, notice_title, notice_content AS body, notice_send_uid AS from_uid,
+                    notice_create_time, notice_recv_read AS is_read
+             FROM board_notice
+             WHERE notice_type=? AND notice_recv_uid=? AND notice_recv_delete=0
+             ORDER BY notice_fid DESC
+             LIMIT ' . $limit . ')
+            UNION ALL
+            (SELECT notice_fid, notice_title, notice_answer AS body, notice_recv_uid AS from_uid,
+                    notice_create_time, notice_send_read AS is_read
+             FROM board_notice
+             WHERE notice_type=? AND notice_send_uid=? AND notice_send_delete=0
+               AND notice_answer_state=1
+             ORDER BY notice_fid DESC
+             LIMIT ' . $limit . ')
+         ) t
          ORDER BY notice_fid DESC
          LIMIT ' . $limit
     );
-    $stmt->bind_param('is', $type, $uid);
+    $stmt->bind_param('isis', $typeMsg, $uid, $typeQna, $uid);
     $stmt->execute();
     $raw = pbg_stmt_fetch_all($stmt);
     $stmt->close();
@@ -1120,11 +1157,11 @@ function api_memo_list()
     foreach ($raw as $r) {
         $rows[] = [
             'id' => (int)$r['notice_fid'],
-            'from' => (string)$r['notice_send_uid'],
+            'from' => (string)$r['from_uid'],
             'title' => (string)$r['notice_title'],
-            'content' => (string)$r['notice_content'],
+            'content' => (string)($r['body'] ?? ''),
             'created_at' => $r['notice_create_time'],
-            'read' => ((int)$r['notice_recv_read'] === 1),
+            'read' => ((int)$r['is_read'] === 1),
         ];
     }
     pbg_json(['status' => 'success', 'data' => $rows]);
@@ -1156,6 +1193,20 @@ function api_memo_delete()
     $stmt->execute();
     $n = $stmt->affected_rows;
     $stmt->close();
+    if ($n < 1) {
+        // Answered inquiry shown in the inbox: hide it on the sender (store) side only
+        $typeQna = 1;
+        $stmt = pbg_prepare(
+            $db,
+            'UPDATE board_notice SET notice_send_delete=1, notice_send_read=1
+             WHERE notice_fid=? AND notice_type=? AND notice_send_uid=? AND notice_send_delete=0
+               AND notice_answer_state=1'
+        );
+        $stmt->bind_param('iis', $id, $typeQna, $uid);
+        $stmt->execute();
+        $n = $stmt->affected_rows;
+        $stmt->close();
+    }
     if ($n < 1) {
         pbg_json(['status' => 'fail', 'code' => 'NOT_FOUND', 'message' => '쪽지를 찾을 수 없습니다']);
     }

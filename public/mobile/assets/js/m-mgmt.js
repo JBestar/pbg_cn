@@ -1223,7 +1223,45 @@
     if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
   }
 
+  function openLangSheet() {
+    var sheet = $('langSheet');
+    if (!sheet) return;
+    var cur = I18N().getLang();
+    $all('[data-lang]', sheet).forEach(function (btn) {
+      btn.classList.toggle('is-current', btn.getAttribute('data-lang') === cur);
+    });
+    sheet.hidden = false;
+  }
+
+  function closeLangSheet() {
+    var sheet = $('langSheet');
+    if (sheet) sheet.hidden = true;
+  }
+
+  function bindLangSheet() {
+    var sheet = $('langSheet');
+    if (!sheet || sheet.dataset.bound === '1') return;
+    sheet.dataset.bound = '1';
+    sheet.addEventListener('click', function (ev) {
+      if (ev.target === sheet) {
+        closeLangSheet();
+        return;
+      }
+      var opt = ev.target.closest('[data-lang]');
+      if (!opt || !sheet.contains(opt)) return;
+      var lang = opt.getAttribute('data-lang');
+      closeLangSheet();
+      if (lang && lang !== I18N().getLang()) {
+        I18N().setLang(lang);
+        toast(I18N().t('langSwitched'));
+      }
+    });
+    var cancel = $('langSheetCancel');
+    if (cancel) cancel.addEventListener('click', closeLangSheet);
+  }
+
   function onMenu(action) {
+    if (action === 'lang') return openLangSheet();
     if (action === 'charge') return openCharge();
     if (action === 'exchange') return openExchange();
     if (action === 'point') return openPointConvert();
@@ -1244,6 +1282,7 @@
         onMenu(btn.getAttribute('data-mgmt'));
       });
     });
+    bindLangSheet();
     var back = $('mgmtPanelBack');
     if (back) back.addEventListener('click', closePanel);
     var chargeBack = $('chargePageBack');

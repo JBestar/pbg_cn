@@ -1,6 +1,6 @@
 /* ===== Betting page — mobile 3D cards ===== */
 .m-bet {
-  --m-bet-dock-h: 172px;
+  --m-bet-dock-h: 128px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -246,13 +246,25 @@
 }
 
 .m-bet-opt.is-active {
-  outline: 2px solid #f5c542;
+  outline: 3px solid #ffe600;
   outline-offset: 1px;
   filter: brightness(1.08);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.4) inset,
-    0 0 0 3px rgba(245, 197, 66, 0.28),
-    0 6px 16px rgba(245, 197, 66, 0.35) !important;
+    0 0 0 3px rgba(255, 230, 0, 0.35),
+    0 6px 16px rgba(255, 230, 0, 0.4) !important;
+  animation: m-bet-opt-blink 0.8s ease-in-out infinite;
+}
+
+@keyframes m-bet-opt-blink {
+  0%, 100% {
+    outline-color: #ffe600;
+    filter: brightness(1.35);
+  }
+  50% {
+    outline-color: rgba(255, 230, 0, 0.15);
+    filter: brightness(0.9);
+  }
 }
 
 .m-bet-opt-mark {
@@ -341,24 +353,26 @@
 
 .m-bet-amounts {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) minmax(0, 1.9fr);
+  gap: 4px;
 }
 
 .m-bet-amt {
+  min-width: 0;
   height: 40px;
-  border: 0;
-  border-radius: 11px;
+  padding: 0;
+  border: 1px solid #6f8f12;
+  border-radius: 6px;
   font-family: inherit;
   font-size: 12px;
   font-weight: 800;
-  color: #2a1a00;
+  color: #1b2400;
   cursor: pointer;
-  background: linear-gradient(180deg, #ffe9a8 0%, #f5c542 50%, #c9921c 100%);
+  background: linear-gradient(180deg, #e4f58a 0%, #b9dc3a 55%, #8fb51c 100%);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.45) inset,
-    0 3px 0 #8a6410,
-    0 5px 10px rgba(201, 146, 28, 0.35);
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 3px 0 #5d7a0c,
+    0 5px 10px rgba(143, 181, 28, 0.3);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -366,88 +380,125 @@
   transform: translateY(2px);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.3) inset,
-    0 1px 0 #8a6410,
-    0 2px 6px rgba(201, 146, 28, 0.3);
+    0 1px 0 #5d7a0c,
+    0 2px 6px rgba(143, 181, 28, 0.3);
 }
 
-.m-bet-actions {
-  display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 8px;
-}
-
-.m-bet-btn {
-  height: 46px;
-  border: 0;
-  border-radius: 13px;
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 800;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.m-bet-btn:disabled {
-  filter: grayscale(0.35) brightness(0.75);
-  cursor: default;
-}
-
-.m-bet-btn-reset {
-  color: #f2e8ff;
-  background: linear-gradient(180deg, #9b6ad8 0%, #6f3db0 55%, #552a8f 100%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.28) inset,
-    0 4px 0 #3a1a66,
-    0 7px 12px rgba(85, 42, 143, 0.4);
-}
-
-.m-bet-btn-place {
-  display: inline-flex;
+.m-bet-total {
+  min-width: 0;
+  height: 40px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  background: linear-gradient(180deg, #b07aef 0%, #7c3fd4 55%, #5c28ad 100%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.3) inset,
-    0 4px 0 #3d1878,
-    0 7px 14px rgba(92, 40, 173, 0.45);
-}
-
-.m-bet-btn-reset:active:not(:disabled),
-.m-bet-btn-place:active:not(:disabled) {
-  transform: translateY(2px);
-}
-
-.m-bet-place-amt {
-  margin-right: 6px;
-  color: #ffe08a;
+  gap: 4px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffa133 0%, #ff8a00 55%, #e06d00 100%);
+  color: #1a0d00;
   font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 3px 0 #9a4a00;
+}
+
+.m-bet-total-k {
+  font-size: 13px;
+}
+
+.m-bet-total-v {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
-.m-bet-place-amt[hidden] {
+.m-bet-wallet,
+.m-bet-draft {
+  height: 52px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 8px;
+}
+
+.m-bet-wallet[hidden],
+.m-bet-draft[hidden] {
   display: none !important;
 }
 
 .m-bet-wallet {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 11px 12px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #ffe9a8 0%, #f5c542 48%, #d4a017 100%);
-  color: #2a1700;
-  font-size: 12px;
-  font-weight: 800;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 4px 0 #9a7510,
-    0 8px 16px rgba(212, 160, 23, 0.4);
+  background: linear-gradient(180deg, #e2e2e2 0%, #cfcfcf 100%);
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.m-bet-wallet span {
+.m-bet-wallet-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1a1aff;
+}
+
+.m-bet-wallet-item {
+  white-space: nowrap;
+}
+
+.m-bet-wallet-v {
+  color: #1a1aff;
+  border-bottom: 2px solid #111;
+  padding: 0 2px;
   font-variant-numeric: tabular-nums;
+}
+
+.m-bet-draft {
+  justify-content: space-between;
+  background: linear-gradient(180deg, #ff2a2a 0%, #e00000 55%, #b30000 100%);
+  box-shadow: 0 0 14px rgba(255, 0, 0, 0.45);
+}
+
+.m-bet-draft-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #ffe600;
+  font-size: 16px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+}
+
+.m-bet-draft-btn {
+  flex: 0 0 auto;
+  height: 40px;
+  padding: 0 16px;
+  border: 2px solid #0a1a4a;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #2f7bff 0%, #0057e6 100%);
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.m-bet-draft-btn:active:not(:disabled) {
+  transform: translateY(2px);
+}
+
+.m-bet-draft-btn:disabled {
+  filter: grayscale(0.5) brightness(0.75);
+  cursor: default;
 }
 
 @media (max-width: 360px) {
@@ -455,5 +506,10 @@
   .m-bet-grid-8 .m-bet-opt.is-p .m-bet-opt-mark,
   .m-bet-grid-8 .m-bet-opt.is-b .m-bet-opt-mark { font-size: 14px; }
   .m-bet-opt.is-combo .m-bet-opt-mark { font-size: 10px; }
-  .m-bet-amt { font-size: 11px; }
+  .m-bet-amt { font-size: 10px; }
+  .m-bet-total-k { font-size: 11px; }
+  .m-bet-total-v { font-size: 12px; }
+  .m-bet-wallet { font-size: 12px; padding: 0 8px; }
+  .m-bet-draft-label { font-size: 13px; }
+  .m-bet-draft-btn { font-size: 14px; padding: 0 10px; letter-spacing: 1px; }
 }

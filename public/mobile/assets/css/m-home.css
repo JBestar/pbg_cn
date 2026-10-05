@@ -557,6 +557,25 @@ body.m-has-nav {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.m-nav-center {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.m-nav-center-img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(255, 0, 0, 0.35));
+}
+
 .m-nav-ico {
   display: flex;
   align-items: center;

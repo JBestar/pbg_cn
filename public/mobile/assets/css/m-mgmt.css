@@ -97,10 +97,10 @@
 
 .m-mgmt-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px 8px;
   width: 100%;
-  max-width: 300px;
+  max-width: 380px;
   margin: auto;
   padding: 0;
   background: none;
@@ -177,6 +177,76 @@
 }
 .m-mgmt-ico--logout {
   background: linear-gradient(180deg, #8ec5ff 0%, #4a90d9 100%);
+}
+.m-mgmt-ico--lang {
+  border-radius: 14px;
+  background: linear-gradient(180deg, #1f3f8f 0%, #0d1f52 100%);
+  color: #8fd0ff;
+}
+
+.m-lang-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.m-lang-sheet[hidden] {
+  display: none !important;
+}
+
+.m-lang-box {
+  width: 100%;
+  max-width: 300px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #0f1830;
+  border: 1px solid rgba(120, 190, 255, 0.25);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.m-lang-title {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #eaf2ff;
+}
+
+.m-lang-opt,
+.m-lang-cancel {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin-top: 8px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.m-lang-opt {
+  border: 1px solid rgba(120, 190, 255, 0.3);
+  background: #1a2a4f;
+  color: #eaf2ff;
+}
+
+.m-lang-opt.is-current {
+  border-color: #f5c542;
+  background: #2a3a10;
+  color: #ffe14a;
+}
+
+.m-lang-cancel {
+  border: 0;
+  background: #3a4258;
+  color: #dce8ff;
 }
 
 .m-mgmt-label {
@@ -1014,8 +1084,8 @@
 }
 
 @media (max-width: 360px) {
-  .m-mgmt-grid { gap: 18px 8px; max-width: 270px; }
-  .m-mgmt-ico { width: 48px; height: 48px; }
+  .m-mgmt-grid { gap: 18px 4px; max-width: 340px; }
+  .m-mgmt-ico { width: 46px; height: 46px; }
   .m-mgmt-ico svg { width: 22px; height: 22px; }
   .m-mgmt-label { font-size: 10px; }
   .m-mgmt-avatar { width: 46px; height: 46px; }
