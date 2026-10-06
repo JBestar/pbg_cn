@@ -10,6 +10,10 @@ body.m-has-nav {
   max-width: 520px;
 }
 
+.m-screen--app[hidden] {
+  display: none !important;
+}
+
 .m-screen--app::after {
   display: none;
 }
