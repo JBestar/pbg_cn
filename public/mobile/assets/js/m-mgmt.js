@@ -684,9 +684,36 @@
     return { cls: '', key: '' };
   }
 
+  /* Rooms 1-2 are powerball odd/even and small/big, rooms 3-4 the normal-ball ones; P = 单/小, B = 双/大 */
+  var ZH_PICK = {
+    1: [[1, 'P']], 2: [[1, 'B']], 3: [[2, 'P']], 4: [[2, 'B']],
+    9: [[3, 'P']], 10: [[3, 'B']], 11: [[4, 'P']], 12: [[4, 'B']],
+    5: [[1, 'P'], [2, 'P']], 6: [[1, 'B'], [2, 'P']], 7: [[1, 'P'], [2, 'B']], 8: [[1, 'B'], [2, 'B']],
+    13: [[3, 'P'], [4, 'P']], 14: [[3, 'B'], [4, 'P']], 15: [[3, 'P'], [4, 'B']], 16: [[3, 'B'], [4, 'B']],
+  };
+
+  function betsLiveZhModeHtml(m) {
+    var parts = ZH_PICK[m];
+    if (!parts) return '';
+    var lane = parts[0][0] <= 2 ? 'pb' : 'nb';
+    var txt = parts.map(function (p) {
+      var room = p[0];
+      var isP = p[1] === 'P';
+      var key = (room === 1 || room === 3)
+        ? (isP ? 'betOdd' : 'betEven')
+        : (isP ? 'betUnder' : 'betOver');
+      return I18N().t(key);
+    }).join('+');
+    return '<span class="m-bets-lane m-bets-lane--' + lane + '">' + esc(txt) + '</span>';
+  }
+
   function betsLiveModeHtml(mode) {
     var m = parseInt(mode, 10) || 0;
     var t = function (k) { return I18N().t(k); };
+    if (I18N().getLang() === 'zh') {
+      var zh = betsLiveZhModeHtml(m);
+      if (zh) return zh;
+    }
     var P = t('markP') || 'P';
     var B = t('markB') || 'B';
     var pSpan = '<span class="m-bets-mark m-bets-mark--p">' + esc(P) + '</span>';

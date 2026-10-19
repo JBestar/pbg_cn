@@ -15,6 +15,7 @@
     busyId: 0,
     seq: 0,
     timer: null,
+    html: '',
   };
 
   var hooks = {
@@ -50,10 +51,17 @@
     if (!body || !state.loaded) return;
     var mgmt = Mgmt();
     if (!mgmt || typeof mgmt.betsLiveTableHtml !== 'function') return;
-    body.innerHTML = mgmt.betsLiveTableHtml(state.rows, {
+    var html = mgmt.betsLiveTableHtml(state.rows, {
       cancelRound: state.canBet ? state.round : 0,
       busyId: state.busyId,
     });
+    if (html === state.html && body.querySelector('.m-bets-table-wrap')) return;
+    var oldWrap = body.querySelector('.m-bets-table-wrap');
+    var top = oldWrap ? oldWrap.scrollTop : 0;
+    body.innerHTML = html;
+    state.html = html;
+    var wrap = body.querySelector('.m-bets-table-wrap');
+    if (wrap && top) wrap.scrollTop = top;
   }
 
   function load(silent) {

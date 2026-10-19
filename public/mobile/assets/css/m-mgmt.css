@@ -831,6 +831,34 @@
   color: #ff4d4d;
 }
 
+/* Chinese 선택: mirrors the bet board game buttons (.m-bet-block.is-pb / .is-nb .m-bet-opt) */
+.m-bets-lane {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2em;
+  margin-bottom: 2px;
+  padding: 3px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 7px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.m-bets-lane--pb {
+  background: linear-gradient(180deg, #1d6fe0 0%, #0c4eab 100%);
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2px 0 #083572, 0 3px 6px rgba(12, 78, 171, 0.4);
+}
+
+.m-bets-lane--nb {
+  background: linear-gradient(180deg, #d7ebff 0%, #9ec8f5 100%);
+  color: #0c3f86;
+  box-shadow: 0 2px 0 #6ea0d4;
+}
+
 .m-bets-pick-ratio {
   display: inline-flex;
   align-items: center;
