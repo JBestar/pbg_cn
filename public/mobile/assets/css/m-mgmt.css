@@ -66,10 +66,10 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  min-width: 140px;
-  max-width: 190px;
+  min-width: 160px;
+  max-width: 260px;
   box-sizing: border-box;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: 12px;
   text-align: center;
   background: rgba(6, 14, 34, 0.6);
@@ -83,7 +83,7 @@
 .m-mgmt-profile-info p {
   margin: 0;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   color: rgba(255, 236, 170, 0.92);
   line-height: 1.35;
@@ -111,6 +111,39 @@
 /* Author `display: grid` would otherwise override the [hidden] attribute */
 .m-mgmt-grid[hidden] {
   display: none !important;
+}
+
+/* 설정: no page scroll; the icon rows split the height left under the profile equally */
+.m-app-main:has(#pageMgmt:not([hidden])) {
+  overflow: hidden;
+}
+
+#pageMgmt:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#pageMgmt .m-mgmt {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#pageMgmt .m-mgmt-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 4px 8px;
+  margin: 0 auto;
+}
+
+#pageMgmt .m-mgmt-item {
+  container-type: size;
+  min-height: 0;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .m-mgmt-item {
@@ -148,6 +181,17 @@
 .m-mgmt-ico svg {
   width: 32px;
   height: 32px;
+}
+
+/* Shrink with the row height, leaving room for a two-line label */
+#pageMgmt .m-mgmt-ico {
+  width: max(30px, min(64px, calc(100cqh - 50px)));
+  height: max(30px, min(64px, calc(100cqh - 50px)));
+}
+
+#pageMgmt .m-mgmt-ico svg {
+  width: 50%;
+  height: 50%;
 }
 
 .m-mgmt-ico--charge {
@@ -1191,6 +1235,10 @@
   .m-mgmt-grid { gap: 18px 4px; max-width: 340px; }
   .m-mgmt-ico { width: 46px; height: 46px; }
   .m-mgmt-ico svg { width: 22px; height: 22px; }
+  #pageMgmt .m-mgmt-ico {
+    width: max(30px, min(46px, calc(100cqh - 46px)));
+    height: max(30px, min(46px, calc(100cqh - 46px)));
+  }
   .m-mgmt-label { font-size: 13px; }
   .m-mgmt-avatar { width: 46px; height: 46px; }
   .m-charge-presets { grid-template-columns: repeat(4, 1fr); }
