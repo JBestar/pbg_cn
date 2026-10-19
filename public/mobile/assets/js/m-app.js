@@ -305,21 +305,9 @@
     stage.style.height = Math.round(MINI_H * s) + 'px';
   }
 
-  function fitPattern(content) {
-    if (!content) return;
-    var table = content.querySelector('table');
-    if (!table) return;
-    table.style.transform = '';
-    table.style.transformOrigin = 'top left';
-    content.style.height = '';
-    var pw = content.clientWidth;
-    var tw = table.scrollWidth;
-    if (pw > 0 && tw > pw + 2) {
-      var s = pw / tw;
-      table.style.transform = 'scale(' + s + ')';
-      content.style.height = Math.ceil(table.offsetHeight * s) + 'px';
-    }
-  }
+  var PATTERN_ROWS = 6;
+  /* Worst case every round flips, so 300 rounds can need 300 road columns */
+  var PATTERN_COLS = 300;
 
   function fillPatternContent(elId, action) {
     var content = $(elId);
@@ -328,7 +316,8 @@
     content.innerHTML = '<div style="padding:12px;color:#969696;text-align:center;">'
       + I18N.t('patternLoading') + '</div>';
     return api(action, {
-      qs: '&lang=' + encodeURIComponent(lang) + '&mode=latestLog&roundCnt=300',
+      qs: '&lang=' + encodeURIComponent(lang) + '&mode=latestLog&roundCnt=300'
+        + '&rows=' + PATTERN_ROWS + '&cols=' + PATTERN_COLS,
     }).then(function (r) {
       if (r.json.status !== 'success') {
         content.innerHTML = '<div style="padding:12px;color:#969696;text-align:center;">'
@@ -336,7 +325,32 @@
         return;
       }
       content.innerHTML = r.json.content || '';
-      fitPattern(content);
+      layoutPatterns();
+    });
+  }
+
+  function layoutPatterns() {
+    var page = $('pagePattern');
+    if (!page || page.hidden) return;
+    var contents = page.querySelectorAll('.content');
+    if (!contents.length) return;
+    var h = contents[0].clientHeight;
+    if (h > 12) {
+      var cell = Math.max(8, Math.floor((h - 1) / PATTERN_ROWS));
+      page.style.setProperty('--pat-cell', cell + 'px');
+      page.style.setProperty('--pat-ball', Math.round(cell * 0.8) + 'px');
+      page.style.setProperty('--pat-font', Math.max(6, Math.round(cell * 0.4)) + 'px');
+    }
+    Array.prototype.forEach.call(page.querySelectorAll('.pattern-title-text'), function (el) {
+      var size = 12;
+      el.style.fontSize = size + 'px';
+      while (size > 6 && el.scrollHeight > el.clientHeight + 1) {
+        size -= 0.5;
+        el.style.fontSize = size + 'px';
+      }
+    });
+    Array.prototype.forEach.call(contents, function (c) {
+      c.scrollLeft = c.scrollWidth;
     });
   }
 
@@ -645,6 +659,7 @@
       renderError();
       updateHeaderUser({ member: state.member });
       applyPatternTitles();
+      layoutPatterns();
       if (Draws && typeof Draws.rerender === 'function') Draws.rerender();
       if (Bet && typeof Bet.applyI18n === 'function') Bet.applyI18n();
       if (Hist && typeof Hist.applyI18n === 'function') Hist.applyI18n();
@@ -767,14 +782,11 @@
         ensureMiniFrame();
         scaleMini();
       }
-      if (page === 'pattern') {
-        var boxes = document.querySelectorAll('#pagePattern .content');
-        Array.prototype.forEach.call(boxes, fitPattern);
-      }
       if (page === 'bet') {
         syncBetBoard();
         scaleVeil();
       }
+      if (page === 'pattern') layoutPatterns();
       if (page === 'hist' && Hist) {
         Hist.sync({ canBet: state.canBet });
         Hist.show();
@@ -789,6 +801,7 @@
     window.addEventListener('resize', function () {
       scaleMini();
       scaleVeil();
+      layoutPatterns();
       if (tickerLine) paintTicker(tickerLine);
     });
     window.addEventListener('orientationchange', function () {

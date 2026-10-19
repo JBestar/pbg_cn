@@ -322,90 +322,85 @@ body.m-has-nav {
   pointer-events: none;
 }
 
-/* Pattern rooms — reuse cabinet HTML classes from API content */
+/* Pattern rooms — reuse cabinet HTML classes from API content.
+   --pat-cell is set from JS so 6 road rows fill each quarter of the screen. */
 .m-pattern-stack {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
-.m-pattern-box.pattern-box,
 .m-pattern-box {
-  border: 1px solid #d5d5d5;
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
   width: 100%;
+  border: 1px solid #d5d5d5;
+  border-radius: 8px;
+  overflow: hidden;
   background: #fff;
   color: #5f6164;
   font-size: 11px;
-  margin: 0;
-  border-collapse: collapse;
-  height: auto;
-  table-layout: fixed;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.m-pattern-box th.title {
-  font-weight: normal;
-  background-color: #f1f1f1;
-  color: #5f6164;
-  border-bottom: 1px solid #d5d5d5;
-  height: 42px;
-  padding: 0 10px 0 8px;
-  text-align: left;
   box-sizing: border-box;
+}
+
+.m-pattern-side {
+  flex: 0 0 24px;
+  width: 24px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-}
-
-.m-pattern-box .pattern-room-ico {
-  position: relative;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  display: block;
+  gap: 3px;
+  padding: 3px 0;
+  background-color: #f1f1f1;
+  border-right: 1px solid #d5d5d5;
+  box-sizing: border-box;
   overflow: hidden;
-  border-radius: 7px;
 }
 
-.m-pattern-box .pattern-room-ico img {
-  width: 100%;
-  height: 100%;
+.m-pattern-side .pattern-room-ico {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
   display: block;
   object-fit: contain;
+  border-radius: 4px;
 }
 
-.m-pattern-box .pattern-title-text {
+.m-pattern-side .pattern-title-text {
   flex: 1 1 auto;
-  min-width: 0;
-  font-size: 13px;
+  min-height: 0;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: 11px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+html[lang="en"] .m-pattern-side .pattern-title-text {
+  text-orientation: mixed;
 }
 
 .mk-p { color: #1265cd; font-weight: 800; }
 .mk-b { color: #cd1212; font-weight: 800; }
 
-.m-pattern-box .pattern-body-cell {
-  border-top: 1px solid #d5d5d5;
-  height: 168px;
-  vertical-align: top;
-  padding: 0;
+.m-pattern-box .content {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+  box-sizing: border-box;
 }
 
-.m-pattern-box .content {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  height: 168px;
-  min-height: 0;
-  box-sizing: border-box;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
+.m-pattern-box .content::-webkit-scrollbar {
+  display: none;
 }
 
 .patternTable {
@@ -418,8 +413,6 @@ body.m-has-nav {
 .patternTable.roadTable {
   border: none;
   margin-left: auto;
-  transform: scale(0.86);
-  transform-origin: top right;
 }
 
 .patternTable .innerTable {
@@ -435,12 +428,22 @@ body.m-has-nav {
   border-bottom: 1px solid #9b9b9b;
 }
 
-.patternTable .innerTable td,
-.patternTable.roadTable td {
+.patternTable .innerTable td {
   width: 24px;
   height: 24px;
   min-width: 24px;
   max-width: 24px;
+}
+
+.patternTable.roadTable td {
+  width: var(--pat-cell, 22px);
+  height: var(--pat-cell, 22px);
+  min-width: var(--pat-cell, 22px);
+  max-width: var(--pat-cell, 22px);
+}
+
+.patternTable .innerTable td,
+.patternTable.roadTable td {
   border-top: 1px solid #e4e4e4;
   border-right: 1px solid #e4e4e4;
   text-align: center;
@@ -490,6 +493,19 @@ body.m-has-nav {
   text-align: center;
   font-size: 9px;
   margin: 0 auto;
+}
+
+.patternTable.roadTable td .odd,
+.patternTable.roadTable td .under,
+.patternTable.roadTable td .even,
+.patternTable.roadTable td .over {
+  width: var(--pat-ball, 18px);
+  height: var(--pat-ball, 18px);
+  line-height: var(--pat-ball, 18px);
+  border-radius: 50%;
+  font-size: var(--pat-font, 9px);
+  letter-spacing: -0.3px;
+  overflow: hidden;
 }
 
 /* Placeholder pages */
@@ -670,28 +686,23 @@ html[lang="en"] .m-nav-label {
   padding: 32px 16px;
 }
 
-.m-pattern-page {
-  overflow-x: hidden;
-  overflow-y: auto;
-  touch-action: pan-y;
-  height: 100%;
-  padding: 8px 8px 12px;
+.m-app-main:has(#pagePattern:not([hidden])) {
+  overflow: hidden;
+}
+
+.m-pattern-page:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: 4px 6px;
   box-sizing: border-box;
 }
 
 .m-pattern-page .m-pattern-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.m-pattern-page .content {
-  overflow: hidden;
-  max-width: 100%;
-}
-
-.m-pattern-page .content table {
-  transform-origin: top left;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .m-hist {

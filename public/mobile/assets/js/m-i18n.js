@@ -26,7 +26,7 @@
         roundPrefix: '제',
         roundSuffix: '회',
         ownerPickTab: '개봉기록',
-        patternTitleSuffix: '패턴 분석',
+        patternTitleSuffix: '패턴분석',
         room1Title: '제1번방',
         room2Title: '제2번방',
         room3Title: '제3번방',
@@ -692,8 +692,8 @@
   function formatPatternTitleHtml(roomN) {
     var room = t('room' + roomN + 'Title') || ('#' + roomN);
     var suffix = t('patternTitleSuffix');
-    return room + ' <span class="mk-p">' + t('markP') + '</span>/<span class="mk-b">' + t('markB') + '</span>'
-      + (suffix ? ' ' + suffix : '');
+    if (!suffix) return room;
+    return room + (pack().htmlLang === 'en' ? ' ' : '') + suffix;
   }
 
   function applyStatic(root) {

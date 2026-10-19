@@ -452,6 +452,17 @@ function streak_summary($arr)
 }
 
 /**
+ * Optional road grid size for pattern endpoints: rows (3-12, default 7), cols (10-400, default 30).
+ * @return int[] [rows, cols]
+ */
+function pbg_pattern_grid_args()
+{
+    $rows = isset($_GET['rows']) ? (int)$_GET['rows'] : 7;
+    $cols = isset($_GET['cols']) ? (int)$_GET['cols'] : 30;
+    return [max(3, min(12, $rows)), max(10, min(400, $cols))];
+}
+
+/**
  * Powerball odd/even pattern HTML (always-on under mini view).
  * Query: date=Y-m-d (game day), mode='' (day) | latestLog, roundCnt, lang
  */
@@ -468,7 +479,8 @@ function api_pattern_pb_oddeven()
     if ($lang !== 'ko' && $lang !== 'zh' && $lang !== 'en') {
         $lang = 'ko';
     }
-    $html = pbg_build_powerball_odd_even_pattern_html($date, $mode, $roundCnt, $lang);
+    list($gridRows, $gridCols) = pbg_pattern_grid_args();
+    $html = pbg_build_powerball_odd_even_pattern_html($date, $mode, $roundCnt, $lang, $gridRows, $gridCols);
     pbg_json([
         'status' => 'success',
         'content' => $html,
@@ -499,7 +511,8 @@ function api_pattern_pb_underover()
     if ($lang !== 'ko' && $lang !== 'zh' && $lang !== 'en') {
         $lang = 'ko';
     }
-    $html = pbg_build_powerball_under_over_pattern_html($date, $mode, $roundCnt, $lang);
+    list($gridRows, $gridCols) = pbg_pattern_grid_args();
+    $html = pbg_build_powerball_under_over_pattern_html($date, $mode, $roundCnt, $lang, $gridRows, $gridCols);
     pbg_json([
         'status' => 'success',
         'content' => $html,
@@ -529,7 +542,8 @@ function api_pattern_sum_oddeven()
     if ($lang !== 'ko' && $lang !== 'zh' && $lang !== 'en') {
         $lang = 'ko';
     }
-    $html = pbg_build_number_sum_odd_even_pattern_html($date, $mode, $roundCnt, $lang);
+    list($gridRows, $gridCols) = pbg_pattern_grid_args();
+    $html = pbg_build_number_sum_odd_even_pattern_html($date, $mode, $roundCnt, $lang, $gridRows, $gridCols);
     pbg_json([
         'status' => 'success',
         'content' => $html,
@@ -559,7 +573,8 @@ function api_pattern_sum_underover()
     if ($lang !== 'ko' && $lang !== 'zh' && $lang !== 'en') {
         $lang = 'ko';
     }
-    $html = pbg_build_number_sum_under_over_pattern_html($date, $mode, $roundCnt, $lang);
+    list($gridRows, $gridCols) = pbg_pattern_grid_args();
+    $html = pbg_build_number_sum_under_over_pattern_html($date, $mode, $roundCnt, $lang, $gridRows, $gridCols);
     pbg_json([
         'status' => 'success',
         'content' => $html,

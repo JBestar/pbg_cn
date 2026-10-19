@@ -820,8 +820,8 @@ function pbg_game_day_window($ymd)
 }
 
 /**
- * Baccarat big-road pattern: fixed 7 rows, bend right on collision / overflow.
- * Newest columns kept when clipping to $maxCols (no horizontal scroll).
+ * Baccarat big-road pattern: $maxRows rows (cabinet 7, mobile 6), bend right on collision / overflow.
+ * Newest columns kept when clipping to $maxCols.
  *
  * @param array $groups [[type, [rounds...]], ...] chronological
  * @param string $emptyLabel
@@ -929,7 +929,7 @@ function pbg_build_baccarat_road_table(array $groups, $emptyLabel = '', $maxRows
  * @param array $groups
  * @param string $lang ko|zh|en
  */
-function pbg_build_odd_even_pattern_table(array $groups, $lang = 'ko')
+function pbg_build_odd_even_pattern_table(array $groups, $lang = 'ko', $maxRows = 7, $maxCols = 30)
 {
     $oddEven = [
         'ko' => ['empty' => '패턴 데이터 없음'],
@@ -939,7 +939,7 @@ function pbg_build_odd_even_pattern_table(array $groups, $lang = 'ko')
     if (!isset($oddEven[$lang])) {
         $lang = 'ko';
     }
-    return pbg_build_baccarat_road_table($groups, $oddEven[$lang]['empty'], 7, 30);
+    return pbg_build_baccarat_road_table($groups, $oddEven[$lang]['empty'], $maxRows, $maxCols);
 }
 
 /**
@@ -949,7 +949,7 @@ function pbg_build_odd_even_pattern_table(array $groups, $lang = 'ko')
  * @param int $roundCnt
  * @param string $lang ko|zh|en
  */
-function pbg_build_powerball_odd_even_pattern_html($date = '', $mode = '', $roundCnt = 300, $lang = 'ko')
+function pbg_build_powerball_odd_even_pattern_html($date = '', $mode = '', $roundCnt = 300, $lang = 'ko', $maxRows = 7, $maxCols = 30)
 {
     if (!$date || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
         $date = date('Y-m-d');
@@ -991,7 +991,7 @@ function pbg_build_powerball_odd_even_pattern_html($date = '', $mode = '', $roun
             $groups[] = [$type, [$round]];
         }
     }
-    return pbg_build_odd_even_pattern_table($groups, $lang);
+    return pbg_build_odd_even_pattern_table($groups, $lang, $maxRows, $maxCols);
 }
 
 /**
@@ -999,7 +999,7 @@ function pbg_build_powerball_odd_even_pattern_html($date = '', $mode = '', $roun
  * @param array $groups
  * @param string $lang ko|zh|en
  */
-function pbg_build_under_over_pattern_table(array $groups, $lang = 'ko')
+function pbg_build_under_over_pattern_table(array $groups, $lang = 'ko', $maxRows = 7, $maxCols = 30)
 {
     $uo = [
         'ko' => ['empty' => '패턴 데이터 없음'],
@@ -1009,13 +1009,13 @@ function pbg_build_under_over_pattern_table(array $groups, $lang = 'ko')
     if (!isset($uo[$lang])) {
         $lang = 'ko';
     }
-    return pbg_build_baccarat_road_table($groups, $uo[$lang]['empty'], 7, 30);
+    return pbg_build_baccarat_road_table($groups, $uo[$lang]['empty'], $maxRows, $maxCols);
 }
 
 /**
  * Build powerball under/over pattern from draw_results (pb <= 4 under, else over).
  */
-function pbg_build_powerball_under_over_pattern_html($date = '', $mode = '', $roundCnt = 300, $lang = 'ko')
+function pbg_build_powerball_under_over_pattern_html($date = '', $mode = '', $roundCnt = 300, $lang = 'ko', $maxRows = 7, $maxCols = 30)
 {
     if (!$date || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
         $date = date('Y-m-d');
@@ -1057,7 +1057,7 @@ function pbg_build_powerball_under_over_pattern_html($date = '', $mode = '', $ro
             $groups[] = [$type, [$round]];
         }
     }
-    return pbg_build_under_over_pattern_table($groups, $lang);
+    return pbg_build_under_over_pattern_table($groups, $lang, $maxRows, $maxCols);
 }
 
 /**
@@ -1099,7 +1099,7 @@ function pbg_pattern_fetch_draws($date = '', $mode = '', $roundCnt = 300)
 /**
  * Number-sum (일반볼) odd/even pattern — ball_sum % 2.
  */
-function pbg_build_number_sum_odd_even_pattern_html($date = '', $mode = '', $roundCnt = 300, $lang = 'ko')
+function pbg_build_number_sum_odd_even_pattern_html($date = '', $mode = '', $roundCnt = 300, $lang = 'ko', $maxRows = 7, $maxCols = 30)
 {
     $rows = pbg_pattern_fetch_draws($date, $mode, $roundCnt);
     $groups = [];
@@ -1113,13 +1113,13 @@ function pbg_build_number_sum_odd_even_pattern_html($date = '', $mode = '', $rou
             $groups[] = [$type, [$round]];
         }
     }
-    return pbg_build_odd_even_pattern_table($groups, $lang);
+    return pbg_build_odd_even_pattern_table($groups, $lang, $maxRows, $maxCols);
 }
 
 /**
  * Number-sum (일반볼) under/over pattern — sum <= 72 under, else over.
  */
-function pbg_build_number_sum_under_over_pattern_html($date = '', $mode = '', $roundCnt = 300, $lang = 'ko')
+function pbg_build_number_sum_under_over_pattern_html($date = '', $mode = '', $roundCnt = 300, $lang = 'ko', $maxRows = 7, $maxCols = 30)
 {
     $rows = pbg_pattern_fetch_draws($date, $mode, $roundCnt);
     $groups = [];
@@ -1133,5 +1133,5 @@ function pbg_build_number_sum_under_over_pattern_html($date = '', $mode = '', $r
             $groups[] = [$type, [$round]];
         }
     }
-    return pbg_build_under_over_pattern_table($groups, $lang);
+    return pbg_build_under_over_pattern_table($groups, $lang, $maxRows, $maxCols);
 }
