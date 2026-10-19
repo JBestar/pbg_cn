@@ -746,7 +746,11 @@
     }
   }
 
-  function renderBetsLiveTable(rows) {
+  /** opts.cancelRound: waiting slips of this round get a 취소 button instead of the 대기 badge (0 = none). */
+  function renderBetsLiveTable(rows, opts) {
+    opts = opts || {};
+    var cancelRound = parseInt(opts.cancelRound, 10) || 0;
+    var busyId = parseInt(opts.busyId, 10) || 0;
     var html = ''
       + '<div class="m-bets-table-wrap"><table class="m-bets-table"><thead><tr>'
       + '<th>' + esc(I18N().t('mgmtBetColRound')) + '</th>'
@@ -774,12 +778,21 @@
         }
         var trCls = stripeDark ? 'm-bets-row--dark' : 'm-bets-row--light';
         if (prevRound != null && prevRound !== round) trCls += ' m-bets-sep';
+        var betId = parseInt(r.id, 10) || 0;
+        var resultHtml;
+        if (cancelRound && round === cancelRound && parseInt(r.state, 10) === 1 && betId) {
+          resultHtml = '<button type="button" class="m-bets-badge m-bets-cancel" data-bet-id="' + betId + '"'
+            + (busyId === betId ? ' disabled' : '') + '>'
+            + esc(I18N().t('histCancel')) + '</button>';
+        } else {
+          resultHtml = '<span class="m-bets-badge ' + st.cls + '">' + esc(I18N().t(st.key) || '-') + '</span>';
+        }
         html += '<tr class="' + trCls + '">'
           + '<td class="m-bets-round" data-round="' + round + '">' + esc(roundTxt) + '</td>'
           + '<td class="m-bets-pick">' + betsLivePickHtml(r) + '</td>'
           + '<td class="m-bets-amt">' + esc(fmtMoney(r.amount)) + '</td>'
           + '<td class="m-bets-win">' + esc(fmtMoney(winAmt)) + '</td>'
-          + '<td><span class="m-bets-badge ' + st.cls + '">' + esc(I18N().t(st.key) || '-') + '</span></td>'
+          + '<td>' + resultHtml + '</td>'
           + '</tr>';
         prevRound = round;
       }
@@ -1402,6 +1415,7 @@
     show: show,
     applyI18n: applyI18n,
     stopLive: stopBetsLivePoll,
+    betsLiveTableHtml: renderBetsLiveTable,
     onToast: function (fn) { hooks.toast = fn; },
     onApi: function (fn) { hooks.api = fn; },
     onLogout: function (fn) { hooks.logout = fn; },

@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="assets/css/mobile.css?v=3" />
   <link rel="stylesheet" href="assets/css/m-home.css?v=13" />
   <link rel="stylesheet" href="assets/css/m-bet.css?v=30" />
-  <link rel="stylesheet" href="assets/css/m-mgmt.css?v=30" />
+  <link rel="stylesheet" href="assets/css/m-mgmt.css?v=34" />
 </head>
 <body>
   <div class="m-screen" id="loginShell">
@@ -167,12 +167,13 @@
       </section>
 
       <section class="m-page" id="pageHist" hidden>
-        <div class="m-hist">
-          <header class="m-hist-bar">
-            <h2 class="m-hist-title" data-i18n="histTitle">배팅기록</h2>
-            <button type="button" class="m-hist-cancel" id="histCancelBtn" data-i18n="histCancel">취소</button>
+        <div class="m-charge-page m-bets-page">
+          <header class="m-charge-page-h">
+            <button type="button" class="m-charge-page-back" id="histPageBack" aria-label="Back">←</button>
+            <h2 class="m-charge-page-title" data-i18n="histTitle">배팅기록</h2>
+            <button type="button" class="m-charge-page-close" id="histPageClose" aria-label="Close">×</button>
           </header>
-          <div id="histBody">
+          <div class="m-charge-page-b" id="histBody">
             <p class="m-mgmt-loading" data-i18n="mgmtLoading">불러오는 중…</p>
           </div>
         </div>
@@ -604,12 +605,12 @@
 
   <div class="m-toast" id="mToast" hidden role="status" aria-live="polite"></div>
 
-  <script src="assets/js/m-i18n.js?v=21"></script>
+  <script src="assets/js/m-i18n.js?v=22"></script>
   <script src="assets/js/m-draws.js?v=2"></script>
   <script src="assets/js/m-nav.js?v=3"></script>
   <script src="assets/js/m-bet.js?v=17"></script>
-  <script src="assets/js/m-hist.js?v=2"></script>
-  <script src="assets/js/m-mgmt.js?v=19"></script>
-  <script src="assets/js/m-app.js?v=26"></script>
+  <script src="assets/js/m-hist.js?v=4"></script>
+  <script src="assets/js/m-mgmt.js?v=20"></script>
+  <script src="assets/js/m-app.js?v=27"></script>
 </body>
 </html>

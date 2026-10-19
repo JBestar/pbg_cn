@@ -1,25 +1,31 @@
 /**
- * Betting history: current-round slips plus settled hit/miss, cancel before close.
+ * Betting history: the commit-era live bet list (5s refresh), with a per-slip
+ * cancel button on waiting bets of the open round until betting closes.
  */
 (function () {
   'use strict';
 
+  var POLL_MS = 5000;
+
   var state = {
     rows: [],
+    loaded: false,
     canBet: true,
-    busy: false,
-    loading: false,
+    round: 0,
+    busyId: 0,
     seq: 0,
+    timer: null,
   };
 
   var hooks = {
     api: null,
     toast: null,
     onBalance: null,
+    close: null,
   };
 
   function I18N() { return window.PBGM_I18N; }
-  function Bet() { return window.PBGM_Bet; }
+  function Mgmt() { return window.PBGM_Mgmt; }
   function $(id) { return document.getElementById(id); }
 
   function esc(s) {
@@ -30,142 +36,144 @@
       .replace(/"/g, '&quot;');
   }
 
-  function fmtMoney(n) {
-    var lang = I18N().getLang();
-    var loc = lang === 'zh' ? 'zh-CN' : (lang === 'en' ? 'en-US' : 'ko-KR');
-    return (Number(n) || 0).toLocaleString(loc, { maximumFractionDigits: 0 }) + 'u';
-  }
-
   function toast(msg) {
     if (typeof hooks.toast === 'function') hooks.toast(msg);
   }
 
-  function laneOf(mode) {
-    mode = mode | 0;
-    if (mode >= 9 && mode <= 16) return 'nb';
-    return 'pb';
-  }
-
-  function pickText(row) {
-    var bet = Bet();
-    if (bet && typeof bet.labelFor === 'function') {
-      var label = bet.labelFor(row.mode);
-      if (label) return label;
-    }
-    return row.label || '';
-  }
-
-  function stateMeta(st) {
-    if (st === 3) return { cls: 'is-hit', key: 'mgmtBetHit' };
-    if (st === 2) return { cls: 'is-miss', key: 'mgmtBetMiss' };
-    if (st === 4) return { cls: 'is-cancel', key: 'mgmtStateCancel' };
-    return { cls: 'is-wait', key: 'mgmtStateWait' };
+  function isVisible() {
+    var page = $('pageHist');
+    return !!page && !page.hidden;
   }
 
   function render() {
     var body = $('histBody');
-    var btn = $('histCancelBtn');
-    if (btn) {
-      btn.hidden = !state.canBet;
-      btn.disabled = state.busy;
-    }
-    if (!body || state.loading) return;
-    var rows = state.rows || [];
-    if (!rows.length) {
-      body.innerHTML = '<p class="m-hist-empty">' + esc(I18N().t('mgmtHistEmpty')) + '</p>';
-      return;
-    }
-    var html = '';
-    var lastRound = null;
-    rows.forEach(function (r) {
-      if (r.round !== lastRound) {
-        if (lastRound != null) html += '</section>';
-        lastRound = r.round;
-        var title = I18N().formatRoundWithDay(r.round, true);
-        html += '<section class="m-hist-round"><h3 class="m-hist-round-h">' + esc(title) + '</h3>';
-      }
-      var lane = laneOf(r.mode);
-      var meta = stateMeta(r.state | 0);
-      html += '<div class="m-hist-row">'
-        + '<span class="m-hist-pick is-' + lane + '">' + esc(pickText(r)) + '</span>'
-        + '<span class="m-hist-amt">' + esc(fmtMoney(r.amount)) + '</span>'
-        + '<span class="m-hist-st ' + meta.cls + '">' + esc(I18N().t(meta.key)) + '</span>'
-        + '</div>';
+    if (!body || !state.loaded) return;
+    var mgmt = Mgmt();
+    if (!mgmt || typeof mgmt.betsLiveTableHtml !== 'function') return;
+    body.innerHTML = mgmt.betsLiveTableHtml(state.rows, {
+      cancelRound: state.canBet ? state.round : 0,
+      busyId: state.busyId,
     });
-    if (lastRound != null) html += '</section>';
-    body.innerHTML = html;
   }
 
-  function load() {
+  function load(silent) {
     var body = $('histBody');
     if (!body) return;
+    if (!silent) {
+      state.loaded = false;
+      body.innerHTML = '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>';
+    }
     if (typeof hooks.api !== 'function') {
+      state.rows = [];
+      state.loaded = true;
       render();
       return;
     }
     var seq = ++state.seq;
-    state.loading = true;
-    body.innerHTML = '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>';
-    hooks.api('history', { qs: '&limit=80' }).then(function (r) {
+    hooks.api('history', { qs: '&limit=50&hide_cancel=1' }).then(function (r) {
       if (seq !== state.seq) return;
-      state.loading = false;
       var json = (r && r.json) || {};
-      state.rows = (json.status === 'success' && Array.isArray(json.data)) ? json.data : [];
+      var rows = (json.status === 'success' && Array.isArray(json.data)) ? json.data : [];
+      state.rows = rows.filter(function (r) { return parseInt(r && r.state, 10) !== 4; });
+      state.loaded = true;
       render();
     }, function () {
-      if (seq !== state.seq) return;
-      state.loading = false;
+      if (seq !== state.seq || silent) return;
       state.rows = [];
-      body.innerHTML = '<p class="m-hist-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+      state.loaded = true;
+      render();
     });
   }
 
-  function cancelOpen() {
-    if (state.busy || !state.canBet) return;
+  function stopPoll() {
+    if (state.timer) {
+      clearInterval(state.timer);
+      state.timer = null;
+    }
+  }
+
+  function startPoll() {
+    stopPoll();
+    state.timer = setInterval(function () {
+      if (!isVisible()) {
+        stopPoll();
+        return;
+      }
+      if (!state.busyId) load(true);
+    }, POLL_MS);
+  }
+
+  function cancelOne(betId) {
+    if (!betId || state.busyId || !state.canBet) return;
     if (typeof hooks.api !== 'function') return;
-    state.busy = true;
+    state.busyId = betId;
     render();
-    hooks.api('cancel', { body: {} }).then(function (r) {
-      state.busy = false;
+    hooks.api('cancel', { body: { bet_id: betId } }).then(function (r) {
+      state.busyId = 0;
       var json = (r && r.json) || {};
       if (json.status !== 'success') {
         var code = json.code || '';
         toast((code && I18N().msg(code)) || json.message || I18N().t('histCancelFail'));
-        render();
+        load(true);
         return;
       }
       var d = json.data || {};
       if (typeof hooks.onBalance === 'function') {
         hooks.onBalance({ balance: d.balance, point: d.point });
       }
-      toast(I18N().msg('cancelOk') || I18N().t('histCancelOk'));
-      load();
+      toast(I18N().t('histCancelOneOk'));
+      load(true);
     }, function () {
-      state.busy = false;
+      state.busyId = 0;
       toast(I18N().t('histCancelFail'));
       render();
     });
   }
 
+  function close() {
+    stopPoll();
+    if (typeof hooks.close === 'function') hooks.close();
+  }
+
   function bind() {
-    var btn = $('histCancelBtn');
-    if (btn && btn.dataset.bound !== '1') {
-      btn.dataset.bound = '1';
-      btn.addEventListener('click', cancelOpen);
+    var body = $('histBody');
+    if (body && body.dataset.bound !== '1') {
+      body.dataset.bound = '1';
+      body.addEventListener('click', function (ev) {
+        var btn = ev.target.closest ? ev.target.closest('.m-bets-cancel') : null;
+        if (!btn || btn.disabled) return;
+        cancelOne(parseInt(btn.getAttribute('data-bet-id'), 10) || 0);
+      });
     }
+    ['histPageBack', 'histPageClose'].forEach(function (id) {
+      var el = $(id);
+      if (el && el.dataset.bound !== '1') {
+        el.dataset.bound = '1';
+        el.addEventListener('click', close);
+      }
+    });
   }
 
   window.PBGM_Hist = {
     bind: bind,
-    show: function () { load(); },
+    show: function () {
+      load(false);
+      startPoll();
+    },
+    refresh: function () { load(true); },
     sync: function (payload) {
       payload = payload || {};
-      if (payload.canBet != null) state.canBet = !!payload.canBet;
+      var canBet = payload.canBet != null ? !!payload.canBet : state.canBet;
+      var round = payload.round != null ? (parseInt(payload.round, 10) || 0) : state.round;
+      if (canBet === state.canBet && round === state.round) return;
+      state.canBet = canBet;
+      state.round = round;
       render();
     },
     applyI18n: function () { render(); },
     onApi: function (fn) { hooks.api = fn; },
     onToast: function (fn) { hooks.toast = fn; },
     onBalance: function (fn) { hooks.onBalance = fn; },
+    onClose: function (fn) { hooks.close = fn; },
   };
 })();

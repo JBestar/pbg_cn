@@ -302,6 +302,8 @@ function api_history()
         $sql .= ' AND state=?';
         $types .= 'i';
         $args[] = $betState;
+    } elseif (!empty($_GET['hide_cancel'])) {
+        $sql .= ' AND state<>4';
     }
     if ($date !== '') {
         $from = $date . ' 00:00:00';
@@ -745,6 +747,17 @@ function api_cancel()
     }
     $auth = pbg_auth_member(true);
     $member = $auth['member'];
+    $body = pbg_body();
+    // bet_id: cancel one slip, only while its round is still open for betting
+    $betId = isset($body['bet_id']) ? (int)$body['bet_id'] : 0;
+    $openRound = 0;
+    if ($betId > 0) {
+        $roundInfo = pbg_current_round_info();
+        if (!$roundInfo['can_bet']) {
+            pbg_json(['status' => 'fail', 'code' => 'CLOSED', 'message' => '当前期已封盘']);
+        }
+        $openRound = (int)$roundInfo['round'];
+    }
 
     pbg_settle_pending();
 
@@ -756,8 +769,13 @@ function api_cancel()
         $fid = (int)$member['mb_fid'];
         $mbUid = $member['mb_uid'];
         $empFid = (int)$member['mb_emp_fid'];
-        $stmt = pbg_prepare($db, 'SELECT * FROM bets WHERE mb_fid=? AND state=1 ORDER BY id DESC');
-        $stmt->bind_param('i', $fid);
+        if ($betId > 0) {
+            $stmt = pbg_prepare($db, 'SELECT * FROM bets WHERE mb_fid=? AND state=1 AND id=? AND round=?');
+            $stmt->bind_param('iii', $fid, $betId, $openRound);
+        } else {
+            $stmt = pbg_prepare($db, 'SELECT * FROM bets WHERE mb_fid=? AND state=1 ORDER BY id DESC');
+            $stmt->bind_param('i', $fid);
+        }
         $stmt->execute();
         $pending = pbg_stmt_fetch_all($stmt);
         $stmt->close();

@@ -760,6 +760,60 @@
   vertical-align: middle;
 }
 
+/* 배팅기록: the table box fills the space between the title bar and the bottom nav; rows scroll inside it */
+.m-app-main:has(#pageHist:not([hidden])) {
+  overflow: hidden;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+#pageHist:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#pageHist .m-charge-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+#pageHist .m-charge-page-b {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 4px;
+}
+
+#pageHist .m-bets-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+}
+
+/* 배팅기록: 회차·배팅금·당첨금·결과 stay on one line; only 선택 takes the spare width and may wrap */
+#pageHist .m-bets-table td {
+  white-space: nowrap;
+}
+
+#pageHist .m-bets-table td.m-bets-pick {
+  width: 100%;
+  max-width: none;
+  white-space: normal;
+  word-break: keep-all;
+}
+
+#pageHist .m-bets-pick-inner {
+  row-gap: 3px;
+}
+
+#pageHist .m-bets-badge {
+  white-space: nowrap;
+}
+
 .m-bets-mark {
   display: inline-flex;
   align-items: center;
@@ -836,6 +890,26 @@
 
 .m-bets-badge.is-cancel {
   background: #8a8a8a;
+}
+
+.m-bets-cancel {
+  border: 0;
+  margin: 0;
+  font-family: inherit;
+  background: linear-gradient(180deg, #ffb347 0%, #f07a12 100%);
+  box-shadow: 0 2px 0 #9a4a06;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.m-bets-cancel:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #9a4a06;
+}
+
+.m-bets-cancel:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .m-bets-roll {

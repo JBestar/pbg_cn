@@ -265,7 +265,7 @@
       member: state.member,
       lastDraw: (Draws && typeof Draws.getLatest === 'function') ? Draws.getLatest() : null,
     });
-    if (Hist && typeof Hist.sync === 'function') Hist.sync({ canBet: state.canBet });
+    if (Hist && typeof Hist.sync === 'function') Hist.sync({ canBet: state.canBet, round: state.round });
   }
 
   /* ---------- home data ---------- */
@@ -721,8 +721,8 @@
           if (d.round_total != null && betRound === state.round) {
             state.roundTotal = Number(d.round_total) || 0;
           }
-          if (Hist && typeof Hist.show === 'function' && $('pageHist') && !$('pageHist').hidden) {
-            Hist.show();
+          if (Hist && typeof Hist.refresh === 'function' && $('pageHist') && !$('pageHist').hidden) {
+            Hist.refresh();
           }
           return {
             ok: true,
@@ -748,6 +748,10 @@
         if (bal.balance != null) state.member.balance = bal.balance;
         if (bal.point != null) state.member.point = bal.point;
         updateHeaderUser({ member: state.member });
+      });
+      Hist.onClose(function () {
+        var betBtn = document.querySelector('.m-nav-item[data-nav="bet"]');
+        if (betBtn) betBtn.click();
       });
     }
 
@@ -788,7 +792,7 @@
       }
       if (page === 'pattern') layoutPatterns();
       if (page === 'hist' && Hist) {
-        Hist.sync({ canBet: state.canBet });
+        Hist.sync({ canBet: state.canBet, round: state.round });
         Hist.show();
       }
       if (page === 'mgmt' && Mgmt && typeof Mgmt.show === 'function') {
