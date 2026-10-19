@@ -6,13 +6,14 @@
   'use strict';
 
   var ITEMS = [
-    { id: 'home', i18n: 'navHome', page: 'home' },
+    { id: 'manual', i18n: 'navManual', page: 'manual' },
+    { id: 'pattern', i18n: 'navPattern', page: 'pattern' },
     { id: 'bet', i18n: 'navBet', page: 'bet' },
+    { id: 'hist', i18n: 'navHist', page: 'hist' },
     { id: 'mgmt', i18n: 'navMgmt', page: 'mgmt' },
-    { id: 'logout', i18n: 'navLogout', page: null, action: 'logout' },
   ];
 
-  var activeId = 'home';
+  var activeId = 'bet';
   var handlers = { page: null, logout: null };
 
   function $(sel, root) {

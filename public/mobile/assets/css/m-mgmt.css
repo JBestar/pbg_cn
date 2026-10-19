@@ -132,8 +132,8 @@
 }
 
 .m-mgmt-ico {
-  width: 54px;
-  height: 54px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -146,8 +146,8 @@
 }
 
 .m-mgmt-ico svg {
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
 }
 
 .m-mgmt-ico--charge {
@@ -252,7 +252,7 @@
 .m-mgmt-label {
   display: inline-block;
   max-width: 100%;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 800;
   text-align: center;
   line-height: 1.3;
@@ -1041,6 +1041,8 @@
 }
 .m-notice-row {
   cursor: pointer;
+  position: relative;
+  z-index: 1;
   -webkit-tap-highlight-color: transparent;
 }
 .m-notice-row td.m-notice-title {
@@ -1087,7 +1089,7 @@
   .m-mgmt-grid { gap: 18px 4px; max-width: 340px; }
   .m-mgmt-ico { width: 46px; height: 46px; }
   .m-mgmt-ico svg { width: 22px; height: 22px; }
-  .m-mgmt-label { font-size: 10px; }
+  .m-mgmt-label { font-size: 13px; }
   .m-mgmt-avatar { width: 46px; height: 46px; }
   .m-charge-presets { grid-template-columns: repeat(4, 1fr); }
   .m-charge-row { grid-template-columns: 68px minmax(0, 1fr); }

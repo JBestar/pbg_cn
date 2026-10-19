@@ -8,9 +8,9 @@
   <title>파워볼 모바일</title>
   <link rel="preload" as="image" href="assets/img/login-bg.jpg?v=1" />
   <link rel="stylesheet" href="assets/css/mobile.css?v=3" />
-  <link rel="stylesheet" href="assets/css/m-home.css?v=5" />
-  <link rel="stylesheet" href="assets/css/m-bet.css?v=12" />
-  <link rel="stylesheet" href="assets/css/m-mgmt.css?v=28" />
+  <link rel="stylesheet" href="assets/css/m-home.css?v=10" />
+  <link rel="stylesheet" href="assets/css/m-bet.css?v=30" />
+  <link rel="stylesheet" href="assets/css/m-mgmt.css?v=30" />
 </head>
 <body>
   <div class="m-screen" id="loginShell">
@@ -72,6 +72,9 @@
 
   <!-- Logged-in app shell (separate from login background) -->
   <div class="m-screen m-screen--app" id="appShell" hidden>
+    <div class="m-ticker" id="mTicker" hidden>
+      <div class="m-ticker-track" id="mTickerTrack"><span id="mTickerA"></span><span id="mTickerB"></span></div>
+    </div>
     <div class="m-app-main" id="appMain">
 
       <section class="m-page" id="pageHome">
@@ -97,6 +100,18 @@
           <span class="m-chip"><span data-i18n="point">포인트</span> <span id="headerPoint">0</span></span>
         </div>
 
+        <div class="m-info">
+          <section class="m-panel">
+            <div class="m-panel-head" data-i18n="ownerPickTab">개봉기록</div>
+            <div class="m-draw-scroll">
+              <ul class="m-draw-list" id="mDrawList"></ul>
+            </div>
+          </section>
+
+        </div>
+      </section>
+
+      <section class="m-page" id="pageManual" hidden>
         <div class="m-mini" id="miniWrap">
           <div class="m-mini-scale" id="miniScale">
             <iframe
@@ -112,76 +127,76 @@
             ></iframe>
           </div>
         </div>
+        <div class="m-placeholder m-manual">
+          <h2 data-i18n="navManual">설명서</h2>
+          <p data-i18n="manualSoon">설명서는 준비되는 대로 제공됩니다.</p>
+        </div>
+      </section>
 
-        <div class="m-info">
-          <section class="m-panel">
-            <div class="m-panel-head" data-i18n="ownerPickTab">개봉기록</div>
-            <div class="m-draw-scroll">
-              <ul class="m-draw-list" id="mDrawList"></ul>
-            </div>
-          </section>
+      <section class="m-page m-pattern-page" id="pagePattern" hidden>
+        <div class="m-pattern-stack">
+          <table class="pattern-box m-pattern-box" id="patternBox">
+            <tr>
+              <td class="pattern-body-cell">
+                <div class="content" id="patternContent"></div>
+              </td>
+            </tr>
+          </table>
+          <table class="pattern-box m-pattern-box" id="patternBoxUo">
+            <tr>
+              <td class="pattern-body-cell">
+                <div class="content" id="patternContentUo"></div>
+              </td>
+            </tr>
+          </table>
+          <table class="pattern-box m-pattern-box" id="patternBoxSumOe">
+            <tr>
+              <td class="pattern-body-cell">
+                <div class="content" id="patternContentSumOe"></div>
+              </td>
+            </tr>
+          </table>
+          <table class="pattern-box m-pattern-box" id="patternBoxSumUo">
+            <tr>
+              <td class="pattern-body-cell">
+                <div class="content" id="patternContentSumUo"></div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </section>
 
-          <div class="m-pattern-stack">
-            <table class="pattern-box m-pattern-box" id="patternBox">
-              <tr>
-                <th class="title" id="patternTitle">
-                  <span class="pattern-room-ico"><img src="assets/img/pattern/room1.png" alt="" width="34" height="34" /></span>
-                  <span class="pattern-title-text" id="patternTitleText">제1번방</span>
-                </th>
-              </tr>
-              <tr>
-                <td class="pattern-body-cell">
-                  <div class="content" id="patternContent"></div>
-                </td>
-              </tr>
-            </table>
-
-            <table class="pattern-box m-pattern-box" id="patternBoxUo">
-              <tr>
-                <th class="title" id="patternTitleUo">
-                  <span class="pattern-room-ico"><img src="assets/img/pattern/room2.png" alt="" width="34" height="34" /></span>
-                  <span class="pattern-title-text" id="patternTitleUoText">제2번방</span>
-                </th>
-              </tr>
-              <tr>
-                <td class="pattern-body-cell">
-                  <div class="content" id="patternContentUo"></div>
-                </td>
-              </tr>
-            </table>
-
-            <table class="pattern-box m-pattern-box" id="patternBoxSumOe">
-              <tr>
-                <th class="title" id="patternTitleSumOe">
-                  <span class="pattern-room-ico"><img src="assets/img/pattern/room3.png" alt="" width="34" height="34" /></span>
-                  <span class="pattern-title-text" id="patternTitleSumOeText">제3번방</span>
-                </th>
-              </tr>
-              <tr>
-                <td class="pattern-body-cell">
-                  <div class="content" id="patternContentSumOe"></div>
-                </td>
-              </tr>
-            </table>
-
-            <table class="pattern-box m-pattern-box" id="patternBoxSumUo">
-              <tr>
-                <th class="title" id="patternTitleSumUo">
-                  <span class="pattern-room-ico"><img src="assets/img/pattern/room4.png" alt="" width="34" height="34" /></span>
-                  <span class="pattern-title-text" id="patternTitleSumUoText">제4번방</span>
-                </th>
-              </tr>
-              <tr>
-                <td class="pattern-body-cell">
-                  <div class="content" id="patternContentSumUo"></div>
-                </td>
-              </tr>
-            </table>
+      <section class="m-page" id="pageHist" hidden>
+        <div class="m-hist">
+          <header class="m-hist-bar">
+            <h2 class="m-hist-title" data-i18n="histTitle">배팅기록</h2>
+            <button type="button" class="m-hist-cancel" id="histCancelBtn" data-i18n="histCancel">취소</button>
+          </header>
+          <div id="histBody">
+            <p class="m-mgmt-loading" data-i18n="mgmtLoading">불러오는 중…</p>
           </div>
         </div>
       </section>
 
       <section class="m-page" id="pageBet" hidden>
+        <div class="m-bet-veil" id="betVeil" hidden>
+          <p class="m-bet-veil-title" id="betVeilTitle" data-i18n="betVeilClosed">베팅마감</p>
+          <div class="m-bet-veil-stage" id="betVeilStage">
+            <div class="m-bet-veil-scale" id="betVeilScale">
+              <iframe
+                id="veilFrame"
+                data-i18n-title="miniTitle"
+                title="파워볼 애니메이션"
+                src="about:blank"
+                width="830"
+                height="273"
+                scrolling="no"
+                frameborder="0"
+                allowtransparency="true"
+              ></iframe>
+            </div>
+          </div>
+        </div>
         <div class="m-bet">
           <div class="m-bet-head">
             <div class="m-bet-live">
@@ -199,109 +214,92 @@
             </div>
           </div>
 
-          <section class="m-bet-sec">
-            <div class="m-bet-heads m-bet-heads--4">
-              <h3 class="m-bet-sec-h" data-i18n="room1Title">제1번방</h3>
-              <h3 class="m-bet-sec-h" data-i18n="room2Title">제2번방</h3>
-              <h3 class="m-bet-sec-h" data-i18n="room3Title">제3번방</h3>
-              <h3 class="m-bet-sec-h" data-i18n="room4Title">제4번방</h3>
-            </div>
-            <div class="m-bet-sec-b m-bet-grid-8">
-              <button type="button" class="m-bet-opt is-p" data-bet-mode="1" data-kind="p">
-                <span class="m-bet-opt-mark" data-role="mark">P</span>
+          <div class="m-bet-board">
+            <div class="m-bet-block is-pb">
+              <button type="button" class="m-bet-opt is-odd is-strong" data-bet-mode="1" data-kind="odd">
+                <span class="m-bet-opt-mark" data-role="mark">홀</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-b" data-bet-mode="2" data-kind="b">
-                <span class="m-bet-opt-mark" data-role="mark">B</span>
+              <button type="button" class="m-bet-opt is-even is-strong" data-bet-mode="2" data-kind="even">
+                <span class="m-bet-opt-mark" data-role="mark">짝</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-p" data-bet-mode="3" data-kind="p">
-                <span class="m-bet-opt-mark" data-role="mark">P</span>
+              <button type="button" class="m-bet-opt is-under is-strong" data-bet-mode="3" data-kind="under">
+                <span class="m-bet-opt-mark" data-role="mark">소</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-b" data-bet-mode="4" data-kind="b">
-                <span class="m-bet-opt-mark" data-role="mark">B</span>
+              <button type="button" class="m-bet-opt is-over is-strong" data-bet-mode="4" data-kind="over">
+                <span class="m-bet-opt-mark" data-role="mark">대</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-p" data-bet-mode="9" data-kind="p">
-                <span class="m-bet-opt-mark" data-role="mark">P</span>
+              <button type="button" class="m-bet-opt is-combo is-strong" data-bet-mode="5" data-kind="ou">
+                <span class="m-bet-opt-mark" data-role="mark">홀+소</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-b" data-bet-mode="10" data-kind="b">
-                <span class="m-bet-opt-mark" data-role="mark">B</span>
+              <button type="button" class="m-bet-opt is-combo is-strong" data-bet-mode="6" data-kind="eu">
+                <span class="m-bet-opt-mark" data-role="mark">짝+소</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-p" data-bet-mode="11" data-kind="p">
-                <span class="m-bet-opt-mark" data-role="mark">P</span>
+              <button type="button" class="m-bet-opt is-combo is-strong" data-bet-mode="7" data-kind="ob">
+                <span class="m-bet-opt-mark" data-role="mark">홀+대</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-b" data-bet-mode="12" data-kind="b">
-                <span class="m-bet-opt-mark" data-role="mark">B</span>
+              <button type="button" class="m-bet-opt is-combo is-strong" data-bet-mode="8" data-kind="eb">
+                <span class="m-bet-opt-mark" data-role="mark">짝+대</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
             </div>
-          </section>
-
-          <section class="m-bet-sec">
-            <div class="m-bet-heads m-bet-heads--2">
-              <h3 class="m-bet-sec-h" data-i18n="betRoomCombo12">제1번방 + 제2번방</h3>
-              <h3 class="m-bet-sec-h" data-i18n="betRoomCombo34">제3번방 + 제4번방</h3>
-            </div>
-            <div class="m-bet-sec-b m-bet-grid-8">
-              <button type="button" class="m-bet-opt is-combo" data-bet-mode="5" data-kind="pp">
-                <span class="m-bet-opt-mark" data-role="mark">P+P</span>
+            <div class="m-bet-block is-nb">
+              <button type="button" class="m-bet-opt is-odd is-soft" data-bet-mode="9" data-kind="odd">
+                <span class="m-bet-opt-mark" data-role="mark">홀</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-combo" data-bet-mode="7" data-kind="pb">
-                <span class="m-bet-opt-mark" data-role="mark">P+B</span>
+              <button type="button" class="m-bet-opt is-even is-soft" data-bet-mode="10" data-kind="even">
+                <span class="m-bet-opt-mark" data-role="mark">짝</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-combo" data-bet-mode="6" data-kind="bp">
-                <span class="m-bet-opt-mark" data-role="mark">B+P</span>
+              <button type="button" class="m-bet-opt is-under is-soft" data-bet-mode="11" data-kind="under">
+                <span class="m-bet-opt-mark" data-role="mark">소</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-combo" data-bet-mode="8" data-kind="bb">
-                <span class="m-bet-opt-mark" data-role="mark">B+B</span>
+              <button type="button" class="m-bet-opt is-over is-soft" data-bet-mode="12" data-kind="over">
+                <span class="m-bet-opt-mark" data-role="mark">대</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-combo" data-bet-mode="13" data-kind="pp">
-                <span class="m-bet-opt-mark" data-role="mark">P+P</span>
+              <button type="button" class="m-bet-opt is-combo is-soft" data-bet-mode="13" data-kind="ou">
+                <span class="m-bet-opt-mark" data-role="mark">홀+소</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-combo" data-bet-mode="15" data-kind="pb">
-                <span class="m-bet-opt-mark" data-role="mark">P+B</span>
+              <button type="button" class="m-bet-opt is-combo is-soft" data-bet-mode="14" data-kind="eu">
+                <span class="m-bet-opt-mark" data-role="mark">짝+소</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-combo" data-bet-mode="14" data-kind="bp">
-                <span class="m-bet-opt-mark" data-role="mark">B+P</span>
+              <button type="button" class="m-bet-opt is-combo is-soft" data-bet-mode="15" data-kind="ob">
+                <span class="m-bet-opt-mark" data-role="mark">홀+대</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
-              <button type="button" class="m-bet-opt is-combo" data-bet-mode="16" data-kind="bb">
-                <span class="m-bet-opt-mark" data-role="mark">B+B</span>
+              <button type="button" class="m-bet-opt is-combo is-soft" data-bet-mode="16" data-kind="eb">
+                <span class="m-bet-opt-mark" data-role="mark">짝+대</span>
                 <span class="m-bet-opt-odds" data-role="odds">—</span>
                 <span class="m-bet-opt-amt" data-role="amt"></span>
               </button>
             </div>
-          </section>
-
-          <section class="m-bet-sec">
-            <h3 class="m-bet-sec-h" data-i18n="betNumberGame">숫자 맞추기</h3>
-            <div class="m-bet-sec-b m-bet-grid-nums">
+            <div class="m-bet-grid-nums">
               <button type="button" class="m-bet-opt is-num" data-bet-mode="30" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">0</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
               <button type="button" class="m-bet-opt is-num" data-bet-mode="31" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">1</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
               <button type="button" class="m-bet-opt is-num" data-bet-mode="32" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">2</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
@@ -313,7 +311,7 @@
               <button type="button" class="m-bet-opt is-num" data-bet-mode="38" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">8</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
               <button type="button" class="m-bet-opt is-num" data-bet-mode="39" data-kind="num"><span class="m-bet-opt-mark" data-role="mark">9</span><span class="m-bet-opt-odds" data-role="odds">—</span><span class="m-bet-opt-amt" data-role="amt"></span></button>
             </div>
-          </section>
+          </div>
 
           <div class="m-bet-dock" id="betDock">
             <div class="m-bet-amounts">
@@ -333,10 +331,9 @@
               <span class="m-bet-wallet-item"><span data-i18n="betHoldMoney">보유머니</span>: <span class="m-bet-wallet-v" id="betUserBalance">0u</span></span>
               <span class="m-bet-wallet-item">p: <span class="m-bet-wallet-v" id="betUserPoint">0</span></span>
             </div>
-            <div class="m-bet-draft" id="betDraftBar" hidden>
-              <span class="m-bet-draft-label" id="betDraftLabel"></span>
-              <button type="button" class="m-bet-draft-btn" id="betPlaceBtn" data-i18n="betPlace">베팅하기</button>
-            </div>
+            <button type="button" class="m-bet-go" id="betPlaceBtn" data-i18n-aria="betPlace" aria-label="베팅하기">
+              <span class="m-bet-go-amt" id="betDraftLabel">0u</span>
+            </button>
           </div>
         </div>
       </section>
@@ -470,7 +467,7 @@
         <div class="m-charge-page m-bets-page">
           <header class="m-charge-page-h">
             <button type="button" class="m-charge-page-back" id="betsLivePageBack" aria-label="Back">←</button>
-            <h2 class="m-charge-page-title" data-i18n="mgmtBetsLiveTitle">베팅리스트</h2>
+            <h2 class="m-charge-page-title" data-i18n="mgmtBetsLive">하부관리</h2>
             <button type="button" class="m-charge-page-close" id="betsLivePageClose" aria-label="Close">×</button>
           </header>
           <div class="m-charge-page-b" id="betsLivePageBody">
@@ -565,32 +562,32 @@
       Labels come from PBGM_I18N (data-i18n), never from images.
     -->
     <nav class="m-nav" id="mNav" aria-label="Main" hidden>
-      <button type="button" class="m-nav-item is-active" data-nav="home" aria-current="page">
+      <button type="button" class="m-nav-item" data-nav="manual" aria-current="false">
         <span class="m-nav-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         </span>
-        <span class="m-nav-label" data-i18n="navHome">홈화면</span>
+        <span class="m-nav-label" data-i18n="navManual">설명서</span>
       </button>
-      <button type="button" class="m-nav-item" data-nav="bet" aria-current="false">
+      <button type="button" class="m-nav-item" data-nav="pattern" aria-current="false">
         <span class="m-nav-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8"/><path d="M12 18v4"/><path d="M7 9h2v4H7zM11 8h2v5h-2zM15 10h2v3h-2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         </span>
-        <span class="m-nav-label" data-i18n="navBet">베팅하기</span>
+        <span class="m-nav-label" data-i18n="navPattern">패턴</span>
       </button>
-      <div class="m-nav-center" aria-hidden="true">
-        <img class="m-nav-center-img" src="assets/img/nav/nav-center-dice.png?v=1" alt="" width="52" height="52" draggable="false" onerror="this.style.visibility='hidden'" />
-      </div>
+      <button type="button" class="m-nav-item m-nav-dice is-active" data-nav="bet" data-i18n-aria="navBet" aria-label="배팅" aria-current="page">
+        <img class="m-nav-center-img" src="assets/img/nav/nav-center-dice.png?v=1" alt="" width="52" height="52" draggable="false" />
+      </button>
+      <button type="button" class="m-nav-item" data-nav="hist" aria-current="false">
+        <span class="m-nav-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        </span>
+        <span class="m-nav-label" data-i18n="navHist">기록</span>
+      </button>
       <button type="button" class="m-nav-item" data-nav="mgmt" aria-current="false">
         <span class="m-nav-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 0-.33 1V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 0-1-.33H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 0 .33-1V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 .51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 .6 1 1.65 1.65 0 0 0 1 .33H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1 .51z"/></svg>
         </span>
-        <span class="m-nav-label" data-i18n="navMgmt">세부관리</span>
-      </button>
-      <button type="button" class="m-nav-item" data-nav="logout" aria-current="false">
-        <span class="m-nav-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </span>
-        <span class="m-nav-label" data-i18n="navLogout">나가기</span>
+        <span class="m-nav-label" data-i18n="navMgmt">설정</span>
       </button>
     </nav>
   </div>
@@ -607,11 +604,12 @@
 
   <div class="m-toast" id="mToast" hidden role="status" aria-live="polite"></div>
 
-  <script src="assets/js/m-i18n.js?v=17"></script>
+  <script src="assets/js/m-i18n.js?v=20"></script>
   <script src="assets/js/m-draws.js?v=2"></script>
-  <script src="assets/js/m-nav.js?v=2"></script>
-  <script src="assets/js/m-bet.js?v=5"></script>
-  <script src="assets/js/m-mgmt.js?v=18"></script>
-  <script src="assets/js/m-app.js?v=14"></script>
+  <script src="assets/js/m-nav.js?v=3"></script>
+  <script src="assets/js/m-bet.js?v=17"></script>
+  <script src="assets/js/m-hist.js?v=2"></script>
+  <script src="assets/js/m-mgmt.js?v=19"></script>
+  <script src="assets/js/m-app.js?v=24"></script>
 </body>
 </html>

@@ -816,15 +816,10 @@
     state.panel = 'betsLive';
     if (typeof hooks.onNavigate === 'function') hooks.onNavigate('betsLive');
     stopBetsLivePoll();
-    loadBetsLive(false);
-    state.liveTimer = setInterval(function () {
-      var page = $('pageBetsLive');
-      if (state.panel !== 'betsLive' || (page && page.hidden)) {
-        stopBetsLivePoll();
-        return;
-      }
-      loadBetsLive(true);
-    }, 5000);
+    var body = $('betsLivePageBody');
+    if (body) {
+      body.innerHTML = '<p class="m-mgmt-soon">' + esc(I18N().t('mgmtDownlineSoon')) + '</p>';
+    }
   }
 
   function closeBetsLivePage() {

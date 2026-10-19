@@ -5,6 +5,7 @@
   var Nav = window.PBGM_Nav;
   var Draws = window.PBGM_Draws;
   var Bet = window.PBGM_Bet;
+  var Hist = window.PBGM_Hist;
   var Mgmt = window.PBGM_Mgmt;
   var TOKEN_KEY = 'pbg_m_token';
   var REQUEST_TIMEOUT_MS = 10000;
@@ -145,7 +146,13 @@
 
   function showPage(name) {
     $('pageHome').hidden = name !== 'home';
+    var pageManual = $('pageManual');
+    if (pageManual) pageManual.hidden = name !== 'manual';
+    var pagePattern = $('pagePattern');
+    if (pagePattern) pagePattern.hidden = name !== 'pattern';
     $('pageBet').hidden = name !== 'bet';
+    var pageHist = $('pageHist');
+    if (pageHist) pageHist.hidden = name !== 'hist';
     $('pageMgmt').hidden = name !== 'mgmt';
     var pageCharge = $('pageCharge');
     if (pageCharge) pageCharge.hidden = name !== 'charge';
@@ -163,6 +170,9 @@
     if (pageInquiry) pageInquiry.hidden = name !== 'inquiry';
     var pageNotice = $('pageNotice');
     if (pageNotice) pageNotice.hidden = name !== 'notice';
+    if (name === 'bet' && Bet && typeof Bet.fitAmountFont === 'function') {
+      requestAnimationFrame(function () { Bet.fitAmountFont(); });
+    }
     var appMain = $('appMain');
     if (appMain) {
       var detailBg = name === 'mgmt' || name === 'charge' || name === 'exchange'
@@ -255,15 +265,60 @@
       member: state.member,
       lastDraw: (Draws && typeof Draws.getLatest === 'function') ? Draws.getLatest() : null,
     });
+    if (Hist && typeof Hist.sync === 'function') Hist.sync({ canBet: state.canBet });
   }
 
   /* ---------- home data ---------- */
 
+  function miniSrc() {
+    if (!state.powerballBase) return '';
+    return state.powerballBase.replace(/\/?$/, '/') + '?view=powerballMiniView&openMini=1';
+  }
+
   function ensureMiniFrame() {
+    var src = miniSrc();
+    if (!src) return;
     var frame = $('miniFrame');
-    if (!frame || !state.powerballBase || frame.dataset.loaded === '1') return;
-    frame.src = state.powerballBase.replace(/\/?$/, '/') + '?view=powerballMiniView&openMini=1';
-    frame.dataset.loaded = '1';
+    if (frame && frame.dataset.loaded !== '1') {
+      frame.src = src;
+      frame.dataset.loaded = '1';
+    }
+    var veil = $('veilFrame');
+    if (veil && veil.dataset.loaded !== '1') {
+      veil.src = src;
+      veil.dataset.loaded = '1';
+      scaleVeil();
+    }
+  }
+
+  function scaleVeil() {
+    var stage = $('betVeilStage');
+    var scale = $('betVeilScale');
+    if (!stage || !scale) return;
+    stage.style.width = '100%';
+    stage.style.height = '';
+    var host = document.querySelector('.m-screen--app');
+    var w = (host && host.clientWidth) || stage.clientWidth || window.innerWidth || MINI_W;
+    if (!(w > 20)) return;
+    var s = w / MINI_W;
+    scale.style.transform = 'scale(' + s + ')';
+    stage.style.height = Math.round(MINI_H * s) + 'px';
+  }
+
+  function fitPattern(content) {
+    if (!content) return;
+    var table = content.querySelector('table');
+    if (!table) return;
+    table.style.transform = '';
+    table.style.transformOrigin = 'top left';
+    content.style.height = '';
+    var pw = content.clientWidth;
+    var tw = table.scrollWidth;
+    if (pw > 0 && tw > pw + 2) {
+      var s = pw / tw;
+      table.style.transform = 'scale(' + s + ')';
+      content.style.height = Math.ceil(table.offsetHeight * s) + 'px';
+    }
   }
 
   function fillPatternContent(elId, action) {
@@ -281,6 +336,56 @@
         return;
       }
       content.innerHTML = r.json.content || '';
+      fitPattern(content);
+    });
+  }
+
+  var tickerLine = '';
+  var tickerGen = 0;
+
+  function paintTicker(text) {
+    var bar = $('mTicker');
+    var track = $('mTickerTrack');
+    var a = $('mTickerA');
+    if (!bar || !track || !a) return;
+    var gen = ++tickerGen;
+    tickerLine = text || I18N.t('tickerEmpty');
+    a.textContent = tickerLine;
+    bar.hidden = false;
+    requestAnimationFrame(function () {
+      if (gen !== tickerGen) return;
+      if (track._run) track._run.cancel();
+      var from = bar.clientWidth || bar.offsetWidth || 320;
+      var textW = a.offsetWidth || 1;
+      var glyph = textW / Math.max(Array.from(tickerLine).length, 1);
+      var pxPerMs = glyph / 280;
+      var travel = Math.max(2400, (from + textW) / pxPerMs);
+      var pause = 1000;
+      var total = travel + pause;
+      var end = travel / total;
+      track._run = track.animate([
+        { transform: 'translateX(' + from + 'px)', offset: 0 },
+        { transform: 'translateX(' + (-textW) + 'px)', offset: end },
+        { transform: 'translateX(' + (-textW) + 'px)', offset: 1 }
+      ], { duration: total, iterations: Infinity, easing: 'linear' });
+    });
+  }
+
+  function loadTicker() {
+    var bar = $('mTicker');
+    if (!bar || !state.token) return Promise.resolve();
+    paintTicker(I18N.t('tickerEmpty'));
+    return api('notice_list', { qs: '&limit=20' }).then(function (r) {
+      var rows = (r.json && r.json.status === 'success' && Array.isArray(r.json.data)) ? r.json.data : [];
+      var parts = [];
+      rows.forEach(function (n) {
+        var title = String(n.title || '').trim();
+        var body = String(n.content || '').replace(/\s+/g, ' ').trim();
+        if (title && body && body !== title) parts.push(title + ' ' + body);
+        else if (title) parts.push(title);
+        else if (body) parts.push(body);
+      });
+      paintTicker(parts.join('    ·    '));
     });
   }
 
@@ -412,9 +517,10 @@
     $('loginPwd').value = '';
     setPwdVisible(false);
     showLoginShell(false);
-    Nav.setActive('home');
-    showPage('home');
+    Nav.setActive('bet');
+    showPage('bet');
     bootHomeData();
+    loadTicker();
   }
 
   function enterLogin(err) {
@@ -433,7 +539,9 @@
     }
     setError(err || null);
     showLoginShell(true);
-    showPage('home');
+    showPage('bet');
+    var bar = $('mTicker');
+    if (bar) bar.hidden = true;
   }
 
   function forceLogoutSession(err) {
@@ -539,9 +647,11 @@
       applyPatternTitles();
       if (Draws && typeof Draws.rerender === 'function') Draws.rerender();
       if (Bet && typeof Bet.applyI18n === 'function') Bet.applyI18n();
+      if (Hist && typeof Hist.applyI18n === 'function') Hist.applyI18n();
       if (Mgmt && typeof Mgmt.applyI18n === 'function') Mgmt.applyI18n();
       if (state.homeReady && state.token) {
         refreshPatternBox();
+        loadTicker();
       }
       var frame = $('miniFrame');
       if (frame) frame.setAttribute('title', I18N.t('miniTitle'));
@@ -596,6 +706,9 @@
           if (d.round_total != null && betRound === state.round) {
             state.roundTotal = Number(d.round_total) || 0;
           }
+          if (Hist && typeof Hist.show === 'function' && $('pageHist') && !$('pageHist').hidden) {
+            Hist.show();
+          }
           return {
             ok: true,
             balance: d.balance,
@@ -604,6 +717,22 @@
             roundTotal: d.round_total,
           };
         });
+      });
+      Bet.onDraw(function () {
+        ensureMiniFrame();
+        scaleVeil();
+      });
+    }
+
+    if (Hist) {
+      Hist.bind();
+      Hist.onToast(toast);
+      Hist.onApi(api);
+      Hist.onBalance(function (bal) {
+        if (!state.member) state.member = {};
+        if (bal.balance != null) state.member.balance = bal.balance;
+        if (bal.point != null) state.member.point = bal.point;
+        updateHeaderUser({ member: state.member });
       });
     }
 
@@ -634,8 +763,22 @@
       if (page !== 'betsLive' && Mgmt && typeof Mgmt.stopLive === 'function') {
         Mgmt.stopLive();
       }
-      if (page === 'home') scaleMini();
-      if (page === 'bet') syncBetBoard();
+      if (page === 'home' || page === 'manual') {
+        ensureMiniFrame();
+        scaleMini();
+      }
+      if (page === 'pattern') {
+        var boxes = document.querySelectorAll('#pagePattern .content');
+        Array.prototype.forEach.call(boxes, fitPattern);
+      }
+      if (page === 'bet') {
+        syncBetBoard();
+        scaleVeil();
+      }
+      if (page === 'hist' && Hist) {
+        Hist.sync({ canBet: state.canBet });
+        Hist.show();
+      }
       if (page === 'mgmt' && Mgmt && typeof Mgmt.show === 'function') {
         Mgmt.sync(state.member);
         Mgmt.show();
@@ -643,7 +786,11 @@
     });
     Nav.onLogout(doLogout);
 
-    window.addEventListener('resize', scaleMini);
+    window.addEventListener('resize', function () {
+      scaleMini();
+      scaleVeil();
+      if (tickerLine) paintTicker(tickerLine);
+    });
     window.addEventListener('orientationchange', function () {
       setTimeout(scaleMini, 120);
     });

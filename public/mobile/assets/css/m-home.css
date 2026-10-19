@@ -8,6 +8,9 @@ body.m-has-nav {
   flex-direction: column;
   background: #0b1220;
   max-width: 520px;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .m-screen--app[hidden] {
@@ -22,9 +25,10 @@ body.m-has-nav {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 0;
   padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px);
   overflow-x: hidden;
   overflow-y: auto;
@@ -561,15 +565,12 @@ body.m-has-nav {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.m-nav-center {
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-select: none;
+.m-nav-dice {
+  margin-top: -16px;
+}
+
+.m-nav-dice.is-active .m-nav-center-img {
+  filter: drop-shadow(0 0 8px rgba(245, 197, 66, 0.7));
 }
 
 .m-nav-center-img {
@@ -600,10 +601,10 @@ body.m-has-nav {
 
 .m-nav-label {
   max-width: 100%;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -619,10 +620,173 @@ body.m-has-nav {
 }
 
 html[lang="zh-CN"] .m-nav-label {
-  font-size: 10px;
+  font-size: 14px;
   letter-spacing: 0;
 }
 
 html[lang="en"] .m-nav-label {
-  font-size: 9px;
+  font-size: 12px;
 }
+
+.m-ticker {
+  position: relative;
+  z-index: 70;
+  flex: 0 0 34px;
+  height: 34px;
+  overflow: hidden;
+  background: #12315f;
+  border-bottom: 1px solid rgba(255, 220, 120, 0.55);
+  pointer-events: none;
+}
+
+.m-ticker[hidden] {
+  display: none !important;
+}
+
+.m-ticker-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max-content;
+  white-space: nowrap;
+  line-height: 34px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff4c2;
+  will-change: transform;
+}
+
+#mTickerB {
+  display: none;
+}
+
+.m-manual {
+  min-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.m-pattern-page {
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
+  height: 100%;
+  padding: 8px 8px 12px;
+  box-sizing: border-box;
+}
+
+.m-pattern-page .m-pattern-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.m-pattern-page .content {
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.m-pattern-page .content table {
+  transform-origin: top left;
+}
+
+.m-hist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 10px 16px;
+  color: #eaf2ff;
+}
+
+.m-hist-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.m-hist-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.m-hist-cancel {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #e10600;
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.m-hist-cancel[hidden] {
+  display: none !important;
+}
+
+.m-hist-cancel:disabled {
+  opacity: 0.55;
+}
+
+.m-hist-empty,
+.m-hist .m-mgmt-loading {
+  text-align: center;
+  color: rgba(220, 232, 255, 0.7);
+}
+
+.m-hist-round {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 3px solid #e10600;
+}
+
+.m-hist-round-h {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #ffd0d0;
+}
+
+.m-hist-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.m-hist-pick {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.m-hist-pick.is-pb {
+  background: #0d4fa3;
+  color: #fff;
+}
+
+.m-hist-pick.is-nb {
+  background: #9ec8f5;
+  color: #0c3f86;
+}
+
+.m-hist-amt {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.m-hist-st.is-hit { color: #7dff9a; }
+.m-hist-st.is-miss { color: #ff8d98; }
+.m-hist-st.is-wait { color: #ffe08a; }
+.m-hist-st.is-cancel { color: rgba(220, 232, 255, 0.55); }

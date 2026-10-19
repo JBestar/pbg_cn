@@ -22,7 +22,7 @@ return [
         'charset' => pbg_env('database.draw.charset', 'utf8mb4'),
     ],
     // Powerball web root (mini view iframe)
-    'powerball_base_url' => pbg_env('powerball.base_url', 'http://powerball.com:82/'),
+    'powerball_base_url' => pbg_env('powerball.base_url', 'https://pbg-2.com/'),
     // Same-server draw fetch
     'powerball_fetch_url' => pbg_env('powerball.fetch_url', 'http://127.0.0.1:82/lottery/getDrawResult'),
     'powerball_fetch_host' => pbg_env('powerball.fetch_host', 'powerball.com'),
