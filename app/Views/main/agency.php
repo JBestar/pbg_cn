@@ -39,16 +39,34 @@
 .btn-store-action {
     margin: 1px;
 }
+#tbodyList td.store-uid-cell {
+    text-align: left;
+    padding-left: 8px;
+}
 .store-tree-uid {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     white-space: nowrap;
 }
-.store-tree-branch {
-    color: #888;
-    font-weight: 700;
+.store-tree-toggle {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    padding: 0;
+    border: 1px solid #999;
+    border-radius: 2px;
+    background: #fff;
+    color: #333;
+    font: 700 12px/14px monospace;
+    cursor: pointer;
 }
-.store-tree-child td.tdDate:nth-child(3) {
-    text-align: left;
+.store-tree-spacer {
+    display: inline-block;
+    width: 20px;
+}
+.store-tree-branch {
+    color: #999;
+    margin-right: 2px;
 }
 </style>
 
@@ -63,7 +81,7 @@ window.ADMIN_I18N.level_store = <?= json_encode(lang('Admin.menu_agency'), JSON_
 </script>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/agency.js?v=9"></script>
+    <script src="/assets/js/agency.js?v=10"></script>
 <?php else :?>
     <script src="/assets/js/agency.js?v=<?=time();?>"></script>
 <?php endif ?>

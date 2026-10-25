@@ -30,9 +30,16 @@ function escHtml(s) {
         .replace(/"/g, '&quot;');
 }
 
+/** Open/closed state for parents that have children. Missing key = treat as open (default expanded). */
+var storeTreeOpen = {};
+var storeTreeTouched = false;
+var lastStoreRows = null;
+
 /** Flatten rows into tree order with depth (mb_parent_fid). */
 function orderStoreTree(arrInfo) {
-    if (!arrInfo || !arrInfo.length) return [];
+    if (!arrInfo || !arrInfo.length) {
+        return { list: [], byParent: {}, map: {} };
+    }
     var map = {};
     var byParent = {};
     var i, r, fid, pf;
@@ -59,7 +66,12 @@ function orderStoreTree(arrInfo) {
             var cf = parseInt(child.mb_fid, 10) || 0;
             if (visited[cf]) continue;
             visited[cf] = true;
-            out.push({ row: child, depth: depth });
+            out.push({
+                row: child,
+                depth: depth,
+                parentFid: parentFid,
+                hasKids: !!(byParent[cf] && byParent[cf].length)
+            });
             walk(cf, depth + 1);
         }
     }
@@ -71,36 +83,97 @@ function orderStoreTree(arrInfo) {
         pf = parseInt(r.mb_parent_fid, 10) || 0;
         if (pf > 0 && !map[pf]) {
             visited[fid] = true;
-            out.push({ row: r, depth: 0 });
+            out.push({
+                row: r,
+                depth: 0,
+                parentFid: 0,
+                hasKids: !!(byParent[fid] && byParent[fid].length)
+            });
             walk(fid, 1);
         }
     }
-    // Any leftover (cycle safety)
     for (i = 0; i < arrInfo.length; i++) {
         r = arrInfo[i];
         fid = parseInt(r.mb_fid, 10) || 0;
         if (!visited[fid]) {
             visited[fid] = true;
-            out.push({ row: r, depth: 0 });
+            out.push({
+                row: r,
+                depth: 0,
+                parentFid: 0,
+                hasKids: !!(byParent[fid] && byParent[fid].length)
+            });
         }
     }
-    return out;
+    return { list: out, byParent: byParent, map: map };
 }
 
-function uidTreeHtml(uid, depth) {
-    depth = parseInt(depth, 10) || 0;
-    if (depth <= 0) return escHtml(uid);
-    var pad = depth * 14;
-    return '<span class="store-tree-uid" style="padding-left:' + pad + 'px;">'
-        + '<span class="store-tree-branch">└ </span>' + escHtml(uid) + '</span>';
+/** First open of 매장관리: expand every parent that has children. */
+function ensureDefaultExpanded(treeRes) {
+    if (storeTreeTouched) return;
+    var list = treeRes.list || [];
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].hasKids) {
+            var fid = parseInt(list[i].row.mb_fid, 10) || 0;
+            if (fid) storeTreeOpen[fid] = true;
+        }
+    }
+}
+
+function isStoreOpen(fid) {
+    if (storeTreeOpen[fid] === false) return false;
+    return true;
+}
+
+function isVisibleInTree(item, map) {
+    var p = item.parentFid;
+    while (p > 0) {
+        if (!isStoreOpen(p)) return false;
+        var parent = map[p];
+        p = parent ? (parseInt(parent.mb_parent_fid, 10) || 0) : 0;
+    }
+    return true;
+}
+
+function uidTreeHtml(r, depth, hasKids, isOpen) {
+    var fid = parseInt(r.mb_fid, 10) || 0;
+    var pad = (parseInt(depth, 10) || 0) * 18;
+    var html = '<span class="store-tree-uid" style="padding-left:' + pad + 'px;">';
+    if (hasKids) {
+        html += '<button type="button" class="store-tree-toggle" onclick="toggleStoreTree(' + fid + ')">'
+            + (isOpen ? '−' : '+') + '</button>';
+    } else {
+        html += '<span class="store-tree-spacer"></span>';
+    }
+    if (depth > 0) html += '<span class="store-tree-branch">└</span>';
+    html += escHtml(r.mb_uid) + '</span>';
+    return html;
+}
+
+function toggleStoreTree(fid) {
+    storeTreeTouched = true;
+    storeTreeOpen[fid] = !isStoreOpen(fid);
+    showPage(lastStoreRows);
 }
 
 function showPage(arrInfo) {
+    lastStoreRows = arrInfo;
     var tHtml = '';
-    var ordered = orderStoreTree(arrInfo);
+    var treeRes = orderStoreTree(arrInfo);
+    ensureDefaultExpanded(treeRes);
+    var ordered = treeRes.list;
+    var map = treeRes.map;
+    var searching = $.trim($('#inputSubId').val() || '') !== '';
+    var visibleNo = 0;
+
     for (var i = 0; i < ordered.length; i++) {
-        var r = ordered[i].row;
-        var depth = ordered[i].depth;
+        var item = ordered[i];
+        if (!searching && !isVisibleInTree(item, map)) continue;
+
+        var r = item.row;
+        var fid = parseInt(r.mb_fid, 10) || 0;
+        var depth = item.depth;
+        var isOpen = searching || isStoreOpen(fid);
         var bet = parseInt(r.bet_sum, 10) || 0;
         var win = parseInt(r.bet_win_sum, 10) || 0;
         var empl = parseFloat(r.bet_empl_sum) || 0;
@@ -109,10 +182,11 @@ function showPage(arrInfo) {
         var eggIn = parseInt(r.charge_present_sum, 10) || 0;
         var eggOut = parseInt(r.exchange_present_sum, 10) || 0;
 
+        visibleNo += 1;
         tHtml += '<tr id="trFid-' + r.mb_fid + '"' + (depth > 0 ? ' class="store-tree-child"' : '') + '>';
-        tHtml += '<td class="tdDate">' + (i + 1) + '</td>';
+        tHtml += '<td class="tdDate">' + visibleNo + '</td>';
         tHtml += '<td class="tdDate">' + getMemberLevelText(r.mb_level) + ' / ' + getMemberChannelText(r.mb_channel) + '</td>';
-        tHtml += '<td class="tdDate">' + uidTreeHtml(r.mb_uid, depth) + '</td>';
+        tHtml += '<td class="tdDate store-uid-cell">' + uidTreeHtml(r, depth, item.hasKids, isOpen) + '</td>';
         tHtml += '<td class="tdDate">' + escHtml(r.mb_nickname) + '</td>';
         tHtml += '<td class="tdDate">' + displayPwd(r.mb_pwd) + '</td>';
         tHtml += '<td class="tdMoney">' + (parseInt(r.mb_money, 10) || 0).toLocaleString() + '</td>';
