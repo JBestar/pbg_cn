@@ -555,6 +555,35 @@ a:active {
     width: calc(100% - 6px);
     max-width: none;
 }
+
+/* Desktop: whole menu fits in one screen; content area scrolls instead of the page */
+@media (min-width: 769px) {
+    .admin-app {
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+    }
+    .admin-sidebar {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding: 4px 0;
+    }
+    .admin-sidebar .spanLeftMenu,
+    .admin-sidebar .spanLeftSubMenu {
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+        flex: 1 1 auto;
+        min-height: auto;
+        max-height: 2.4em;
+        padding-top: 0;
+        padding-bottom: 0;
+        font-size: clamp(12px, 2.6vh, 17px);
+        line-height: 1.2;
+    }
+}
 .admin-account-wrap {
     width: 100%;
     overflow-x: auto;
