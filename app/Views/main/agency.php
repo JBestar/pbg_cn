@@ -26,7 +26,7 @@
                     <th><?= lang('Admin.th_egg_in') ?></th>
                     <th><?= lang('Admin.th_egg_out') ?></th>
                     <th><?= lang('Admin.th_charge_recall') ?></th>
-                    <th><?= lang('Admin.th_edit') ?></th>
+                    <th><?= lang('Admin.th_edit_delete') ?></th>
                     <th><?= lang('Admin.th_join_date') ?></th>
                 </tr>
             </thead>
@@ -39,6 +39,17 @@
 .btn-store-action {
     margin: 1px;
 }
+.store-tree-uid {
+    display: inline-block;
+    white-space: nowrap;
+}
+.store-tree-branch {
+    color: #888;
+    font-weight: 700;
+}
+.store-tree-child td.tdDate:nth-child(3) {
+    text-align: left;
+}
 </style>
 
 <script>
@@ -46,13 +57,13 @@ window.ADMIN_I18N = window.ADMIN_I18N || {};
 window.ADMIN_I18N.btn_egg_charge = <?= json_encode(lang('Admin.btn_egg_charge'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.btn_egg_recover = <?= json_encode(lang('Admin.btn_egg_recover'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.btn_edit = <?= json_encode(lang('Admin.btn_edit'), JSON_UNESCAPED_UNICODE) ?>;
-window.ADMIN_I18N.btn_approve = <?= json_encode(lang('Admin.btn_approve'), JSON_UNESCAPED_UNICODE) ?>;
-window.ADMIN_I18N.btn_block = <?= json_encode(lang('Admin.btn_block'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.btn_delete = <?= json_encode(lang('Admin.btn_delete'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.msg_delete_store = <?= json_encode(lang('Admin.msg_delete_store'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.level_store = <?= json_encode(lang('Admin.menu_agency'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/agency.js?v=8"></script>
+    <script src="/assets/js/agency.js?v=9"></script>
 <?php else :?>
     <script src="/assets/js/agency.js?v=<?=time();?>"></script>
 <?php endif ?>

@@ -489,6 +489,9 @@ class Api extends BaseController
 			} else {
 				if($objMember->mb_level == LEVEL_AGENCY){			//하부매장 삭제
 					$this->member_model->deleteByEmpFid($objMember->mb_fid);
+				} else if($objMember->mb_level == LEVEL_EMPLOYEE){
+					// 하하부까지 soft-delete
+					$this->member_model->deleteDescendantsByParentFid($objMember->mb_fid);
 				}
 
 				$bResult = $this->member_model->deleteByUid($objMember->mb_uid);

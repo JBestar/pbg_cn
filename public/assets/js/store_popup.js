@@ -1,4 +1,5 @@
 var mMaxFeeRatio = null;
+var mAgencyFeeRatio = null;
 
 function showAlert(msg) {
     if (window.Swal) {
@@ -48,7 +49,11 @@ function applyMaxFeeHint(max) {
     var $hint = $('#hintFeeMax');
     if ($hint.length) $hint.text(feeMaxHint(mMaxFeeRatio));
     var $input = $('#regSubSingleDealRate, #editSubSingleDealRate');
-    if ($input.length) $input.attr('max', mMaxFeeRatio);
+    if ($input.length) {
+        $input.attr('max', mMaxFeeRatio);
+        // Max fee value itself is the placeholder (e.g. "2")
+        $input.attr('placeholder', String(mMaxFeeRatio));
+    }
 }
 
 function loadMaxFee(done) {
@@ -62,7 +67,8 @@ function loadMaxFee(done) {
                 return;
             }
             if (jResult.status === 'success' && jResult.data) {
-                applyMaxFeeHint(jResult.data.mb_game_pb_ratio || 0);
+                mAgencyFeeRatio = parseFloat(jResult.data.mb_game_pb_ratio) || 0;
+                applyMaxFeeHint(mAgencyFeeRatio);
             }
             if (typeof done === 'function') done();
         },
@@ -77,14 +83,122 @@ function validateFee(gameRatio) {
     var fee = parseFloat(gameRatio);
     if (isNaN(fee)) fee = 0;
     if (fee > mMaxFeeRatio) {
-        showAlert(feeOverMsg(mMaxFeeRatio));
+        var parentUid = $.trim($('#regSubParent').val() || '');
+        if (parentUid) {
+            showAlert(i18n('msg_fee_over_parent', '수수료가 상위 매장 수수료를 초과할 수 없습니다.'));
+        } else {
+            showAlert(feeOverMsg(mMaxFeeRatio));
+        }
         return false;
     }
     return true;
 }
 
+/** Build a flat parent-option list with indent from mb_parent_fid. */
+function fillParentCombo(rows) {
+    var $sel = $('#regSubParent');
+    if (!$sel.length) return;
+    var noneLabel = i18n('parent_store_none', '(없음 — 총판 직속)');
+    $sel.empty().append($('<option>').val('').text(noneLabel));
+    if (!rows || !rows.length) return;
+
+    var byParent = {};
+    var map = {};
+    var i, r, fid, pf;
+    for (i = 0; i < rows.length; i++) {
+        r = rows[i];
+        fid = parseInt(r.mb_fid, 10) || 0;
+        pf = parseInt(r.mb_parent_fid, 10) || 0;
+        map[fid] = r;
+        if (!byParent[pf]) byParent[pf] = [];
+        byParent[pf].push(r);
+    }
+    Object.keys(byParent).forEach(function (k) {
+        byParent[k].sort(function (a, b) {
+            return String(a.mb_uid).localeCompare(String(b.mb_uid));
+        });
+    });
+
+    var visited = {};
+    function addOption(row, depth) {
+        var rate = parseFloat(row.mb_game_pb_ratio);
+        if (isNaN(rate)) rate = 0;
+        var pad = '';
+        for (var d = 0; d < depth; d++) pad += '　';
+        var label = pad + (depth ? '└ ' : '') + row.mb_uid
+            + (row.mb_nickname ? ' / ' + row.mb_nickname : '')
+            + ' (' + rate + '%)';
+        $sel.append(
+            $('<option>')
+                .val(row.mb_uid)
+                .attr('data-rate', rate)
+                .text(label)
+        );
+    }
+    function walk(parentFid, depth) {
+        var list = byParent[parentFid] || [];
+        for (var n = 0; n < list.length; n++) {
+            var child = list[n];
+            var cf = parseInt(child.mb_fid, 10) || 0;
+            if (visited[cf]) continue;
+            visited[cf] = true;
+            addOption(child, depth);
+            walk(cf, depth + 1);
+        }
+    }
+    walk(0, 0);
+    // Orphans (parent missing from list) as extra roots
+    for (i = 0; i < rows.length; i++) {
+        r = rows[i];
+        fid = parseInt(r.mb_fid, 10) || 0;
+        if (visited[fid]) continue;
+        pf = parseInt(r.mb_parent_fid, 10) || 0;
+        if (pf > 0 && !map[pf]) {
+            visited[fid] = true;
+            addOption(r, 0);
+            walk(fid, 1);
+        }
+    }
+}
+
+function onParentChange() {
+    var $opt = $('#regSubParent option:selected');
+    var rate = $opt.attr('data-rate');
+    if (rate == null || rate === '') {
+        applyMaxFeeHint(mAgencyFeeRatio != null ? mAgencyFeeRatio : 0);
+    } else {
+        applyMaxFeeHint(rate);
+    }
+}
+
+function loadParentOptions(done) {
+    $.ajax({
+        url: '/api/member_subs',
+        type: 'post',
+        dataType: 'json',
+        success: function (jResult) {
+            if (jResult.status === 'logout') {
+                window.close();
+                return;
+            }
+            if (jResult.status === 'success') {
+                fillParentCombo(jResult.data || []);
+            }
+            if (typeof done === 'function') done();
+        },
+        error: function () {
+            if (typeof done === 'function') done();
+        }
+    });
+}
+
 function initStoreReg() {
-    loadMaxFee();
+    loadMaxFee(function () {
+        loadParentOptions(function () {
+            onParentChange();
+        });
+    });
+    $('#regSubParent').off('change.fee').on('change.fee', onParentChange);
 }
 
 function reqRegMember() {

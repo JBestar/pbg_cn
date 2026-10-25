@@ -531,10 +531,11 @@ class Member_Model extends Model {
         } else return NULL;
         
         try { 
-            $tbColumn = ['mb_fid', 'mb_uid', 'mb_level', 'mb_channel', 'mb_emp_fid', 'mb_nickname', 'mb_money', 'mb_point' ];
+            $tbColumn = ['mb_fid', 'mb_uid', 'mb_level', 'mb_channel', 'mb_emp_fid', 'mb_parent_fid', 'mb_nickname', 'mb_money', 'mb_point', 'mb_game_pb_ratio'];
 
             $this->mBuilder ->select($tbColumn)
                             ->where($where)
+                            ->orderBy('mb_uid', 'ASC')
                             ->getCompiledSelect(false);
             
             $query = $this->mBuilder->get();
@@ -547,6 +548,29 @@ class Member_Model extends Model {
         return NULL;
         
 
+    }
+
+    /** Soft-delete every store under this parent (and their children). */
+    public function deleteDescendantsByParentFid($parentFid)
+    {
+        $parentFid = (int)$parentFid;
+        if ($parentFid <= 0) {
+            return;
+        }
+        try {
+            $rows = $this->mDb->query(
+                "SELECT mb_fid FROM member WHERE mb_state_delete = 0 AND mb_parent_fid = " . $parentFid
+            )->getResult();
+        } catch (\Exception $e) {
+            return;
+        }
+        foreach ($rows as $row) {
+            $childFid = (int)$row->mb_fid;
+            $this->deleteDescendantsByParentFid($childFid);
+            $this->mBuilder->set('mb_state_delete', 1);
+            $this->mBuilder->where('mb_fid', $childFid);
+            $this->mBuilder->update();
+        }
     }
 
     public function searchList($arrRqData, $level ){
@@ -576,7 +600,7 @@ class Member_Model extends Model {
             $where_exchange .= " AND exchange_time_require <= '".$arrRqData['end']." 23:59:59' ";
         }            
             
-        $strSql = "SELECT mb_fid, mb_uid, mb_level, mb_channel, mb_emp_fid, mb_nickname, mb_money, mb_point, mb_pwd, mb_time_join, mb_time_last, ";
+        $strSql = "SELECT mb_fid, mb_uid, mb_level, mb_channel, mb_emp_fid, mb_parent_fid, mb_nickname, mb_money, mb_point, mb_pwd, mb_time_join, mb_time_last, ";
         $strSql.= " mb_ip_last, mb_game_pb_ratio, mb_state_active, mb_limit_round, mb_limit_single, mb_limit_mix, mb_limit_three, mb_limit_digit, mb_color, mb_rest, ";
 
         if($level == LEVEL_EMPLOYEE){
