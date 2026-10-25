@@ -40,13 +40,38 @@
     margin: 1px;
 }
 #tbodyList td.store-uid-cell {
+    position: relative;
     text-align: left;
     padding-left: 8px;
 }
 .store-tree-uid {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
+}
+.store-tree-vline,
+.store-tree-hline {
+    position: absolute;
+    pointer-events: none;
+}
+.store-tree-vline {
+    top: -1px;
+    bottom: -1px;
+    width: 0;
+    border-left: 1px solid #999;
+}
+.store-tree-vline-top {
+    bottom: 50%;
+}
+.store-tree-vline-bottom {
+    top: calc(50% + 8px);
+}
+.store-tree-hline {
+    top: 50%;
+    height: 0;
+    border-top: 1px solid #999;
 }
 #tbodyList td button.store-tree-toggle {
     width: 16px;
@@ -73,10 +98,6 @@
     display: inline-block;
     width: 20px;
 }
-.store-tree-branch {
-    color: #999;
-    margin-right: 2px;
-}
 </style>
 
 <script>
@@ -90,7 +111,7 @@ window.ADMIN_I18N.level_store = <?= json_encode(lang('Admin.menu_agency'), JSON_
 </script>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/agency.js?v=11"></script>
+    <script src="/assets/js/agency.js?v=12"></script>
 <?php else :?>
     <script src="/assets/js/agency.js?v=<?=time();?>"></script>
 <?php endif ?>
