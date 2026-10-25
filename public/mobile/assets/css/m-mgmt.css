@@ -36,7 +36,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  margin: 12px auto 0;
+  margin: 72px auto 0;
   background: none;
   border: 0;
   box-shadow: none;
@@ -61,15 +61,18 @@
   height: 30px;
 }
 
+/* Two columns: labels right-aligned, values left-aligned, so the label/value edge lines up */
 .m-mgmt-profile-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  min-width: 160px;
-  max-width: 260px;
+  display: grid;
+  grid-template-columns: max-content max-content;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 10px;
+  row-gap: 3px;
+  min-width: 180px;
+  max-width: 300px;
   box-sizing: border-box;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 12px;
   text-align: center;
   background: rgba(6, 14, 34, 0.6);
@@ -81,15 +84,22 @@
 }
 
 .m-mgmt-profile-info p {
-  margin: 0;
+  display: contents;
   white-space: nowrap;
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 700;
   color: rgba(255, 236, 170, 0.92);
   line-height: 1.35;
 }
 
+.m-mgmt-profile-info p > span {
+  justify-self: end;
+  text-align: right;
+}
+
 .m-mgmt-profile-info strong {
+  justify-self: start;
+  text-align: left;
   color: #ffe14a;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
@@ -137,6 +147,11 @@
   grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 4px 8px;
   margin: 0 auto;
+}
+
+/* Last row has only 로그아웃 + 언어설정: start it in column 2 so the pair sits in the middle */
+#pageMgmt .m-mgmt-item[data-mgmt="logout"] {
+  grid-column: 2;
 }
 
 #pageMgmt .m-mgmt-item {

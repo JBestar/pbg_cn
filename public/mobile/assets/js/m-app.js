@@ -229,16 +229,6 @@
     });
   }
 
-  function scaleMini() {
-    var wrap = $('miniWrap');
-    var scale = $('miniScale');
-    if (!wrap || !scale) return;
-    var w = wrap.clientWidth || window.innerWidth || MINI_W;
-    var s = w / MINI_W;
-    scale.style.transform = 'scale(' + s + ')';
-    wrap.style.height = Math.round(MINI_H * s) + 'px';
-  }
-
   function updateHeaderUser(d) {
     var m = (d && d.member) || (d && d.machine) || state.member || {};
     state.member = {
@@ -278,11 +268,6 @@
   function ensureMiniFrame() {
     var src = miniSrc();
     if (!src) return;
-    var frame = $('miniFrame');
-    if (frame && frame.dataset.loaded !== '1') {
-      frame.src = src;
-      frame.dataset.loaded = '1';
-    }
     var veil = $('veilFrame');
     if (veil && veil.dataset.loaded !== '1') {
       veil.src = src;
@@ -507,7 +492,6 @@
 
   function bootHomeData() {
     state.homeReady = true;
-    scaleMini();
     applyPatternTitles();
     return refreshStatus()
       .then(function () {
@@ -546,11 +530,6 @@
     state.round = 0;
     state.roundTotal = 0;
     if (Bet && typeof Bet.reset === 'function') Bet.reset();
-    var frame = $('miniFrame');
-    if (frame) {
-      frame.src = 'about:blank';
-      delete frame.dataset.loaded;
-    }
     setError(err || null);
     showLoginShell(true);
     showPage('bet');
@@ -668,8 +647,6 @@
         refreshPatternBox();
         loadTicker();
       }
-      var frame = $('miniFrame');
-      if (frame) frame.setAttribute('title', I18N.t('miniTitle'));
     });
 
     $('loginForm').addEventListener('submit', function (e) {
@@ -782,10 +759,6 @@
       if (page !== 'betsLive' && Mgmt && typeof Mgmt.stopLive === 'function') {
         Mgmt.stopLive();
       }
-      if (page === 'home' || page === 'manual') {
-        ensureMiniFrame();
-        scaleMini();
-      }
       if (page === 'bet') {
         syncBetBoard();
         scaleVeil();
@@ -803,13 +776,12 @@
     Nav.onLogout(doLogout);
 
     window.addEventListener('resize', function () {
-      scaleMini();
       scaleVeil();
       layoutPatterns();
       if (tickerLine) paintTicker(tickerLine);
     });
     window.addEventListener('orientationchange', function () {
-      setTimeout(scaleMini, 120);
+      setTimeout(scaleVeil, 120);
     });
 
     setPwdVisible(false);

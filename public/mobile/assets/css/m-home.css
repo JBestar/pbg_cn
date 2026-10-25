@@ -617,7 +617,7 @@ html[lang="en"] .m-pattern-side .pattern-title-text {
 
 .m-nav-label {
   max-width: 100%;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.03em;
@@ -636,12 +636,12 @@ html[lang="en"] .m-pattern-side .pattern-title-text {
 }
 
 html[lang="zh-CN"] .m-nav-label {
-  font-size: 14px;
+  font-size: 17px;
   letter-spacing: 0;
 }
 
 html[lang="en"] .m-nav-label {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .m-ticker {
