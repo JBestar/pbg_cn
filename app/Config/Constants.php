@@ -114,6 +114,9 @@ defined('RESULT_OVERMONEY')     || define('RESULT_OVERMONEY', 9);
 defined('RESULT_OVERRATIO')     || define('RESULT_OVERRATIO', 10);
 defined('RESULT_CAPTCHA_ERR')  || define('RESULT_CAPTCHA_ERR', 11);
 defined('RESULT_CAPTCHA_NONE')  || define('RESULT_CAPTCHA_NONE', 12);
+defined('RESULT_NO_PARENT')     || define('RESULT_NO_PARENT', 13);
+defined('RESULT_OVERPARENT')    || define('RESULT_OVERPARENT', 14);
+defined('RESULT_UNDERCHILD')    || define('RESULT_UNDERCHILD', 15);
 
 //Json Result Status
 defined('STATUS_SUCCESS')      || define('STATUS_SUCCESS', 'success');

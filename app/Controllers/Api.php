@@ -564,6 +564,11 @@ class Api extends BaseController
 			{
 				$result->status = STATUS_FAIL;
 			} else {
+				$objMember->parent_uid = '';
+				if(!empty($objMember->mb_parent_fid)){
+					$objParent = $this->member_model->getByFid($objMember->mb_parent_fid);
+					if(!is_null($objParent)) $objMember->parent_uid = $objParent->mb_uid;
+				}
 				$result->data = $objMember;
 				$result->status = STATUS_SUCCESS;
 				
@@ -2355,11 +2360,13 @@ class Api extends BaseController
 				$result->status = STATUS_FAIL;		
 			} else if($objNotice->notice_recv_uid != $objAdmin->mb_uid){
 				$result->status = STATUS_FAIL;
+			} else if(!isset($arrReqData['answer']) || trim((string)$arrReqData['answer']) === ''){
+				$result->status = STATUS_FAIL;
 			}  else {
 
 				$bResult = $this->notice_model->answerQna($arrReqData);
 	
-				$result->status = STATUS_SUCCESS;
+				$result->status = $bResult ? STATUS_SUCCESS : STATUS_FAIL;
 			}
 
         }
@@ -2807,7 +2814,7 @@ class Api extends BaseController
 				if($objMember->mb_level == LEVEL_AGENCY) {
 					$arrData['notice'] =  $this->notice_model->waitProc($emp_uid);
 					$arrData['memo'] = $this->notice_model->waitMemoUnread($emp_uid);
-					$arrData['memo_account'] = $this->notice_model->waitMemoUnread($emp_uid, '충전계좌요청');
+					$arrData['memo_account'] = $this->notice_model->waitQnaByTitle($emp_uid, '충전계좌요청');
 				} else {
 					$arrData['notice'] = 0;
 					$arrData['memo'] = 0;

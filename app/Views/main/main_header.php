@@ -29,7 +29,7 @@
         <script src="/assets/js/lib/sweetalert2.all.min.js"></script>
 
         <script src="/assets/js/util.js?v=10"></script>
-        <script src="/assets/js/header.js?v=6"></script>
+        <script src="/assets/js/header.js?v=7"></script>
         <script src="/assets/js/window.js"></script>
         <script>
         window.ADMIN_I18N = {

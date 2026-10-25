@@ -16,7 +16,7 @@ class Member_Model extends Model {
         $this->mDb      = Database::connect();
         $this->mBuilder = $this->mDb->table($this->mTbName);
 
-        $this->mTbColumn = ['mb_fid', 'mb_uid', 'mb_level', 'mb_channel', 'mb_emp_fid', 'mb_nickname', 'mb_money', 'mb_point',
+        $this->mTbColumn = ['mb_fid', 'mb_uid', 'mb_level', 'mb_channel', 'mb_emp_fid', 'mb_parent_fid', 'mb_nickname', 'mb_money', 'mb_point',
             'mb_lang', 'mb_time_join', 'mb_time_last', 'mb_ip_last', 'mb_game_pb_ratio', 'mb_state_active', 'mb_state_delete',
             'mb_limit_round', 'mb_limit_single', 'mb_limit_mix', 'mb_limit_three', 'mb_limit_digit' ];
     }
@@ -390,6 +390,17 @@ class Member_Model extends Model {
 
             if(floatval($arrRqData['game_ratio']) > floatval($objAdmin->mb_game_pb_ratio) )
                 return RESULT_OVERRATIO;
+
+            // 상위 추천계정: one of this agency's stores; the new store becomes its sub-store (rate ≤ parent rate)
+            $parentUid = isset($arrRqData['parent_uid']) ? trim((string)$arrRqData['parent_uid']) : '';
+            if($parentUid !== ''){
+                $objParent = $this->getByUid($this->mDb->escapeString($parentUid));
+                if(is_null($objParent) || $objParent->mb_level != LEVEL_EMPLOYEE || $objParent->mb_emp_fid != $objAdmin->mb_fid)
+                    return RESULT_NO_PARENT;
+                if(floatval($arrRqData['game_ratio']) > floatval($objParent->mb_game_pb_ratio) )
+                    return RESULT_OVERPARENT;
+                $arrRqData['mb_parent_fid'] = (int)$objParent->mb_fid;
+            }
         } else if($objAdmin->mb_level > LEVEL_AGENCY){
             $arrRqData['level'] = LEVEL_AGENCY;
             $arrRqData['mb_emp_fid'] = 0;
@@ -405,6 +416,7 @@ class Member_Model extends Model {
         $this->mBuilder->set('mb_level', $arrRqData['level']);
         $this->mBuilder->set('mb_channel', $arrRqData['channel']);
         $this->mBuilder->set('mb_emp_fid', $arrRqData['mb_emp_fid']);
+        $this->mBuilder->set('mb_parent_fid', isset($arrRqData['mb_parent_fid']) ? (int)$arrRqData['mb_parent_fid'] : 0);
         $this->mBuilder->set('mb_nickname', $arrRqData['nickname']);
         $this->mBuilder->set('mb_time_join', 'NOW()', false);
         $this->mBuilder->set('mb_game_pb_ratio', floatval($arrRqData['game_ratio']));
@@ -436,6 +448,20 @@ class Member_Model extends Model {
             
             if(floatval($arrRqData['game_ratio']) > floatval($objAdmin->mb_game_pb_ratio) )
                 return RESULT_OVERRATIO;
+
+            // Store tree: rate stays ≤ the 상위 매장 and ≥ every direct sub-store, so no upline share goes negative
+            $objSelf = $this->getByUid($arrRqData['uid']);
+            if(!is_null($objSelf)){
+                $fRatio = floatval($arrRqData['game_ratio']);
+                if(!empty($objSelf->mb_parent_fid)){
+                    $objParent = $this->getByFid($objSelf->mb_parent_fid);
+                    if(!is_null($objParent) && $fRatio > floatval($objParent->mb_game_pb_ratio))
+                        return RESULT_OVERPARENT;
+                }
+                $row = $this->mDb->query("SELECT MAX(mb_game_pb_ratio) AS mx FROM member WHERE mb_state_delete = 0 AND mb_parent_fid = ".intval($objSelf->mb_fid))->getRow();
+                if(!is_null($row) && !is_null($row->mx) && $fRatio < floatval($row->mx))
+                    return RESULT_UNDERCHILD;
+            }
         } else if($objAdmin->mb_level > LEVEL_AGENCY){
             $arrRqData['level'] = LEVEL_AGENCY;
         } else return RESULT_ERROR;

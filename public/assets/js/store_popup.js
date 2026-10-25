@@ -97,7 +97,8 @@ function reqRegMember() {
         bank_name: $('#regSubBank').val(),
         bank_num: $('#regSubBankNum').val(),
         bank_owner: $('#regSubBankOwner').val(),
-        game_ratio: $('#regSubSingleDealRate').val() || '0'
+        game_ratio: $('#regSubSingleDealRate').val() || '0',
+        parent_uid: $.trim($('#regSubParent').val() || '')
     };
     if (!objData.uid || !objData.nickname || !objData.pwd || !objData.bank_pwd) {
         showAlert('아이디, 이름, 비밀번호, 출금 비밀번호는 필수입니다.');
@@ -119,6 +120,8 @@ function reqRegMember() {
                 if (jResult.code == 6) showAlert('ID exists');
                 else if (jResult.code == 7) showAlert('Name exists');
                 else if (jResult.code == 10) showAlert(feeOverMsg(mMaxFeeRatio != null ? mMaxFeeRatio : ''));
+                else if (jResult.code == 13) showAlert(i18n('msg_parent_invalid', '상위 추천계정을 찾을 수 없습니다.'));
+                else if (jResult.code == 14) showAlert(i18n('msg_fee_over_parent', '수수료가 상위 매장 수수료를 초과할 수 없습니다.'));
                 else showAlert('Fail');
             } else if (jResult.status === 'logout') {
                 window.close();
@@ -162,6 +165,10 @@ function fillEditForm(d) {
     $('#editSubLimitThree').val(d.mb_limit_three || 0);
     $('#editSubLimitDigit').val(d.mb_limit_digit || 0);
     $('#editSubSingleDealRate').val(d.mb_game_pb_ratio || 0);
+    if (d.parent_uid) {
+        $('#editSubParent').text(d.parent_uid);
+        $('#editSubParentRow').show();
+    }
 }
 
 function reqEditMember() {
@@ -199,6 +206,8 @@ function reqEditMember() {
                 setTimeout(function () { window.close(); }, 500);
             } else if (jResult.status === 'fail') {
                 if (jResult.code == 10) showAlert(feeOverMsg(mMaxFeeRatio != null ? mMaxFeeRatio : ''));
+                else if (jResult.code == 14) showAlert(i18n('msg_fee_over_parent', '수수료가 상위 매장 수수료를 초과할 수 없습니다.'));
+                else if (jResult.code == 15) showAlert(i18n('msg_fee_under_child', '수수료가 하부 매장 수수료보다 낮을 수 없습니다.'));
                 else showAlert('Fail');
             } else if (jResult.status === 'logout') {
                 window.close();

@@ -26,6 +26,7 @@ body{margin:0;padding:16px 20px;background:#fff;font-size:14px;}
 <table class="popup-table">
 <tr><td class="lbl"><?= lang('Admin.label_id') ?></td><td><span id="editSubId" style="font-weight:700"></span></td></tr>
 <tr><td class="lbl"><?= lang('Admin.label_name') ?></td><td><span id="editSubName" style="font-weight:700"></span></td></tr>
+<tr id="editSubParentRow" style="display:none"><td class="lbl"><?= lang('Admin.label_parent_store') ?></td><td><span id="editSubParent" style="font-weight:700"></span></td></tr>
 <tr><td class="lbl"><?= lang('Admin.label_password') ?></td><td><input type="text" id="editSubPwd"></td></tr>
 <tr><td class="lbl"><?= lang('Admin.label_bank_pwd') ?></td><td><input type="text" id="editSubExcPwd"></td></tr>
 <tr><td class="lbl"><?= lang('Admin.label_phone') ?></td><td><input type="text" id="editSubPhone"></td></tr>
@@ -51,6 +52,8 @@ window.ADMIN_I18N = window.ADMIN_I18N || {};
 window.ADMIN_I18N.btn_ok = <?= json_encode(lang('Admin.btn_ok'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.hint_fee_max = <?= json_encode(lang('Admin.hint_fee_max'), JSON_UNESCAPED_UNICODE) ?>;
 window.ADMIN_I18N.msg_fee_over = <?= json_encode(lang('Admin.msg_fee_over'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.msg_fee_over_parent = <?= json_encode(lang('Admin.msg_fee_over_parent'), JSON_UNESCAPED_UNICODE) ?>;
+window.ADMIN_I18N.msg_fee_under_child = <?= json_encode(lang('Admin.msg_fee_under_child'), JSON_UNESCAPED_UNICODE) ?>;
 </script>
 <script src="/assets/js/store_popup.js?v=<?= time() ?>"></script>
 <script>initStoreEdit();</script>

@@ -174,6 +174,22 @@ class Notice_Model extends Model {
         return 0;
     }
 
+    /** Unanswered inquiries (문의) with an exact title, e.g. '충전계좌요청'. */
+    public function waitQnaByTitle($recv_uid, $title)
+    {
+        try {
+            return $this->mDb->table($this->mTbName)
+                ->where('notice_type', NOTICE_TYPE_QNA)
+                ->where('notice_recv_uid', (string)$recv_uid)
+                ->where('notice_recv_delete', 0)
+                ->where('notice_answer_state', 0)
+                ->where('notice_title', (string)$title)
+                ->countAllResults();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
     public function searchCount($arrRqData, $notice_type){
         
         try { 

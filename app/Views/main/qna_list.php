@@ -1,4 +1,6 @@
-
+<style>
+    .qna-wait td{font-weight:700;background:#fff6e8;}
+</style>
 
     
     <div class="divTitle"><?= lang('Admin.title_qna_mgmt') ?></div>
@@ -70,4 +72,4 @@
 
 
 
-<script src="/assets/js/qna_list.js?v=2"></script>
+<script src="/assets/js/qna_list.js?v=3"></script>

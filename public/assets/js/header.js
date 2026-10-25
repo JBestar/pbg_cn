@@ -1,5 +1,6 @@
 var mUser;
 var mWorker;
+var mQnaVoiceTimer = null;
 
 $(document).ready(function() {
     mUser = null;
@@ -154,22 +155,38 @@ function showWaitTansfer(arrInfo) {
     setWaitBadge('spanQnaCnt', arrInfo['notice']);
 
     var t = window.ADMIN_I18N || {};
+    var spoke = false;
     if (arrInfo['charge'] > 0) {
 
         speak(t.voice_charge_wait || "하부 충전요청이 도착하였습니다.", { rate: 1, pitch: 1.2 });
+        spoke = true;
     } else if (arrInfo['exchange'] > 0) {
         speak(t.voice_exchange_wait || "하부 환전요청이 도착하였습니다.", { rate: 1, pitch: 1.2 });
+        spoke = true;
     } else if (arrInfo['memo_account'] > 0) {
         speak(t.voice_account_wait || "충전계좌요청이 도착하였습니다.", { rate: 1, pitch: 1.2 });
+        spoke = true;
     }
 
+    // speak() cancels the current utterance, so the QNA voice must wait for the one above.
+    if (mQnaVoiceTimer) {
+        clearTimeout(mQnaVoiceTimer);
+        mQnaVoiceTimer = null;
+    }
     if (arrInfo['level'] == 8) {
-        if (arrInfo['notice'] > 0) {
-            if (mUser != null) {
-                speak(mUser.mb_nickname, { rate: 1, pitch: 1.2 });
-            }
-            setTimeout(function() { speak(t.voice_qna_wait || "문의가 도착하였습니다.", { rate: 1, pitch: 1.2 }); }, 1000);
-
+        // 충전계좌요청 is counted in 'notice' too; only announce other inquiries here.
+        var qnaOther = (parseInt(arrInfo['notice'], 10) || 0) - (parseInt(arrInfo['memo_account'], 10) || 0);
+        if (qnaOther > 0) {
+            mQnaVoiceTimer = setTimeout(function() {
+                mQnaVoiceTimer = null;
+                if (mUser != null) {
+                    speak(mUser.mb_nickname, { rate: 1, pitch: 1.2 });
+                }
+                mQnaVoiceTimer = setTimeout(function() {
+                    mQnaVoiceTimer = null;
+                    speak(t.voice_qna_wait || "문의가 도착하였습니다.", { rate: 1, pitch: 1.2 });
+                }, 1000);
+            }, spoke ? 3000 : 0);
         }
     }
 
