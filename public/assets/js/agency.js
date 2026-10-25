@@ -141,11 +141,12 @@ function uidTreeHtml(r, depth, hasKids, isOpen) {
     var html = '<span class="store-tree-uid" style="padding-left:' + pad + 'px;">';
     if (hasKids) {
         html += '<button type="button" class="store-tree-toggle" onclick="toggleStoreTree(' + fid + ')">'
-            + (isOpen ? '−' : '+') + '</button>';
+            + (isOpen ? '−' : '+') + '</button>'
+            + '<span class="store-tree-branch">-</span>';
     } else {
         html += '<span class="store-tree-spacer"></span>';
+        if (depth > 0) html += '<span class="store-tree-branch">└</span>';
     }
-    if (depth > 0) html += '<span class="store-tree-branch">└</span>';
     html += escHtml(r.mb_uid) + '</span>';
     return html;
 }

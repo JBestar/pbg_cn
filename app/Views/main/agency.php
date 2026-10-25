@@ -48,16 +48,25 @@
     align-items: center;
     white-space: nowrap;
 }
-.store-tree-toggle {
+#tbodyList td button.store-tree-toggle {
     width: 16px;
+    min-width: 16px;
+    max-width: 16px;
     height: 16px;
+    min-height: 16px;
+    max-height: 16px;
     margin-right: 4px;
     padding: 0;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 16px;
     border: 1px solid #999;
     border-radius: 2px;
     background: #fff;
     color: #333;
-    font: 700 12px/14px monospace;
+    font: 700 12px/1 monospace;
     cursor: pointer;
 }
 .store-tree-spacer {
@@ -81,7 +90,7 @@ window.ADMIN_I18N.level_store = <?= json_encode(lang('Admin.menu_agency'), JSON_
 </script>
 
 <?php if($_ENV['CI_ENVIRONMENT'] == ENV_PRODUCTION) :?>
-    <script src="/assets/js/agency.js?v=10"></script>
+    <script src="/assets/js/agency.js?v=11"></script>
 <?php else :?>
     <script src="/assets/js/agency.js?v=<?=time();?>"></script>
 <?php endif ?>
