@@ -530,6 +530,44 @@ function pbg_ensure_bet_point_columns()
         @$db->query("ALTER TABLE `bets` ADD COLUMN `empl_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `after_money`");
         @$db->query("ALTER TABLE `bets` ADD COLUMN `agen_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `empl_point`");
     }
+    pbg_ensure_downline_schema();
+}
+
+/**
+ * Store tree (매장 → 하부매장 → …): member.mb_parent_fid is the 상위 매장 while mb_emp_fid stays the 총판,
+ * so money charge/exchange keep going through the agency. point_share keeps one row per upline store per bet.
+ */
+function pbg_ensure_downline_schema()
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    $db = pbg_db();
+    $chk = @$db->query("SHOW COLUMNS FROM `member` LIKE 'mb_parent_fid'");
+    if ($chk && $chk->num_rows === 0) {
+        @$db->query("ALTER TABLE `member` ADD COLUMN `mb_parent_fid` INT NOT NULL DEFAULT 0 AFTER `mb_emp_fid`, ADD KEY `idx_parent` (`mb_parent_fid`)");
+    }
+    $chk = @$db->query("SHOW COLUMNS FROM `bets` LIKE 'upline_point'");
+    if ($chk && $chk->num_rows === 0) {
+        @$db->query("ALTER TABLE `bets` ADD COLUMN `upline_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `agen_point`");
+    }
+    @$db->query(
+        "CREATE TABLE IF NOT EXISTS `point_share` (
+          `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          `bet_id` BIGINT UNSIGNED NOT NULL,
+          `round` INT UNSIGNED NOT NULL DEFAULT 0,
+          `mb_fid` INT NOT NULL COMMENT 'upline store that received the point',
+          `child_fid` INT NOT NULL COMMENT 'its direct sub-store the bet came through',
+          `from_fid` INT NOT NULL COMMENT 'store that placed the bet',
+          `amount` DECIMAL(14,2) NOT NULL,
+          `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (`id`),
+          KEY `idx_bet` (`bet_id`),
+          KEY `idx_mb_time` (`mb_fid`, `created_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    );
 }
 
 /** Memo/쪽지 table used by admin Notice_Model (idempotent). */
@@ -570,8 +608,10 @@ function pbg_ensure_board_notice()
 /**
  * lion getEmployeePbRatio — store + agency commission on bet amount.
  * Uses 0.01 precision (not integer round).
+ * Sub-stores: the betting store gets its own rate, every upline store (mb_parent_fid chain)
+ * gets (its rate − its child's rate), and the agency gets (agency rate − top store rate).
  *
- * @return array{agen_fid:int,agen_point:float,store_fid:int,store_point:float,agen_uid:string,agen_emp_fid:int}
+ * @return array{agen_fid:int,agen_point:float,store_fid:int,store_point:float,agen_uid:string,agen_emp_fid:int,uplines:array,upline_point:float}
  */
 function pbg_employee_pb_points(array $storeMember, $amount)
 {
@@ -582,6 +622,8 @@ function pbg_employee_pb_points(array $storeMember, $amount)
         'agen_emp_fid' => 0,
         'store_fid' => 0,
         'store_point' => 0.0,
+        'uplines' => [],
+        'upline_point' => 0.0,
     ];
     $amount = (float)$amount;
     if ($amount <= 0) {
@@ -603,12 +645,38 @@ function pbg_employee_pb_points(array $storeMember, $amount)
         return $out;
     }
     $agenRate = (float)$agency['mb_game_pb_ratio'];
-    if ($agenRate < $storeRate) {
+
+    $uplines = [];
+    $child = $storeMember;
+    $childRate = $storeRate;
+    $seen = [(int)$storeMember['mb_fid'] => true];
+    $parentFid = isset($storeMember['mb_parent_fid']) ? (int)$storeMember['mb_parent_fid'] : 0;
+    while ($parentFid > 0 && !isset($seen[$parentFid]) && count($uplines) < 10) {
+        $seen[$parentFid] = true;
+        $parent = pbg_get_member_by_fid($parentFid);
+        if (!$parent || (int)$parent['mb_level'] !== 7 || (int)$parent['mb_emp_fid'] !== $empFid) {
+            break;
+        }
+        $parentRate = (float)$parent['mb_game_pb_ratio'];
+        $diff = round((max(0.0, $parentRate - $childRate) * $amount) / 100.0, 2);
+        $uplines[] = [
+            'fid' => (int)$parent['mb_fid'],
+            'uid' => (string)$parent['mb_uid'],
+            'emp_fid' => (int)$parent['mb_emp_fid'],
+            'child_fid' => (int)$child['mb_fid'],
+            'point' => $diff,
+        ];
+        $child = $parent;
+        $childRate = max($childRate, $parentRate);
+        $parentFid = (int)$parent['mb_parent_fid'];
+    }
+    $topRate = $childRate;
+    if ($agenRate < $topRate) {
         return $out;
     }
 
     $storePoint = round(($storeRate * $amount) / 100.0, 2);
-    $agenPoint = round((($agenRate - $storeRate) * $amount) / 100.0, 2);
+    $agenPoint = round((($agenRate - $topRate) * $amount) / 100.0, 2);
     if ($storePoint < 0) {
         $storePoint = 0.0;
     }
@@ -622,6 +690,12 @@ function pbg_employee_pb_points(array $storeMember, $amount)
     $out['agen_point'] = $agenPoint;
     $out['agen_uid'] = (string)$agency['mb_uid'];
     $out['agen_emp_fid'] = (int)$agency['mb_emp_fid'];
+    $sum = 0.0;
+    foreach ($uplines as $u) {
+        $sum += $u['point'];
+    }
+    $out['uplines'] = $uplines;
+    $out['upline_point'] = round($sum, 2);
     return $out;
 }
 

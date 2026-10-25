@@ -87,6 +87,9 @@ try {
         case 'exchange_list':
             api_exchange_list();
             break;
+        case 'downline':
+            api_downline();
+            break;
         default:
             pbg_json(['status' => 'fail', 'message' => 'unknown action'], 400);
     }
@@ -681,6 +684,12 @@ function api_bet()
                 PBG_POINTCHANGE_BET
             );
         }
+        $uplinePoint = (float)$pb['upline_point'];
+        foreach ($pb['uplines'] as $up) {
+            if ($up['point'] > 0) {
+                pbg_adjust_point($db, $up['fid'], $up['point'], $up['uid'], $up['emp_fid'], PBG_POINTCHANGE_BET);
+            }
+        }
 
         $round = (int)$roundInfo['round'];
         $target = $meta['target'];
@@ -690,9 +699,9 @@ function api_bet()
         $emptyResult = '';
         $mcode = $machineCode !== '' ? $machineCode : $mbUid;
 
-        $ins = $db->prepare('INSERT INTO bets (mb_fid, mb_uid, emp_fid, machine_id, machine_code, round, mode, target, ratio, amount, win_amount, state, result, before_money, after_money, empl_point, agen_point) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+        $ins = $db->prepare('INSERT INTO bets (mb_fid, mb_uid, emp_fid, machine_id, machine_code, round, mode, target, ratio, amount, win_amount, state, result, before_money, after_money, empl_point, agen_point, upline_point) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
         $ins->bind_param(
-            'isiisiisdddisdddd',
+            'isiisiisdddisddddd',
             $fid,
             $mbUid,
             $empFid,
@@ -709,13 +718,24 @@ function api_bet()
             $bal,
             $after,
             $emplPoint,
-            $agenPoint
+            $agenPoint,
+            $uplinePoint
         );
         if (!$ins->execute()) {
             throw new RuntimeException($ins->error);
         }
         $betId = (int)$ins->insert_id;
         $ins->close();
+
+        foreach ($pb['uplines'] as $up) {
+            if ($up['point'] <= 0) {
+                continue;
+            }
+            $sh = $db->prepare('INSERT INTO point_share (bet_id, round, mb_fid, child_fid, from_fid, amount, created_at) VALUES (?,?,?,?,?,?,NOW())');
+            $sh->bind_param('iiiiid', $betId, $round, $up['fid'], $up['child_fid'], $fid, $up['point']);
+            $sh->execute();
+            $sh->close();
+        }
 
         pbg_money_log($machineId, $betId, 1, -$amount, $bal, $after, 'bet', $fid, $mbUid);
         $db->commit();
@@ -813,6 +833,7 @@ function api_cancel()
         $refunded = 0;
         $reclaimStore = 0.0;
         $reclaimAgenByFid = [];
+        $reclaimUplineByFid = [];
         foreach ($bets as $bet) {
             $amt = (float)$bet['amount'];
             $before = $bal;
@@ -828,7 +849,22 @@ function api_cancel()
                 }
                 $reclaimAgenByFid[$agenFid] += $agenPt;
             }
-            $updBet = $db->prepare('UPDATE bets SET state=4, empl_point=0, agen_point=0, settled_at=NOW() WHERE id=? AND state=1');
+            $shSel = $db->prepare('SELECT mb_fid, amount FROM point_share WHERE bet_id=?');
+            $shSel->bind_param('i', $bid);
+            $shSel->execute();
+            foreach (pbg_stmt_fetch_all($shSel) as $sh) {
+                $upFid = (int)$sh['mb_fid'];
+                if (!isset($reclaimUplineByFid[$upFid])) {
+                    $reclaimUplineByFid[$upFid] = 0.0;
+                }
+                $reclaimUplineByFid[$upFid] += (float)$sh['amount'];
+            }
+            $shSel->close();
+            $shDel = $db->prepare('DELETE FROM point_share WHERE bet_id=?');
+            $shDel->bind_param('i', $bid);
+            $shDel->execute();
+            $shDel->close();
+            $updBet = $db->prepare('UPDATE bets SET state=4, empl_point=0, agen_point=0, upline_point=0, settled_at=NOW() WHERE id=? AND state=1');
             $updBet->bind_param('i', $bid);
             $updBet->execute();
             $updBet->close();
@@ -860,6 +896,16 @@ function api_cancel()
                 (int)$agen['mb_emp_fid'],
                 PBG_POINTCHANGE_CANCEL
             );
+        }
+        foreach ($reclaimUplineByFid as $upFid => $upPts) {
+            if ($upPts <= 0) {
+                continue;
+            }
+            $up = pbg_get_member_by_fid((int)$upFid);
+            if (!$up) {
+                continue;
+            }
+            pbg_adjust_point($db, (int)$upFid, 0 - $upPts, (string)$up['mb_uid'], (int)$up['mb_emp_fid'], PBG_POINTCHANGE_CANCEL);
         }
 
         $db->commit();
@@ -1391,6 +1437,115 @@ function api_exchange_list()
         ];
     }
     pbg_json(['status' => 'success', 'data' => $rows]);
+}
+
+/**
+ * 하부관리: my direct sub-stores with their own bets in the period and the points that reached me
+ * through each of them (deeper sub-stores' points are added to the direct sub-store they hang under).
+ * GET from, to (YYYY-MM-DD, default today), uid (optional exact/partial id filter).
+ */
+function api_downline()
+{
+    $auth = pbg_auth_member(true);
+    $member = $auth['member'];
+    pbg_ensure_downline_schema();
+    $fid = (int)$member['mb_fid'];
+
+    $today = date('Y-m-d');
+    $from = isset($_GET['from']) ? trim((string)$_GET['from']) : '';
+    $to = isset($_GET['to']) ? trim((string)$_GET['to']) : '';
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) {
+        $from = $today;
+    }
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) {
+        $to = $today;
+    }
+    if ($from > $to) {
+        $tmp = $from;
+        $from = $to;
+        $to = $tmp;
+    }
+    $fromTs = $from . ' 00:00:00';
+    $toTs = $to . ' 23:59:59';
+    $search = isset($_GET['uid']) ? trim((string)$_GET['uid']) : '';
+
+    $db = pbg_db();
+    $sql = 'SELECT mb_fid, mb_uid, mb_nickname, mb_money, mb_point, mb_game_pb_ratio
+            FROM member
+            WHERE mb_parent_fid=? AND mb_level=7 AND mb_state_delete=0';
+    if ($search !== '') {
+        $sql .= ' AND mb_uid LIKE ?';
+    }
+    $sql .= ' ORDER BY mb_uid';
+    $stmt = pbg_prepare($db, $sql);
+    if ($search !== '') {
+        $like = '%' . $search . '%';
+        $stmt->bind_param('is', $fid, $like);
+    } else {
+        $stmt->bind_param('i', $fid);
+    }
+    $stmt->execute();
+    $subs = pbg_stmt_fetch_all($stmt);
+    $stmt->close();
+
+    $betStmt = pbg_prepare(
+        $db,
+        'SELECT COALESCE(SUM(amount),0) AS bet_sum,
+                COALESCE(SUM(CASE WHEN state=3 THEN win_amount ELSE 0 END),0) AS win_sum
+         FROM bets
+         WHERE mb_fid=? AND state IN (1,2,3) AND created_at BETWEEN ? AND ?'
+    );
+    $shareStmt = pbg_prepare(
+        $db,
+        'SELECT COALESCE(SUM(amount),0) AS pt FROM point_share
+         WHERE mb_fid=? AND child_fid=? AND created_at BETWEEN ? AND ?'
+    );
+    $rows = [];
+    foreach ($subs as $s) {
+        $sf = (int)$s['mb_fid'];
+        $betStmt->bind_param('iss', $sf, $fromTs, $toTs);
+        $betStmt->execute();
+        $b = pbg_stmt_fetch_one($betStmt);
+        $shareStmt->bind_param('iiss', $fid, $sf, $fromTs, $toTs);
+        $shareStmt->execute();
+        $p = pbg_stmt_fetch_one($shareStmt);
+        $bet = $b ? (float)$b['bet_sum'] : 0.0;
+        $win = $b ? (float)$b['win_sum'] : 0.0;
+        $rows[] = [
+            'uid' => $s['mb_uid'],
+            'name' => $s['mb_nickname'],
+            'money' => (float)$s['mb_money'],
+            'point' => (float)$s['mb_point'],
+            'rate' => (float)$s['mb_game_pb_ratio'],
+            'bet' => $bet,
+            'win' => $win,
+            'profit' => round($bet - $win, 2),
+            'earned' => $p ? (float)$p['pt'] : 0.0,
+        ];
+    }
+    $betStmt->close();
+    $shareStmt->close();
+
+    $tot = pbg_prepare(
+        $db,
+        'SELECT COALESCE(SUM(amount),0) AS pt FROM point_share WHERE mb_fid=? AND created_at BETWEEN ? AND ?'
+    );
+    $tot->bind_param('iss', $fid, $fromTs, $toTs);
+    $tot->execute();
+    $t = pbg_stmt_fetch_one($tot);
+    $tot->close();
+
+    pbg_json([
+        'status' => 'success',
+        'data' => [
+            'from' => $from,
+            'to' => $to,
+            'my_rate' => (float)$member['mb_game_pb_ratio'],
+            'my_point' => (float)$member['mb_point'],
+            'earned_total' => $t ? (float)$t['pt'] : 0.0,
+            'rows' => $rows,
+        ],
+    ]);
 }
 
 function api_settle()

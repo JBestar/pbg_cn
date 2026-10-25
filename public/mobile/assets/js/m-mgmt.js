@@ -849,21 +849,131 @@
     });
   }
 
-  function openBetsLive() {
+  function fmtRate(v) {
+    var n = Number(v);
+    return isFinite(n) ? (Math.round(n * 100) / 100) + '%' : '-';
+  }
+
+  /* 하부관리: direct sub-stores; 적립포인트 = points that reached me through that sub-store (its own sub-stores included) */
+  function renderDownline(d) {
+    var t = function (k) { return esc(I18N().t(k)); };
+    var rows = (d && Array.isArray(d.rows)) ? d.rows : [];
+    var html = ''
+      + '<div class="m-bets-table-wrap m-down-table-wrap"><table class="m-bets-table m-down-table"><thead><tr>'
+      + '<th>' + t('downColUid') + '</th>'
+      + '<th>' + t('downColName') + '</th>'
+      + '<th class="m-down-earned">' + t('downColEarned') + '</th>'
+      + '<th>' + t('downColBet') + '</th>'
+      + '<th>' + t('downColWin') + '</th>'
+      + '<th>' + t('downColProfit') + '</th>'
+      + '<th>' + t('downColMoney') + '</th>'
+      + '<th>' + t('downColRate') + '</th>'
+      + '<th>' + t('downColPoint') + '</th>'
+      + '</tr></thead><tbody>';
+    if (!rows.length) {
+      html += '<tr><td colspan="9" class="m-charge-empty">' + t('downEmpty') + '</td></tr>';
+    } else {
+      var sum = { bet: 0, win: 0, profit: 0, earned: 0 };
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i] || {};
+        var profit = Number(r.profit) || 0;
+        sum.bet += Number(r.bet) || 0;
+        sum.win += Number(r.win) || 0;
+        sum.profit += profit;
+        sum.earned += Number(r.earned) || 0;
+        html += '<tr class="' + (i % 2 ? 'm-bets-row--dark' : 'm-bets-row--light') + '">'
+          + '<td class="m-down-uid">' + esc(r.uid || '-') + '</td>'
+          + '<td>' + esc(r.name || '-') + '</td>'
+          + '<td class="m-down-earned">' + esc(fmtPoint(r.earned)) + '</td>'
+          + '<td class="m-bets-amt">' + esc(fmtMoney(r.bet)) + '</td>'
+          + '<td class="m-bets-win">' + esc(fmtMoney(r.win)) + '</td>'
+          + '<td class="' + (profit < 0 ? 'm-down-neg' : 'm-down-pos') + '">' + esc(fmtMoney(profit)) + '</td>'
+          + '<td>' + esc(fmtMoney(r.money)) + '</td>'
+          + '<td>' + esc(fmtRate(r.rate)) + '</td>'
+          + '<td>' + esc(fmtPoint(r.point)) + '</td>'
+          + '</tr>';
+      }
+      html += '<tr class="m-down-total">'
+        + '<td colspan="2">' + t('downTotal') + '</td>'
+        + '<td class="m-down-earned">' + esc(fmtPoint(sum.earned)) + '</td>'
+        + '<td>' + esc(fmtMoney(sum.bet)) + '</td>'
+        + '<td>' + esc(fmtMoney(sum.win)) + '</td>'
+        + '<td>' + esc(fmtMoney(sum.profit)) + '</td>'
+        + '<td></td><td></td><td></td>'
+        + '</tr>';
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function setDownSummary(d) {
+    var earned = $('downEarned');
+    var myPoint = $('downMyPoint');
+    var myRate = $('downMyRate');
+    if (earned) earned.textContent = d ? fmtPoint(d.earned_total) : '0';
+    if (myPoint) myPoint.textContent = d ? fmtPoint(d.my_point) : '0';
+    if (myRate) myRate.textContent = d ? fmtRate(d.my_rate) : '-';
+  }
+
+  function loadDownline() {
+    var body = $('betsLivePageBody');
+    if (!body) return;
+    body.innerHTML = '<p class="m-mgmt-loading">' + esc(I18N().t('mgmtLoading')) + '</p>';
+    if (typeof hooks.api !== 'function') {
+      setDownSummary(null);
+      body.innerHTML = renderDownline(null);
+      return;
+    }
+    var fromEl = $('downFrom');
+    var toEl = $('downTo');
+    var uidEl = $('downUid');
+    var qs = '';
+    var from = fromEl ? String(fromEl.value || '') : '';
+    var to = toEl ? String(toEl.value || '') : '';
+    var uid = uidEl ? String(uidEl.value || '').trim() : '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(from)) qs += '&from=' + from;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(to)) qs += '&to=' + to;
+    if (uid) qs += '&uid=' + encodeURIComponent(uid);
+    var seq = (state.downSeq || 0) + 1;
+    state.downSeq = seq;
+    hooks.api('downline', { qs: qs }).then(function (r) {
+      if (state.panel !== 'betsLive' || state.downSeq !== seq) return;
+      var json = (r && r.json) || {};
+      if (json.status !== 'success') {
+        body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+        return;
+      }
+      state.downData = json.data || null;
+      setDownSummary(state.downData);
+      body.innerHTML = renderDownline(state.downData);
+    }, function () {
+      if (state.panel !== 'betsLive' || state.downSeq !== seq) return;
+      body.innerHTML = '<p class="m-mgmt-empty">' + esc(I18N().t('mgmtLoadFail')) + '</p>';
+    });
+  }
+
+  function openBetsLive(resetFilter) {
     var mgmtPanel = $('mgmtPanel');
     if (mgmtPanel) mgmtPanel.hidden = true;
     showGrid(true);
+    stopBetsLivePoll();
+    if (resetFilter) {
+      var today = todayYmd();
+      var fromEl = $('downFrom');
+      var toEl = $('downTo');
+      var uidEl = $('downUid');
+      if (fromEl) fromEl.value = today;
+      if (toEl) toEl.value = today;
+      if (uidEl) uidEl.value = '';
+    }
     state.panel = 'betsLive';
     if (typeof hooks.onNavigate === 'function') hooks.onNavigate('betsLive');
-    stopBetsLivePoll();
-    var body = $('betsLivePageBody');
-    if (body) {
-      body.innerHTML = '<p class="m-mgmt-soon">' + esc(I18N().t('mgmtDownlineSoon')) + '</p>';
-    }
+    loadDownline();
   }
 
   function closeBetsLivePage() {
     stopBetsLivePoll();
+    state.downSeq = (state.downSeq || 0) + 1;
     if (state.panel === 'betsLive') state.panel = null;
     if (typeof hooks.onNavigate === 'function') hooks.onNavigate('mgmt');
   }
@@ -1300,7 +1410,7 @@
     if (action === 'charge') return openCharge();
     if (action === 'exchange') return openExchange();
     if (action === 'point') return openPointConvert();
-    if (action === 'betsLive') return openBetsLive();
+    if (action === 'betsLive') return openBetsLive(true);
     if (action === 'betsAll') return openBetsAll(true);
     if (action === 'wins') return openWins();
     if (action === 'inquiry') return openInquiry();
@@ -1336,6 +1446,13 @@
     var betsLiveClose = $('betsLivePageClose');
     if (betsLiveBack) betsLiveBack.addEventListener('click', closeBetsLivePage);
     if (betsLiveClose) betsLiveClose.addEventListener('click', closeBetsLivePage);
+    var downFilter = $('downFilter');
+    if (downFilter) {
+      downFilter.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (state.panel === 'betsLive') loadDownline();
+      });
+    }
     var betsAllBack = $('betsAllPageBack');
     var betsAllClose = $('betsAllPageClose');
     if (betsAllBack) betsAllBack.addEventListener('click', closeBetsAllPage);
@@ -1398,7 +1515,11 @@
     if (state.panel === 'point') openPointConvert();
     else if (state.panel === 'charge') openCharge();
     else if (state.panel === 'exchange') openExchange();
-    else if (state.panel === 'betsLive') openBetsLive();
+    else if (state.panel === 'betsLive') {
+      setDownSummary(state.downData);
+      var downBody = $('betsLivePageBody');
+      if (downBody && state.downData) downBody.innerHTML = renderDownline(state.downData);
+    }
     else if (state.panel === 'betsAll') openBetsAll();
     else if (state.panel === 'wins') openWins();
     else if (state.panel === 'inquiry') openInquiry();
@@ -1424,6 +1545,7 @@
       || state.panel === 'notice'
     ) {
       if (state.panel === 'betsAll') state.betsAllSeq = (state.betsAllSeq || 0) + 1;
+      if (state.panel === 'betsLive') state.downSeq = (state.downSeq || 0) + 1;
       if (state.panel === 'wins') state.winsSeq = (state.winsSeq || 0) + 1;
       if (state.panel === 'inquiry') state.inquirySeq = (state.inquirySeq || 0) + 1;
       if (state.panel === 'notice') {

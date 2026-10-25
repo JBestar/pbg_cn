@@ -215,6 +215,25 @@ if (!col_exists($db, 'bets', 'empl_point')) {
 if (!col_exists($db, 'bets', 'agen_point')) {
     run_sql($db, "ALTER TABLE `bets` ADD COLUMN `agen_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `empl_point`");
 }
+if (!col_exists($db, 'bets', 'upline_point')) {
+    run_sql($db, "ALTER TABLE `bets` ADD COLUMN `upline_point` DECIMAL(14,2) NOT NULL DEFAULT 0 AFTER `agen_point`");
+}
+if (!col_exists($db, 'member', 'mb_parent_fid')) {
+    run_sql($db, "ALTER TABLE `member` ADD COLUMN `mb_parent_fid` INT NOT NULL DEFAULT 0 AFTER `mb_emp_fid`, ADD KEY `idx_parent` (`mb_parent_fid`)");
+}
+run_sql($db, "CREATE TABLE IF NOT EXISTS `point_share` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `bet_id` BIGINT UNSIGNED NOT NULL,
+  `round` INT UNSIGNED NOT NULL DEFAULT 0,
+  `mb_fid` INT NOT NULL,
+  `child_fid` INT NOT NULL,
+  `from_fid` INT NOT NULL,
+  `amount` DECIMAL(14,2) NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_bet` (`bet_id`),
+  KEY `idx_mb_time` (`mb_fid`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 if (!col_exists($db, 'money_log', 'mb_fid')) {
     run_sql($db, "ALTER TABLE `money_log` ADD COLUMN `mb_fid` INT NOT NULL DEFAULT 0 AFTER `id`");
 }

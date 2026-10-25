@@ -1090,6 +1090,135 @@
   max-height: calc(100vh - 300px);
 }
 
+/* 하부관리: summary + filter on top, the sub-store table fills the rest and scrolls inside */
+.m-app-main:has(#pageBetsLive:not([hidden])) {
+  overflow: hidden;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+#pageBetsLive:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#pageBetsLive .m-charge-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+#pageBetsLive .m-charge-page-b {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 4px;
+}
+
+.m-down-sum {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.m-down-sum-i {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 4px;
+  border-radius: 8px;
+  background: #0d1626;
+  border: 1px solid rgba(120, 180, 255, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.m-down-sum-k {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(220, 232, 255, 0.85);
+  white-space: nowrap;
+}
+
+.m-down-sum-v {
+  font-size: 15px;
+  font-weight: 900;
+  color: #eef4ff;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.m-down-sum-i--earned {
+  background: linear-gradient(180deg, #3d8fff 0%, #1a5fd4 55%, #0d4aa8 100%);
+}
+
+.m-down-sum-i--earned .m-down-sum-k {
+  color: #fff;
+}
+
+.m-down-sum-i--earned .m-down-sum-v {
+  color: #ffe14a;
+}
+
+.m-down-filter {
+  flex-wrap: wrap;
+  row-gap: 6px;
+  margin-bottom: 8px;
+}
+
+.m-down-filter .m-bets-filter-f {
+  flex: 1 1 calc(50% - 3px);
+}
+
+.m-down-filter .m-down-filter-uid {
+  flex: 1 1 0;
+}
+
+.m-down-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.m-down-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+}
+
+.m-down-table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.m-down-table td {
+  white-space: nowrap;
+}
+
+.m-down-table td.m-down-uid {
+  font-weight: 800;
+}
+
+.m-down-table .m-down-earned {
+  color: #ffe14a;
+  font-weight: 900;
+}
+
+.m-down-table td.m-down-neg {
+  color: #ff6b6b;
+}
+
+.m-down-table tr.m-down-total td {
+  background: #0a1222;
+  border-top: 2px solid rgba(120, 180, 255, 0.45);
+  font-weight: 900;
+}
+
 .m-bets-table--all {
   width: max-content;
   min-width: 100%;
